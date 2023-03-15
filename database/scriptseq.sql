@@ -1,0 +1,14 @@
+SELECT setval('plan_templates_id_seq', (SELECT MAX(id) FROM plan_templates) + 1);
+SELECT setval('plan_template_details_id_seq', (SELECT MAX(id) FROM plan_template_details) + 1);
+SELECT setval('plans_id_seq', (SELECT MAX(id) FROM plans) + 1);
+SELECT setval('plan_registered_template_details_id_seq', (SELECT MAX(id) FROM plan_registered_template_details) + 1);
+SELECT setval('plan_details_id_seq', (SELECT MAX(id) FROM plan_details) + 1);
+SELECT setval('companies_id_seq', (SELECT MAX(id) FROM companies) + 1);
+SELECT setval('settings_id_seq', (SELECT MAX(id) FROM settings) + 1);
+SELECT setval('departments_id_seq', (SELECT MAX(id) FROM departments) + 1);
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users) + 1);
+select setval('indicator_sources_id_seq', (select max(id) from indicator_sources)+1);
+select setval('prj_project_catalog_line_actions_id_seq', (select max(id) from prj_project_catalog_line_actions)+1);
+select setval('prj_project_catalog_line_action_services_id_seq', (select max(id) from prj_project_catalog_line_action_services)+1);
+select setval('prj_project_catalog_assistants_id_seq', (select max(id) from prj_project_catalog_assistants)+1);
+select setval('prj_project_catalog_funders_id_seq', (select max(id) from prj_project_catalog_funders)+1);

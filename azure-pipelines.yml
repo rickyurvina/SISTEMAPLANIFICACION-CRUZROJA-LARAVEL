@@ -1,0 +1,59 @@
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+variables:
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+# Trigger when develop branch change
+trigger:
+  batch: true
+  branches:
+    include:
+    - develop
+
+# no PR trigger
+pr: none
+
+stages:
+  - stage: Build
+    displayName: Build Stage
+    jobs:
+      - job: build
+        displayName: Build and Push
+        pool:
+          vmImage: $(vmImageName)
+        steps:
+        
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'CRE-ACR'
+              repository: 'cre'
+              command: 'buildAndPush'
+              Dockerfile: 'docker/production/php.Dockerfile'
+              buildContext: '.'
+              tags: '$(Build.BuildNumber)'
+      
+  - stage: Deploy
+    displayName: Deploy Stage
+    dependsOn: Build
+    condition: succeeded()
+
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy
+        pool:
+          vmImage: $(vmImageName)
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+                steps:
+                  - task: SSH@0
+                    inputs:
+                      sshEndpoint: 'CRE-VM'
+                      runOptions: 'commands'
+                      commands: '. /opt/planning/run.sh $(Build.BuildNumber)'
+                      failOnStdErr: false
+                      readyTimeout: '20000'

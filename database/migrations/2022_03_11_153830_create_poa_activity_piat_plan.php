@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreatePoaActivityPiatPlan extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        if (!Schema::hasTable('poa_activity_piat_plan')) {
+            Schema::create('poa_activity_piat_plan', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('id_poa_activity_piat')->references('id')->on('poa_activity_piat');
+                $table->string('task', 255);
+                $table->integer('responsable');
+                $table->date('date');
+                $table->time('initial_time');
+                $table->time('end_time');
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('poa_activity_piat_plan');
+    }
+}

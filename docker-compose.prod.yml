@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+
+  web:
+    image: cruzroja.azurecr.io/cre:latest
+    env_file: ${PROD_ENV_FILE}
+    restart: always
+    ports:
+      - "8001:80"
+    volumes:
+       - storage:/app/storage
+       - ./nginx/nginx.conf:/etc/nginx/sites-enabled/default
+       - ./nginx/www_cruzroja_org_ec.crt:/etc/nginx/certificate.key:ro
+       - ./nginx/www_cruzroja_org_ec.crt:/etc/nginx/certificate.crt:ro
+
+volumes:
+  storage:

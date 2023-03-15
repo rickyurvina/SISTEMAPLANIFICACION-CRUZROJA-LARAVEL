@@ -1,0 +1,89 @@
+<div>
+    @include('modules.poa.reports.activity-status.header')
+    @if(count($data)>0)
+        <div class="card">
+            <table class="border border-dark m-0">
+                <thead class="border border-dark bg-primary-50">
+                <tr class="border border-dark">
+                    <th class="border border-dark text-center" style="width: 20%">{{ strtoupper(trans_choice('poa.program',1)) }}</th>
+                    <th class="border border-dark text-center"
+                        style="width: 30%">{{ strtoupper(trans_choice('poa.indicator', 2)) }}</th>
+                    <th class="border border-dark text-center"
+                        style="width: 30%">{{ strtoupper(trans_choice('poa.activity', 2)) }}</th>
+                    <th class="border border-dark text-center" style="width: 10%">{{ strtoupper(__('poa.responsible')) }}</th>
+                    <th class="border border-dark text-center" style="width: 10%">{{ strtoupper(__('poa.status')) }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($data as $items)
+                    @foreach($items as $item)
+                        <tr class="border border-dark">
+                            @if($loop->first)
+                                <td class="border border-dark" rowspan="{{count($items)}}">{{ $item['programName'] }}</td>
+                            @endif
+                            <td class="border border-dark">
+                                 <span>
+                                     <i class="{{$item['indicatorIcon'] }}"></i>
+                                        {{ $item['indicator'] }}
+                                </span>
+                            </td>
+                            <td class="border border-dark">
+                                <a href="javascript:void(0);" aria-expanded="false"
+                                   wire:click="$emitTo('poa.reports.poa-show-activity', 'open', {{ $item['id'] }})">
+                                    {{ $item['activity']}}
+                                </a>
+                            </td>
+                            <td class="border border-dark">{{ $item['responsible'] }}</td>
+                            <td class="border border-dark">
+                                @switch($item['status'])
+                                    @case( \App\Models\Poa\PoaActivity::STATUS_SCHEDULED)
+                                        <span class="badge badge-info badge-pill">
+                                        {{ $item['status'] }}
+                                    </span>
+                                        @break
+                                    @case( \App\Models\Poa\PoaActivity::STATUS_IN_PROGRESS)
+                                        <span class="badge badge-success badge-pill">
+                                        {{ $item['status'] }}
+                                    </span>
+                                        @break
+                                    @case( \App\Models\Poa\PoaActivity::STATUS_ON_DELAY)
+                                        <span class="badge badge-warning badge-pill">
+                                        {{ $item['status'] }}
+                                    </span>
+                                        @break
+                                    @case( \App\Models\Poa\PoaActivity::STATUS_FINISHED)
+                                        <span class="badge badge-success badge-pill">
+                                        {{ $item['status'] }}
+                                    </span>
+                                        @break
+                                    @default
+                                        <span class="badge badge-info badge-pill">
+                                        {{ $item['status'] }}
+                                    </span>
+                                @endswitch
+                            </td>
+                        </tr>
+                    @endforeach
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <div class="text-center col-12">
+            <x-empty-content>
+                <x-slot name="img">
+                    <img src="{{ asset_cdn("img/no_info.png") }}" width="auto" height="auto" alt="No Info">
+                </x-slot>
+            </x-empty-content>
+        </div>
+    @endif
+    <div wire:ignore>
+        <livewire:poa.reports.poa-show-activity/>
+    </div>
+</div>
+@push('page_script')
+    <script>
+        Livewire.on('toggleShowModal', () => $('#poa-show-activity-modal').modal('toggle'));
+        Livewire.on('toggleDropDownFilter', () => $("#dropdown-filter").removeClass("show"));
+    </script>
+@endpush
