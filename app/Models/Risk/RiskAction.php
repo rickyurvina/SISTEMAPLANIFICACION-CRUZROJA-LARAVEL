@@ -66,12 +66,6 @@ class RiskAction extends Model
             }
         });
 
-        static::deleted(function ($model) {
-            if ($model->task) {
-                $model->task->delete();
-            }
-        });
-
         static::created(function ($model) {
             if ($model->risk->riskable_type == Project::class) {
                 RiskCreatedEvent::dispatch($model);

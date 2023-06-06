@@ -22,7 +22,6 @@ class EditNonConformity extends Component
         $this->page=$page;
         $this->causesItems=$this->nonConformity->causes;
         $this->emit('loadEditedData', 'causes', $this->causesItems);
-
     }
 
     public function render()

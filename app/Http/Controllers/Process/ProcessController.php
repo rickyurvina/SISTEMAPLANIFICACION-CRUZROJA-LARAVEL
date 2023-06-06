@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Process;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
 use App\Http\Requests\Process\ProcessRequest;
 use App\Jobs\Process\CreateProcess;
 use App\Jobs\Process\CreateProcessInputs;
@@ -27,22 +28,40 @@ class ProcessController extends Controller
      */
     public $search = '';
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:process-manage');
+        $this->middleware('permission:process-view|process-manage',
+            [
+                'only' => [
+                    'index',
+                    'showProcess',
+                    'showInformation',
+                    'showRisks',
+                    'showPlanChanges',
+                ]]);
+        $this->middleware('permission:process-view-files|process-manage-files', ['only' => ['showFiles']]);
+        $this->middleware('permission:process-view-evaluations|process-manage-evaluations', ['only' => ['showActivities']]);
+        $this->middleware('permission:process-view-files|process-manage-files', ['only' => ['showFiles']]);
+        $this->middleware('permission:process-view-activities|process-manage-activities', ['only' => ['showActivities']]);
+        $this->middleware('permission:process-view-risks|process-manage-risks', ['only' => ['showRisks']]);
+        $this->middleware('permission:process-view-conformities|process-close-conformities', ['only' => ['showConformities']]);
+    }
+
     public function index(): View
     {
-        if (user()->can('process-view-process') || user()->can('process-manage-process')) {
-            return view('modules.process.processes.index');
-        } else {
-            abort(403);
-        }
+        return view('modules.process.processes.index');
     }
 
     public function showProcess(Department $department)
     {
-        if (user()->can('process-view-process-information') || user()->isMemberOfDepartment($department->id)) {
-            return view('modules.process.processes.showProcess', ['department' => $department]);
-        } else {
-            abort(403);
-        }
+        return view('modules.process.processes.showProcess', ['department' => $department]);
     }
 
     /**
@@ -115,104 +134,71 @@ class ProcessController extends Controller
 
     public function showInformation(Process $process, $page)
     {
-        if (user()->can('process-view-process-information')) {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.information', ['process' => $process, 'subMenu' => 'showInformation', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-        } else {
-            abort(403);
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.information', ['process' => $process, 'subMenu' => 'showInformation', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 
     public function showRisks(Process $process, $page)
     {
-        if (user()->can('process-manage-risks-process') || user()->can('process-view-risks-process')) {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.risks', ['process' => $process, 'subMenu' => 'showRisks', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-
-        } else {
-            abort(403);
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.risks', ['process' => $process, 'subMenu' => 'showRisks', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 
     public function showPlanChanges(Process $process, $page)
     {
-        if (user()->can('process-manage-changes') || user()->can('process-view-changes')) {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.planChanges', ['process' => $process, 'subMenu' => 'showPlanChanges', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-
-        } else {
-            abort(403);
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.planChanges', ['process' => $process, 'subMenu' => 'showPlanChanges', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 
     public function showFiles(Process $process, $page)
     {
-        if (user()->can('process-manage-files-process') || user()->can('process-view-files-process')) {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.files', ['process' => $process, 'subMenu' => 'showFiles', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-
-        } else {
-            abort(403);
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.files', ['process' => $process, 'subMenu' => 'showFiles', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 
     public function showIndicators(Process $process, $page)
     {
-        if (user()->can('process-view-indicators') || user()->can('process-manage-indicators') || user()->can('process-view-risks-process')) {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.indicators', ['process' => $process, 'subMenu' => 'showIndicators', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-
-        } else {
-            abort(403);
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.indicators', ['process' => $process, 'subMenu' => 'showIndicators', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 
     public function showActivities(Process $process, $page)
     {
-        if (user()->can('process-manage-activities-process') || user()->can('process-view-activities-process')) {
-            abort(403);
-        } else {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.activities', ['process' => $process, 'subMenu' => 'showActivities', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.activities', ['process' => $process, 'subMenu' => 'showActivities', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 
     public function showConformities(Process $process, $page)
     {
-        if (user()->can('process-view-conformities') || user()->can('process-manage-conformities') || user()->can('process-close-conformities')) {
-            $users = User::get();
-            $process->load(['activitiesProcess', 'indicators', 'risks']);
-            $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
-                $query->where('id', $process->owner_id);
-            })->get();
-            return view('modules.process.plan.conformities', ['process' => $process, 'subMenu' => 'showConformities', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
-        } else {
-            abort(403);
-        }
+        $users = User::get();
+        $process->load(['activitiesProcess', 'indicators', 'risks']);
+        $userDepartments = Department::whereHas('users', function (Builder $query) use ($process) {
+            $query->where('id', $process->owner_id);
+        })->get();
+        return view('modules.process.plan.conformities', ['process' => $process, 'subMenu' => 'showConformities', 'page' => $page, 'users' => $users, 'userDepartments' => $userDepartments]);
     }
 }

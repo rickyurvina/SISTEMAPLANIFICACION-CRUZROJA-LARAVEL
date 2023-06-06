@@ -76,7 +76,6 @@ class PoaIndicatorConfig extends Component
             'data.*.reason' => 'required_if:data.*.id,==,false',
         ]);
 
-        //Recuperar los programas seleccionados
         $lastPlanDetailId = "";
         for ($i = 0; $i < count($this->data); $i++) {
             if (!($this->data[$i]['id'] == null)) {
@@ -90,15 +89,10 @@ class PoaIndicatorConfig extends Component
         if ($contProgramsSelected > 0) {
             $this->weight = 100.00 / $contProgramsSelected;
         }
+
         for ($i = 0; $i < count($this->data); $i++) {
-            $poaIndicatorConfigs = new PoaIndicatorConfigs();
-            $poaIndicatorConfigs->poa_id = $this->poaId;
-            $poaIndicatorConfigs->measure_id = $this->data[$i]['measureId'];
-            if ($this->data[$i]['id'] == null) {
-                $poaIndicatorConfigs->selected = false;
-                $poaIndicatorConfigs->reason = $this->data[$i]['reason'];
-            } else {
-                $poaIndicatorConfigs->selected = true;
+            $programId = null;
+            if ($this->data[$i]['id'] != null) {
                 $program = PoaProgram::where('plan_detail_id', $this->data[$i]['planDetailId'])
                     ->where('poa_id', $this->poaId)
                     ->first();
@@ -107,17 +101,26 @@ class PoaIndicatorConfig extends Component
                 } else {
                     $programId = $this->selectProgram($this->data[$i]['planDetailId']);
                 }
-                $poaIndicatorConfigs->program_id = $programId;
             }
-            PoaIndicatorConfigs::updateOrCreate(['poa_id' => $this->poaId,
-                'measure_id' => $this->data[$i]['measureId']],
-                [
-                    'poa_id' => (int)$this->poaId,
-                    'measure_id' => $this->data[$i]['measureId'],
-                    'program_id' => $this->data[$i]['id'] == null ? null : $poaIndicatorConfigs->program_id,
+            $poaIndicatorConfigs = PoaIndicatorConfigs::where('poa_id', $this->poaId)
+                ->where('measure_id', $this->data[$i]['measureId'])
+                ->first();
+            if ($poaIndicatorConfigs) {
+                $poaIndicatorConfigs->update([
+                    'program_id' => $this->data[$i]['id'] == null ? null : $programId,
                     'selected' => $this->data[$i]['id'] == null ? false : true,
                     'reason' => $this->data[$i]['id'] == null ? $this->data[$i]['reason'] : null
                 ]);
+            } else {
+                \App\Models\Poa\PoaIndicatorConfig::create([
+                    'program_id' => $this->data[$i]['id'] == null ? null : $programId,
+                    'poa_id' => $this->poaId,
+                    'measure_id' => $this->data[$i]['measureId'],
+                    'selected' => $this->data[$i]['id'] == null ? false : true,
+                    'reason' => $this->data[$i]['id'] == null ? $this->data[$i]['reason'] : null
+                ]);
+            }
+
         }
         flash(trans('general.ok_config_indicator'))->success();
         return redirect()->route('poa.poas');
@@ -151,7 +154,7 @@ class PoaIndicatorConfig extends Component
                 ->where('plan_id', $plans->id)
                 ->first();
             foreach ($planDetails->where('plan_registered_template_detail_id', $programTemplateId->id) as $planDetail) {
-                if ($planDetail->plan_registered_template_detail_id === $programTemplatePoaIndicator->id) {
+                if (isset($programTemplatePoaIndicator) && $planDetail->plan_registered_template_detail_id === $programTemplatePoaIndicator->id) {
                     $measures = Measure::withoutGlobalScope(\App\Scopes\Company::class)
                         ->orderBy('id', 'asc')
                         ->when($this->is_SC === true, function ($query) {
@@ -176,7 +179,7 @@ class PoaIndicatorConfig extends Component
                             ->where('measure_id', $measure->id)
                             ->first();
                         if ($poaIndicatorConfig) {
-                            $element['reason'] = $poaIndicatorConfig->reason;
+                            $element['reason'] = $poaIndicatorConfig->reason == "" ? 'Ingrese Justificación' : $poaIndicatorConfig->reason;
                             $element['selected'] = $poaIndicatorConfig->selected;
                             if ($poaIndicatorConfig->program_id) {
                                 $element['programId'] = $poaIndicatorConfig->program_id;
@@ -185,7 +188,7 @@ class PoaIndicatorConfig extends Component
                                 $element['id'] = $element['measureId'];
                             }
                         } else {
-                            $element['reason'] = "";
+                            $element['reason'] = "Jus";
                             $element['selected'] = "";
                         }
                         if ($measure->national) {
@@ -195,7 +198,7 @@ class PoaIndicatorConfig extends Component
                     }
                 } else {
                     foreach ($planDetail->children as $childPlan) {
-                        if ($childPlan->plan_registered_template_detail_id === $programTemplatePoaIndicator->id) {
+                        if ( isset($programTemplatePoaIndicator) && $childPlan->plan_registered_template_detail_id === $programTemplatePoaIndicator->id) {
                             $measures = Measure::withoutGlobalScope(\App\Scopes\Company::class)
                                 ->orderBy('id', 'asc')
                                 ->when($this->is_SC === true, function ($query) {
@@ -221,7 +224,7 @@ class PoaIndicatorConfig extends Component
                                     ->first();
 
                                 if ($poaIndicatorConfig) {
-                                    $element['reason'] = $poaIndicatorConfig->reason;
+                                    $element['reason'] = $poaIndicatorConfig->reason == "" ? 'Ingrese Justificación' : $poaIndicatorConfig->reason;
                                     $element['selected'] = $poaIndicatorConfig->selected;
                                     if ($poaIndicatorConfig->program_id) {
                                         $element['programId'] = $poaIndicatorConfig->program_id;

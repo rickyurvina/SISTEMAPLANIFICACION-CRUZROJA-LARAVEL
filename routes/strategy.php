@@ -41,4 +41,6 @@ Route::group(['prefix' => 'strategy'], function () {
     Route::get('measures/update/periods', 'Strategy\MeasureController@updateByPeriod')->name('index.measure.strategy-period');
     Route::get('measures/update/frequency', 'Strategy\MeasureController@updateByFrequency')->name('index.measure.strategy-frequency');
     Route::delete('measures/{measure}', 'Strategy\MeasureController@destroy')->name('destroy.measure.strategy');
+
+    Route::get('updateScores',[MeasureController::class,'updateScores'])->name('strategy.updateScores');
 });

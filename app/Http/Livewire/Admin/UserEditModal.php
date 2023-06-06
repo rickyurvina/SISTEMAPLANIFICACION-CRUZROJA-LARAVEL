@@ -66,13 +66,11 @@ class UserEditModal extends Component
     ];
 
     protected $rules = [
-
         'name' => 'required',
         'surname' => 'required',
         'email' => 'required|email',
         'phone' => 'required',
         'password' => 'confirmed',
-//        'companyDepartments' => 'required',
     ];
 
 

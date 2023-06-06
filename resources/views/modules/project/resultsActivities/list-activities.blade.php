@@ -186,11 +186,19 @@
                                                         </div>
                                                         @if($activity->validateCrateBudget())
                                                             <div class="p-2">
-                                                                <a href="{{route('projects.expenses_activity',$activity)}}">
-                                                                    <i class="fas fa-money-bill mr-1 text-success"
-                                                                       data-toggle="tooltip" data-placement="top" title=""
-                                                                       data-original-title="Presupuesto"></i>
-                                                                </a>
+                                                                @if($project->isMisional())
+                                                                    <a href="{{route('projects.expenses_activity',$activity)}}">
+                                                                        <i class="fas fa-money-bill mr-1 text-success"
+                                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                                           data-original-title="Presupuesto"></i>
+                                                                    </a>
+                                                                @else
+                                                                    <a href="{{route('projectsInternal.expenses_activity',$activity)}}">
+                                                                        <i class="fas fa-money-bill mr-1 text-success"
+                                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                                           data-original-title="Presupuesto"></i>
+                                                                    </a>
+                                                                @endif
                                                             </div>
                                                         @endif
                                                     </div>

@@ -61,8 +61,10 @@ class ActivityController extends Controller
             'measureAdvances',
             'accounts.transactionsDetails'
         ]);
+        $transaction = Transaction::where('year', $activity->program->poa->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->withoutGlobalScopes()->first();
 
-        return view('modules.poa.activity.show', compact('activity'));
+        return view('modules.poa.activity.show', compact('activity','transaction'));
     }
 
     public function expensesPoaActivity(PoaActivity $activity)
@@ -85,7 +87,7 @@ class ActivityController extends Controller
         ];
         $response = $this->ajaxDispatch(new BudgetIncomeDelete($data));
         if ($response['success']) {
-            flash(trans_choice('messages.success.deleted', 0, ['type' => __('budget.incomes')]))->success();
+            flash(trans_choice('messages.success.deleted', 0, ['type' => __('budget.expense')]))->success();
             return redirect()->route('poa.expenses_activity', $activity);
         } else {
             flash($response['message'])->error();

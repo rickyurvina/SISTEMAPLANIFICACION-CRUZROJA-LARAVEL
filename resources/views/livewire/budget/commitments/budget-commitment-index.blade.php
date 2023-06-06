@@ -2,7 +2,9 @@
     <div class="d-flex flex-wrap w-75">
         <div class="d-flex flex-column p-2 w-25" wire:ignore>
             <x-label-detail>Estado</x-label-detail>
-            <select class="form-control" id="select2-states">
+            <select class="form-control" id="select2-states" wire:ignore.self wire:model="stateSelect">
+                <option value="0">Seleccione</option>
+
                 <option value="{{ \App\States\Transaction\Draft::label() }}">{{ \App\States\Transaction\Draft::label() }}</option>
                 <option value="{{ \App\States\Transaction\Approved::label() }}">{{ \App\States\Transaction\Approved::label() }}</option>
                 <option value="{{ \App\States\Transaction\Override::label() }}">{{ \App\States\Transaction\Override::label() }}</option>
@@ -21,7 +23,8 @@
             </label>
         </div>
         <div class="w-15">
-            <select class="form-control" id="select2-registers">
+            <select class="form-control" id="select2-registers" wire:ignore.self wire:model="countRegisterSelect">
+                <option value="0">Seleccione</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -59,6 +62,7 @@
                     <th class="w-auto table-th">{{__('general.description')}}</th>
                     <th class="w-auto table-th">{{__('general.date')}}</th>
                     <th class="w-auto table-th">{{__('general.state')}}</th>
+                    <th class="w-auto text-center table-th">{{__('general.total')}}</th>
                     <th class="w-10 table-th text-center"><a href="#">{{ trans('general.actions') }} </a></th>
                 </tr>
                 </thead>
@@ -82,29 +86,34 @@
                                             {{ $item->status->label() }}
                                 </span>
                             </td>
+                            <td>{{$item->balance}}</td>
+
                             <td class="text-center table-th">
                                 <div class="frame-wrap">
                                     <div class="d-flex justify-content-center">
                                         <div class="p-2">
                                             <a href="#" data-toggle="modal" data-transaction-id="{{ $item->id }}"
-                                               data-target="#show-commitment" class="mr-2 p-2 bg-">
-                                                <i class="fas fa-search"></i>
+                                               data-target="#show-commitment">
+                                                <i class="fas fa-search" data-toggle="tooltip"
+                                                   data-placement="top" title=""
+                                                   data-original-title="{{ trans('general.show') }}"></i>
                                             </a>
                                         </div>
                                         @if($item->status instanceof \App\States\Transaction\Draft)
                                             <div class="p-2">
                                                 <button type="submit" class="" id="btn-override" style="border: 0 !important; background-color: transparent !important;"
                                                         wire:click="$emit('openSwalOverRide', '{{ $item->id }}')">
-                                                    <i class="fas fa-stop-circle mr-1 text-danger" data-toggle="tooltip" data-placement="top" title=""
+                                                    <i class="fas fa-stop-circle text-danger" data-toggle="tooltip" data-placement="top" title=""
                                                        data-original-title="Anular"></i>
                                                 </button>
                                             </div>
+
                                             <div class="p-2">
-                                                <a href="{{route('budget.edit-commitment',['commitment'=>$item,'certification'=>$certification])}}" class="mr-2 p-2"
-                                                   data-toggle="tooltip"
-                                                   data-placement="top" title=""
-                                                   data-original-title="{{ trans('general.edit') }}">
-                                                    <i class="fas fa-pencil-alt text-info"></i>
+                                                <a href="{{route('budget.edit-commitment',['commitment'=>$item,'certification'=>$certification])}}"
+                                                >
+                                                    <i class="fas fa-pencil-alt text-info" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="{{ trans('general.edit') }}"></i>
                                                 </a>
                                             </div>
                                         @endif
@@ -128,29 +137,33 @@
                             <td class="table-th">
                                 <span class="badge {{ $item->status->color() }}">{{ $item->status->label() }}</span>
                             </td>
+                            <td>{{$item->balance}}</td>
+
                             <td>
                                 <div class="frame-wrap">
                                     <div class="d-flex justify-content-start">
-                                        <div class="p-2 mr-2">
+                                        <div class="p-2">
                                             <a href="#" data-toggle="modal" data-transaction-id="{{ $item->id }}"
                                                data-target="#show-commitment">
-                                                <i class="fas fa-search"></i>
+                                                <i class="fas fa-search" data-toggle="tooltip"
+                                                   data-placement="top" title=""
+                                                   data-original-title="{{ trans('general.show') }}"></i>
                                             </a>
                                         </div>
                                         @if(($item->status instanceof \App\States\Transaction\Draft))
                                             <div class="p-2">
                                                 <button type="submit" class="" id="btn-override" style="border: 0 !important; background-color: transparent !important;"
                                                         wire:click="$emit('openSwalOverRide', '{{ $item->id }}')">
-                                                    <i class="fas fa-stop-circle mr-1 text-danger" data-toggle="tooltip" data-placement="top" title=""
+                                                    <i class="fas fa-stop-circle text-danger" data-toggle="tooltip" data-placement="top" title=""
                                                        data-original-title="Anular"></i>
                                                 </button>
                                             </div>
                                             <div class="p-2">
                                                 <a href="{{route('budget.edit-commitment',['commitment'=>$item,'certification'=>$certification])}}"
-                                                   data-toggle="tooltip"
-                                                   data-placement="top" title=""
-                                                   data-original-title="{{ trans('general.edit') }}">
-                                                    <i class="fas fa-pencil-alt text-info"></i>
+                                                >
+                                                    <i class="fas fa-pencil-alt text-info" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="{{ trans('general.edit') }}"></i>
                                                 </a>
                                             </div>
                                         @endif
@@ -217,5 +230,22 @@
                 });
             });
         })
+    </script>
+    <script>
+        window.addEventListener('loadSelects2', event => {
+            $('#select2-states').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('stateSelect', $(this).val());
+            });
+
+            $('#select2-registers').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('countRegisterSelect', $(this).val());
+            });
+        });
     </script>
 @endpush

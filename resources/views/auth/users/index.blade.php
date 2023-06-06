@@ -7,13 +7,12 @@
         <i class="fal fa-tasks text-primary"></i> {{ trans_choice('general.users', 2) }}
 
     </h1>
-    @can('admin-crud-admin')
+    @if(Gate::check('admin-manage-users') )
         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#add_user_modal">
             <i class="fas fa-plus mr-1"></i>
             {{ trans('general.create') }}
         </button>
-
-    @endcan
+    @endif
 @endsection
 
 @section('content')
@@ -31,9 +30,9 @@
                     <th class="color-primary-500">{{ trans_choice('general.department', 0) }}</th>
                     <th>@sortablelink('last_logged_in_at', trans('general.last_logged_in_at'))</th>
                     <th>@sortablelink('enabled', trans('general.enabled'))</th>
-                    @can('admin-crud-admin')
+
                     <th class="text-center color-primary-500">{{ trans('general.actions') }}</th>
-                    @endcan
+
                 </tr>
                 </thead>
                 <tbody>
@@ -73,16 +72,45 @@
                         <td>
                             <x-enabled enabled="{{ $item->enabled }}"/>
                         </td>
-                        @can('admin-crud-admin')
                         <td class="text-center w-20">
-                            <a href="javascript:void(0);" data-toggle="modal" data-target="#edit_user_modal"
-                                data-id="{{$item->id}}" class="">
-                                <i class="fas fa-pencil mr-1 text-info" data-toggle="tooltip" data-placement="top"
-                                    title="" data-original-title="Editar"></i>
-                            </a>
-                            <x-delete-link action="{{ route('users.destroy', $item->id) }}" id="{{ $item->id }}"/>
+                            @if(Gate::check('admin-manage-users') )
+                                <div class="frame-wrap">
+                                    <div class="d-flex justify-content-center">
+                                        {{--                                        <div class="p-2">--}}
+                                        {{--                                            <a href="javascript:void(0);" data-toggle="modal" data-target="#edit_user_modal"--}}
+                                        {{--                                               data-id="{{$item->id}}" class="">--}}
+                                        {{--                                                <i class="fas fa-pencil mr-1 text-info" data-toggle="tooltip" data-placement="top"--}}
+                                        {{--                                                   title="" data-original-title="Editar"></i>--}}
+                                        {{--                                            </a>--}}
+                                        {{--                                        </div>--}}
+                                        <div class="p-2">
+                                            <a href="javascript:void(0);" data-toggle="modal" data-target="#user_assign_roles"
+                                               data-id="{{$item->id}}" class="">
+                                                <i class="fas fa-user-alt-slash mr-1 text-primary" data-toggle="tooltip" data-placement="top"
+                                                   title="" data-original-title="Asignar Roles"></i>
+                                            </a>
+                                        </div>
+                                        <div class="p-2">
+                                            <a href="javascript:void(0);" data-toggle="modal" data-target="#user_assign_companies"
+                                               data-id="{{$item->id}}" class="">
+                                                <i class="fas fa-home mr-1 text-success" data-toggle="tooltip" data-placement="top"
+                                                   title="" data-original-title="Asignar Juntas"></i>
+                                            </a>
+                                        </div>
+                                        <div class="p-2">
+                                            <a href="javascript:void(0);" data-toggle="modal" data-target="#user_assign_departments"
+                                               data-id="{{$item->id}}" class="">
+                                                <i class="fas fa-clipboard-list mr-1 text-secondary" data-toggle="tooltip" data-placement="top"
+                                                   title="" data-original-title="Asignar Departamentos"></i>
+                                            </a>
+                                        </div>
+                                        <div class="p-2">
+                                            <x-delete-link action="{{ route('users.destroy', $item->id) }}" id="{{ $item->id }}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </td>
-                        @endcan
                     </tr>
                 @endforeach
                 </tbody>
@@ -92,16 +120,38 @@
     </div>
     <livewire:admin.user-create-modal/>
     <livewire:admin.user-edit-modal/>
+    <livewire:admin.user-assign-companies/>
+    <livewire:admin.user-assign-roles/>
+    <livewire:admin.user-assign-departments/>
 @endsection
 @push('page_script')
     <script>
         Livewire.on('toggleUserEditModal', () => $('#edit_user_modal').modal('toggle'));
         Livewire.on('toggleUserAddModal', () => $('#add_user_modal').modal('toggle'));
+        Livewire.on('toggleAssignDepartments', () => $('#user_assign_departments').modal('toggle'));
         $('#edit_user_modal').on('show.bs.modal', function (e) {
             //get level ID & plan registered template detail ID
             let id = $(e.relatedTarget).data('id');
             //Livewire event trigger
             Livewire.emit('openUserEditModal', id);
+        });
+        $('#user_assign_roles').on('show.bs.modal', function (e) {
+            //get level ID & plan registered template detail ID
+            let id = $(e.relatedTarget).data('id');
+            //Livewire event trigger
+            Livewire.emit('openUserAssignRoles', id);
+        });
+        $('#user_assign_departments').on('show.bs.modal', function (e) {
+            //get level ID & plan registered template detail ID
+            let id = $(e.relatedTarget).data('id');
+            //Livewire event trigger
+            Livewire.emit('openUserAssignDepartments', id);
+        });
+        $('#user_assign_companies').on('show.bs.modal', function (e) {
+            //get level ID & plan registered template detail ID
+            let id = $(e.relatedTarget).data('id');
+            //Livewire event trigger
+            Livewire.emit('openUserAssignCompanies', id);
         });
 
         $('#add_user_modal').on('show.bs.modal', function (e) {

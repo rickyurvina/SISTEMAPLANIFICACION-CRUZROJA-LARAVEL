@@ -36,7 +36,7 @@
                     <th class="border text-center bold-h4 ">POR COMPROMETER</th>
                     <th class="border text-center bold-h4 ">POR DEVENGAR</th>
                     <th class="border text-center bold-h4 ">PAGADO</th>
-                    <th class="border text-center bold-h4 ">{{trans('general.actions')}}</th>
+                    {{--                    <th class="border text-center bold-h4 ">{{trans('general.actions')}}</th>--}}
                 </tr>
                 @foreach($activities as $activity)
                     @foreach($activity->accounts as $account)
@@ -45,9 +45,7 @@
                                 <td class="border text-center " rowspan="{{$activity->accounts->count()}}">{{$activity->text}}</td>
                             @endif
                             <td class="border text-center ">
-                                <a href="{{route('budget.showAccount',$account->id)}}">
-                                    {{$account->code}}
-                                </a>
+                                {{$account->code}}
                             </td>
                             <td>{{ money( $account->balancePr->getAmount()) }} </td>
                             <td class="border text-center ">{{$account->balanceRe}}</td>
@@ -58,20 +56,20 @@
                             <td class="border text-center ">0,00 US$</td>
                             <td class="border text-center ">0,00 US$</td>
                             <td class="border text-center ">0,00 US$</td>
-                            <td>
-                                <div class="frame-wrap">
-                                    <div class="d-flex justify-content-start">
-                                        <div class="p-2">
-                                            <a href="{{ route('projects.showIndex', $item->id) }}"
-                                               aria-expanded="false"
-                                               data-toggle="tooltip" data-placement="top" title=""
-                                               data-original-title="Ficha del Proyecto">
-                                                <i class="fas fa-eye text-info"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
+                            {{--                            <td>--}}
+                            {{--                                <div class="frame-wrap">--}}
+                            {{--                                    <div class="d-flex justify-content-start">--}}
+                            {{--                                        <div class="p-2">--}}
+                            {{--                                            <a href="{{ route('projects.showIndex', $item->id) }}"--}}
+                            {{--                                               aria-expanded="false"--}}
+                            {{--                                               data-toggle="tooltip" data-placement="top" title=""--}}
+                            {{--                                               data-original-title="Ficha del Proyecto">--}}
+                            {{--                                                <i class="fas fa-eye text-info"></i>--}}
+                            {{--                                            </a>--}}
+                            {{--                                        </div>--}}
+                            {{--                                    </div>--}}
+                            {{--                                </div>--}}
+                            {{--                            </td>--}}
                         </tr>
                     @endforeach
                 @endforeach
@@ -96,9 +94,7 @@
                                 <td class="border text-center " rowspan="{{$activity->accounts->count()}}">{{$activity->text}}</td>
                             @endif
                             <td class="border text-center ">
-                                <a href="{{route('budget.showAccount',$account->id)}}">
                                     {{$account->code}}
-                                </a>
                             </td>
                             <td class="border text-center">
                                 {{ $account->description}}
@@ -135,7 +131,7 @@
         </div>
         <x-pagination :items="$activities"/>
     @endif
-    <livewire:budget.expenses.project.expense-project-activity-approve-from-budget :transactionId="$transaction->id" class="{{\App\Models\Projects\Activities\Task::class}}" />
+    <livewire:budget.expenses.project.expense-project-activity-approve-from-budget :transactionId="$transaction->id" class="{{\App\Models\Projects\Activities\Task::class}}"/>
 </div>
 @push('page_script')
 
@@ -163,7 +159,7 @@
                     icon: 'success',
                     showCancelButton: true,
                     confirmButtonColor: 'var(--success)',
-                    confirmButtonText: '<i class="fas fa-check-circle"></i> {{ trans('general.yes') . ', ' . trans('general.delete') }}',
+                    confirmButtonText: '<i class="fas fa-check-circle"></i> {{ trans('general.yes') . ', ' . trans('general.approve') }}',
                     cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
                 }).then((result) => {
                     if (result.value) {

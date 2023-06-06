@@ -7,6 +7,7 @@ use App\Events\Projects\ProjectCreated;
 use App\Events\Projects\ProjectUpdatedThresholds;
 use App\Models\Admin\Department;
 use App\Models\Auth\User;
+use App\Models\Budget\Transaction;
 use App\Models\Comment;
 use App\Models\Common\CatalogGeographicClassifier;
 use App\Models\Indicators\Indicator\Indicator;
@@ -678,4 +679,20 @@ class Project extends Model
     {
         return $this->morphMany(ProjectThreshold::class, 'thresholdable');
     }
+
+    /**
+     * @return bool
+     */
+    public function isMisional(): bool
+    {
+        if ($this->type==self::TYPE_MISSIONARY_PROJECT || $this->type==self::TYPE_EMERGENCY )
+            return true;
+        return false;
+    }
+
+    public  function hasTransaction(){
+       return Transaction::where('year', $this->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->withoutGlobalScopes()->first();
+    }
+
 }

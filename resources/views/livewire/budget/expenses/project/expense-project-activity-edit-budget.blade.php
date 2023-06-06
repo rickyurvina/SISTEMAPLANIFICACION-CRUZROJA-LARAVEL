@@ -28,27 +28,18 @@
                                 <div class="col-md-12 table-responsive">
                                     <table class="table table-bordered detail-table">
                                         <tbody>
-
-                                        <tr>
-                                            <td>Objetivo Estratègico</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->parent->parent->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->parent->parent->name}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Objetivo Específico</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->parent->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->parent->name}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Program</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->name}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Resultado Estratégico</td>
-                                            <td> {{$this->activity->indicator->indicatorable->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->name}}</td>
-                                        </tr>
+                                        @if($tree)
+                                            @foreach($tree as $element)
+                                                @php
+                                                    $key = array_search($element->planRegistered->name, array_column($this->fields, 'label'));
+                                                @endphp
+                                                <tr>
+                                                    <td>{{$element->name}}</td>
+                                                    <td>{{$element->code}}</td>
+                                                    <td> {{$element->name}}</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
                                         </tbody>
                                     </table>
                                     <table class="table table-bordered detail-table">

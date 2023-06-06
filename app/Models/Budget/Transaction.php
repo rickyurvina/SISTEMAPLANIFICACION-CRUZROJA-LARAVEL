@@ -237,7 +237,7 @@ class Transaction extends Model
             ]);
         })->whereHas('transaction', function ($q) {
             $q->where('type', Transaction::TYPE_PROFORMA)->where('year', $this->year)
-                ->whereState('status', Approved::class)->withoutGlobalScopes();
+                ->whereState('status', Approved::class);
         });
 
         $total = 0;
@@ -257,7 +257,7 @@ class Transaction extends Model
             ]);
         })->whereHas('transaction', function ($q) {
             $q->where('type', Transaction::TYPE_PROFORMA)->where('year', $this->year)
-                ->whereState('status', Approved::class)->withoutGlobalScopes();
+                ->whereState('status', Approved::class);
         });
         $total = 0;
         foreach ($expenses->get() as $expens) {

@@ -2,7 +2,7 @@
     <div class="frame-wrap mb-3">
         <div class="d-flex d-flex-row">
             @if($project->phase instanceof \App\States\Project\StartUp)
-                @can('project-manage-indexCard')
+                @can('project-manage')
                     <a href="{{ route('projects.showIndex', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'act' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="Ficha"
@@ -13,7 +13,7 @@
             @endif
 
             @if($project->phase instanceof \App\States\Project\Planning)
-                @can('project-manage-governance')
+                @can('project-manage-team' || 'project-view-team')
                     <a href="{{ route('projects.team', $project->id) }}">
                       <span class="btn btn-sm {{ $page == 'team' ? 'btn-success':' btn-info' }} mr-2"
                             data-placement="top" title="{{trans('general.governance')}}"
@@ -22,7 +22,7 @@
                     </a>
                 @endcan
             @endif
-            @can('project-manage-logicFrame')
+            @can('project-view-logicFrame' || 'project-manage-logicFrame')
                 <a href="{{ route('projects.logic-frame', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'logic_frame' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="{{trans('general.logic_frame')}}"
@@ -30,7 +30,7 @@
                                     <i class="fas fa-file-archive mr-1"></i>        {{substr(trans('general.logic_frame'),0,25) }}</span>
                 </a>
             @endcan
-            @can('project-manage-stakeholders')
+            @can('project-manage-stakeholders' ||'project-view-stakeholders')
 
                 <a href="{{ route('projects.stakeholder', $project->id) }}">
                                    <span class="btn btn-sm {{ $page == 'stakeholders' ? 'btn-success':' btn-info' }} mr-2"
@@ -39,14 +39,14 @@
                                    > <i class="fas fa-poll-people mr-1"></i>{{substr(trans('general.stakeholders'),0,25) }}</span>
                 </a>
             @endcan
-            @can('project-manage-risks')
+            @can('project-manage-risks' || 'project-view-risks')
                 <a href="{{ route('projects.risks', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'risks' ? 'btn-success':' btn-info' }} mr-2"
                                     ><i class="fas fa-engine-warning mr-1"></i> Riesgos</span>
                 </a>
             @endcan
             @if($project->phase instanceof \App\States\Project\StartUp)
-                @can('project-manage-formulatedDocument')
+                @can('project-manage')
                     <a href="{{ route('projects.doc', $project->id) }}">
                                      <span class="btn btn-sm {{ $page == 'formulated_document' ? 'btn-success':' btn-info' }} mr-2"
                                            data-placement="top" title="Documento Formulado"
@@ -54,7 +54,7 @@
                                      > <i class="fas fa-file mr-1"></i>Documento Formulado</span>
                     </a>
                 @endcan
-                @can('project-manage-referentialBudget')
+                @can('project-manage-referentialBudget' || 'project-view-referentialBudget')
                     <a href="{{ route('projects.showReferentialBudget', $project->id) }}">
                                    <span class="btn btn-sm {{ $page == 'budget' ? 'btn-success':' btn-info' }} mr-2"
                                          data-placement="top" title="Presupuesto"
@@ -65,7 +65,7 @@
             @endif
 
             @if(!($project->phase instanceof \App\States\Project\StartUp))
-                @can('project-manage-timetable')
+                @can('project-manage-activities' ||'project-view-activities')
                     <a href="{{ route('projects.activities', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'activities' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="{{trans('general.activities')}}"
@@ -75,7 +75,7 @@
                     </a>
                 @endcan
 
-                @can('project-manage-calendar')
+                @can('project-manage-calendar' || 'project-view-calendar')
                     <a href="{{ route('projects.calendar', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'calendar' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="Calendario"
@@ -84,7 +84,7 @@
                                     </span>
                     </a>
                 @endcan
-                @can('project-manage-activities')
+                @can('project-manage-activities' ||'project-view-activities')
                     <a href="{{ route('projects.activities_results', $project) }}">
                                     <span class="btn btn-sm {{ $page == 'activities_results' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="{{trans_choice('general.activities',2)}}"
@@ -93,14 +93,18 @@
                                     </span>
                     </a>
                 @endcan
-
-                <a href="{{ route('projects.budgetDocumentReport', $project) }}">
+                @if($project->hasTransaction())
+                    @can('project-manage-referentialBudget' ||'project-view-referentialBudget')
+                        <a href="{{ route('projects.budgetDocumentReport', $project) }}">
                            <span class="btn btn-sm {{ $page == 'budget' ? 'btn-success':' btn-info' }} mr-2"
                                  data-placement="top" title="Presupuesto"
                                  data-original-title="Presupuesto"
                            > <i class="fas fa-dollar-sign mr-1"></i>Presupuesto</span>
-                </a>
-                @can('project-manage-acquisitions')
+                        </a>
+                    @endcan
+                @endif
+
+                @can('project-manage-acquisitions' ||'project-view-acquisitions')
                     <a href="{{ route('projects.acquisitions', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'acquisitions' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="{{trans('general.acquisitions')}}"
@@ -108,7 +112,7 @@
                                       <i class="fas fa-bags-shopping mr-1"></i>  Adquisiciones</span>
                     </a>
                 @endcan
-                @can('project-manage-communication')
+                @can('project-manage-communication' || 'project-view-communication')
                     <a href="{{route('projects.communication', $project)}}">
                                     <span class="btn btn-sm {{ $page == 'communications' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top" title="{{trans('general.communication')}}"
@@ -119,7 +123,7 @@
                 @endcan
 
             @endif
-            @can('project-view-summary')
+            @can('project-view' || 'project->manage')
                 <a href="{{ route('projects.showSummary', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'summary' ? 'btn-success':' btn-info' }} mr-2"
                                           data-placement="top"

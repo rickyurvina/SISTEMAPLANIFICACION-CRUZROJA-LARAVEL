@@ -19,20 +19,25 @@
     </div>
 </div>
 <div class="d-flex flex-wrap mt-2">
-    <x-label-detail>{{trans('general.cost')}}</x-label-detail>
+    <x-label-detail>{{trans('general.module_budget')}}</x-label-detail>
     <div class="detail">
-        @if($project->phase instanceof  \App\States\Project\Planning)
-
-            <livewire:components.input-text :modelId="$task->id"
-                                            class="\App\Models\Projects\Activities\Task"
-                                            field="amount"
-                                            :rules="'required|numeric'"
-                                            event="App\Events\Projects\ProjectActivityWeightChanged"
-                                            eventLivewire="refreshPage"
-                                            defaultValue="{{ $task->amount}}"/>
+        @if($transaction && $task->getTotalBudget($transaction)->getAmount()>0)
+            {{$task->getTotalBudget($transaction)}}
         @else
-            {{$task->amount}}
+            @if($project->phase instanceof  \App\States\Project\Planning)
+
+                <livewire:components.input-text :modelId="$task->id"
+                                                class="\App\Models\Projects\Activities\Task"
+                                                field="amount"
+                                                :rules="'required|numeric'"
+                                                event="App\Events\Projects\ProjectActivityWeightChanged"
+                                                eventLivewire="refreshPage"
+                                                defaultValue="{{ $task->amount}}"/>
+            @else
+                {{$task->amount}}
+            @endif
         @endif
+
     </div>
 </div>
 <div class="d-flex flex-wrap mt-2">

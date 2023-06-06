@@ -52,9 +52,11 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'https://cre.laverix.com.ec'),
 
     'asset_url' => env('ASSET_URL', null),
+
+    'erp_url' => env('APP_ERP_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------
@@ -178,7 +180,6 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\ViewComposerServiceProvider::class,
         App\Providers\BladeServiceProvider::class,
-
     ],
 
     /*

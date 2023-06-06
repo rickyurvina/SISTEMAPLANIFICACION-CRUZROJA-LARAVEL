@@ -35,6 +35,13 @@
                                             <span class="hidden-sm-down ml-1">Requerimientos</span>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#files" role="tab"
+                                           aria-selected="false" wire:ignore>
+                                            <i class="fal fa-file"></i>
+                                            <span class="hidden-sm-down ml-1">Archivos y Comentarios</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                             <div class="ml-auto p-2">
@@ -55,6 +62,9 @@
                             </div>
                             <div class="tab-pane fade" id="requirements" role="tabpanel" wire:ignore.self>
                                 @include('modules.piat.edit.requirements')
+                            </div>
+                            <div class="tab-pane fade" id="files" role="tabpanel" wire:ignore.self>
+                                @include('modules.piat.files')
                             </div>
                         </div>
                     </div>

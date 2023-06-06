@@ -9,6 +9,19 @@ use Illuminate\Contracts\View\View;
 
 class TemplateController extends Controller
 {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:strategy-manage-templates|strategy-manage|strategy-view-templates', ['only' => ['index']]);
+        $this->middleware('permission:strategy-manage-templates|strategy-manage', ['only' => ['edit']]);
+    }
+
     /**
      * Calls Plan templates configuration default view
      *
@@ -16,9 +29,6 @@ class TemplateController extends Controller
      */
     public function index()
     {
-        if (user()->cannot('strategy-crud-strategy') && user()->cannot('strategy-read-strategy') && user()->cannot('strategy-template-crud-strategy')) {
-            abort(403);
-        }
         return view('modules.strategy.template.index');
     }
 
@@ -30,9 +40,6 @@ class TemplateController extends Controller
      */
     public function edit($id)
     {
-        if (user()->cannot('strategy-crud-strategy') && user()->cannot('strategy-template-crud-strategy')) {
-            abort(403);
-        }
         return view('modules.strategy.template.edit')->with('id', $id);
     }
 }

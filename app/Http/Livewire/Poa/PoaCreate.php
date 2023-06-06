@@ -66,11 +66,10 @@ class PoaCreate extends Component
             if ($response['success']) {
                 flash(trans_choice('messages.success.added', 0, ['type' => __('general.poa')]))->success();
                 DB::commit();
-                return redirect()->route('poa.poas');
             } else {
                 flash($response['message'])->error();
-                return redirect()->route('poa.poas');
             }
+            return redirect()->route('poa.poas');
         } catch (\Exception $exception) {
             DB::rollBack();
             throw new \Exception($exception->getMessage());

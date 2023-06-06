@@ -3,11 +3,30 @@
 namespace App\Http\Controllers\Process;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
 use App\Models\Process\ProcessPlanChanges;
 use Illuminate\Http\Request;
 
 class ProcessPlanChangesController extends Controller
 {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:process-manage');
+        $this->middleware('permission:process-manage-changes',
+            [
+                'only' => [
+                    'edit',
+                    'destroy',
+                ]]);
+    }
+
     /**
      * Show the form for editing the specified resource.
      *

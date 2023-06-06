@@ -5,9 +5,8 @@ namespace App\Http\Livewire\Projects\Activities;
 use App\Jobs\Projects\CreateTaskWorkLog;
 use App\Models\Auth\User;
 use App\Models\Budget\Account;
+use App\Models\Budget\Transaction;
 use App\Models\Common\CatalogGeographicClassifier;
-
-//use App\Models\Indicators\Indicator\Indicator;
 use App\Models\Indicators\Indicator\Indicator;
 use App\Models\Measure\Measure;
 use App\Models\Poa\Poa;
@@ -16,13 +15,17 @@ use App\Models\Poa\PoaProgram;
 use App\Models\Projects\Activities\ActivityTask;
 use App\Models\Projects\Activities\Task;
 use App\Models\Projects\Catalogs\ProjectLineActionServiceActivity;
+use App\Scopes\Company;
+use App\States\Transaction\Approved;
 use App\Traits\Jobs;
 use App\Traits\Uploads;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Money\Money;
 
 class ProjectRegisterAdvanceActivity extends Component
 {
@@ -60,10 +63,10 @@ class ProjectRegisterAdvanceActivity extends Component
     public array $hoursUsers = [];
     public $rule;
     public $transaction;
-    public $expenses;
+    public Collection $expenses;
     public $poaId;
     public $credits;
-    public $total = 0;
+    public $total=null;
     public $poaActivityIndicatorId = null;
     public $poaActivityIndicatorName = '';
     public $isGantt = false;
@@ -231,6 +234,9 @@ class ProjectRegisterAdvanceActivity extends Component
         }
         $result = $this->task->parentOfTask;
         $this->resultIndicators = Measure::where('indicatorable_type', Task::class)->where('indicatorable_id', $result->id)->get();
+        $this->transaction = Transaction::where('year', $this->project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->withoutGlobalScope(Company::class)->first();
+
         $this->loadBudget();
     }
 
@@ -503,9 +509,9 @@ class ProjectRegisterAdvanceActivity extends Component
     {
         $this->validate(
             [
-                'advance' => 'nullable|min:1|numeric|integer',
-                'advanceMen' => 'nullable|min:1|numeric|integer',
-                'advanceWomen' => 'nullable|min:1|numeric|integer',
+                'advance' => 'nullable|numeric|integer',
+                'advanceMen' => 'nullable|numeric|integer',
+                'advanceWomen' => 'nullable|numeric|integer',
             ]);
         try {
             DB::beginTransaction();
@@ -513,13 +519,16 @@ class ProjectRegisterAdvanceActivity extends Component
             $oldAdvanceMen = $taskGoal->men;
             $oldAdvanceWomen = $taskGoal->women;
             $oldAdvance = $taskGoal->actual;
-            $taskGoal->men = $this->advanceMen + $oldAdvanceMen;
-            $taskGoal->women = $this->advanceWomen + $oldAdvanceWomen;
-            $taskGoal->actual = $this->advance + $this->advanceMen + $this->advanceWomen + $oldAdvance;
+
             $this->taskDetail->loadMedia(['file']);
             $this->media = $this->taskDetail->media;
             if (count($this->media) > 0) {
-                $taskGoal->save();
+                $taskGoal->update(
+                    [
+                        'men' => $this->advanceMen + $oldAdvanceMen,
+                        'women' => $this->advanceWomen + $oldAdvanceWomen,
+                        'actual' => $this->advance + $oldAdvance
+                    ]);
                 flash('Valor Actualizado')->success()->livewire($this);
                 $this->reset([
                     'period',
@@ -642,14 +651,21 @@ class ProjectRegisterAdvanceActivity extends Component
                 ['type', Account::TYPE_EXPENSE],
                 ['accountable_id', $this->task->id],
                 ['accountable_type', Task::class],
+                ['year', $this->transaction->year],
             ]
         );
+        $total = 0;
 
-        foreach ($expenses->get() as $expens) {
-            $this->total += $expens->balance->getAmount();
+        foreach ($expenses->get() as $account) {
+            if ($this->transaction->status instanceof Approved) {
+                $total += $account->balance->getAmount();
+            } else {
+                $total += $account->balanceDraft->getAmount();
+            }
         }
+        $this->total = $total;
 
-        $this->expenses = $expenses->get();
+        $this->expenses = $expenses->orderBy('id', 'desc')->get();
     }
 
     public function updatedPoaActivityIndicatorId($value)

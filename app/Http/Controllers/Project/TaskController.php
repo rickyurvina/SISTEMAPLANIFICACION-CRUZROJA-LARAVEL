@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Project;
 
 use App\Abstracts\Http\Controller;
 use App\Events\Projects\Activities\TaskUpdatedCreateGoals;
+use App\Http\Middleware\Azure\Azure;
 use App\Models\Projects\Activities\Task;
 use App\Models\Projects\Project;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +12,25 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:project-manage|project-super-admin');
+        $this->middleware('permission:project-manage-activities',[
+            'only'=>[
+                'store',
+                'updateParent',
+                'update',
+                'delete',
+                'updateOrder',
+            ]]);
+    }
+
     public function store(Request $request, Project $project): JsonResponse
     {
         $task = new Task();

@@ -135,48 +135,6 @@
 
 <div style="page-break-after: always;"></div>
 
-{{--<table class="summary-table w-100">--}}
-{{--    <h2>Historial de Revisiones</h2>--}}
-{{--    <tbody>--}}
-{{--    <tr>--}}
-{{--        <th class="bg-red" scope="row">--}}
-{{--            <h3 class="color-white">--}}
-{{--                Fecha--}}
-{{--            </h3>--}}
-{{--        </th>--}}
-{{--        <th class="bg-red" scope="row">--}}
-{{--            <h3>--}}
-{{--                Versión--}}
-{{--            </h3>--}}
-{{--        </th>--}}
-{{--        <th class="bg-red" scope="row">--}}
-{{--            <h3>--}}
-{{--               Descripción--}}
-{{--            </h3>--}}
-{{--        </th>--}}
-{{--        <th class="bg-red" scope="row">--}}
-{{--            <h3>--}}
-{{--                Autor--}}
-{{--            </h3>--}}
-{{--        </th>--}}
-{{--    </tr>--}}
-{{--    <tr>--}}
-{{--        <td>--}}
-
-{{--        </td>--}}
-{{--        <td>--}}
-
-{{--        </td>--}}
-{{--        <td>--}}
-
-{{--        </td>--}}
-{{--        <td>--}}
-
-{{--        </td>--}}
-{{--    </tr>--}}
-{{--    </tbody>--}}
-{{--</table>--}}
-
 <h2 class="text-center color-black">
     PERFIL DEL PROYECTO
 </h2>
@@ -303,7 +261,6 @@
 <p>
     {{explode(',',$project->estimated_time)[3]??0 }}-Meses
 </p>
-<div style="page-break-after: always;"></div>
 <h2 id="stakeholders">6. ACTORES CLAVE</h2>
 @if($project->stakeholders->count()>0)
     <table class="summary-table w-100">
@@ -374,7 +331,6 @@
         <strong>No existen </strong>actores clave.
     </div>
 @endif
-<div style="page-break-after: always;"></div>
 
 <h2 id="schedule">7. CRONOGRAMA</h2>
 @php
@@ -429,10 +385,6 @@
                             </td>
                             @php
                                 $l++;
-                                if($l>9)
-                                {
-                                  echo('<div style="page-break-after: always;"></div>');
-                                }
                             @endphp
                         @endfor
                     </tr>
@@ -455,10 +407,8 @@
     @endphp
 @endwhile
 
-<div style="page-break-after: always;"></div>
 
 <h2 id="budget">8. PRESUPUESTO</h2>
 {{'$'.number_format($project->estimated_amount,2) }}
-
 </body>
 </html>

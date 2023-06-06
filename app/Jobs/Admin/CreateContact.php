@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class CreateContact extends Job
 {
     protected $request;
-    protected Contact $contact;
+    protected User $user;
 
     /**
      * Create a new job instance.
@@ -30,9 +30,8 @@ class CreateContact extends Job
     public function handle()
     {
         DB::transaction(function () {
-            $this->contact = User::create($this->request->all());
-            $this->contact->departments()->sync($this->request->department);
+            $this->user = User::create($this->request->all());
         });
-        return $this->contact;
+        return $this->user;
     }
 }

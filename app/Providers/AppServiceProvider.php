@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Vendor\Spatie\Activity;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -75,6 +77,15 @@ class AppServiceProvider extends ServiceProvider
 
             return $existIndicator->count() < 1;
         });
+
+//        Activity::saving(function (Activity $activity) {
+//            $activity->properties = $activity->properties->put('agent', [
+//                'ip' => Request::ip(),
+//                'browser' => \Browser::browserName(),
+//                'os' => \Browser::platformName(),
+//                'url' => Request::fullUrl(),
+//                ]);
+//            });
 
     }
 

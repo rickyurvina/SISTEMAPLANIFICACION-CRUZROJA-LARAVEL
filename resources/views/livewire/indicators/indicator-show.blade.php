@@ -34,13 +34,9 @@
                                 <dd class="col-sm-4">
                                     {{ $indicator->type=='Manual'? trans('indicators.indicator.manual') :'' }}{{ $indicator->type=='Homologated'? trans('indicators.indicator.homologate'):'' }} {{ $indicator->type=='Grouped'? trans('indicators.indicator.grouped'):'' }}
                                 </dd>
-                                <dt class="col-sm-2"><h5><strong>{{ trans('indicators.indicator.results') }}</strong></h5></dt>
+                                <dt class="col-sm-2"><h5><strong>{{ trans('indicators.indicator.indicator_detail') }}</strong></h5></dt>
                                 <dd class="col-sm-4">
                                     {{ $indicator->results }}
-                                </dd>
-                                <dt class="col-sm-2"><h5><strong>{{ trans('indicators.indicator.type_of_aggregation') }}</strong></h5></dt>
-                                <dd class="col-sm-4">
-                                    {{ $indicator->getTypeAggregation() }}
                                 </dd>
 
                                 <dt class="col-sm-2"><h5><strong>{{ trans('indicators.indicator.unit_of_measurement') }}</strong></h5></dt>
@@ -112,42 +108,15 @@
                                     <dd class="col-sm-4">
                                         <span class="form-label badge {{$indicator->getStateIndicator()[0]?? null}}  badge-pill">{{$indicator->getStateIndicator()[1]?? null}}</span>
                                     </dd>
-
-                                    <div class="col-sm-8 text-center">
-
-                                        <table id="dt-basic-example" class="table table-bordered  table-striped w-100 dataTable no-footer dtr-inline" role="grid"
-                                               aria-describedby="dt-basic-example_info" style="width: 300px">
-                                            <thead>
-                                            <tr>
-                                                <th class="sorting text-center" tabindex="0" aria-controls="dt-basic-example" rowspan="1" colspan="5" style="width: 111px">
-                                                    <h3>{{trans('indicators.indicator.threshold_details')}}</h3></th>
-                                            </tr>
-                                            <tr role="row">
-                                                <th class="sorting text-center" tabindex="0" aria-controls="dt-basic-example" rowspan="1" colspan="1" style="width: 111px">
-                                                    <span class="">{{trans('indicators.indicator.state')}}</span></th>
-                                                <th class="sorting text-center" tabindex="0" aria-controls="dt-basic-example" rowspan="1" colspan="1"
-                                                    style="width: 111px">{{trans('indicators.indicator.minimum')}}</th>
-                                                <th class="sorting text-center" tabindex="0" aria-controls="dt-basic-example" rowspan="1" colspan="1"
-                                                    style="width: 111px">{{trans('indicators.indicator.maximum')}}</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-
-                                            <tr id="1" role="row" class="add">
-                                                <td class="dtr-control text-center">
-                                                    <span class="d-inline-block rounded-circle mr-2 bg-warning bg-warning" style="width: 15px; height: 15px"></span>
-                                                </td>
-                                                <td class="dtr-control text-center">
-                                                    <small>{{$minAW}}</small>
-                                                </td>
-                                                <td class="dtr-control text-center">
-                                                    <small>{{$maxAW}}</small>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div id="indicator-chart-"  style="height: 350px; width: 100%">
+                                    <dt class="col-sm-2"><h5><strong>{{trans('general.min') }}</strong></h5></dt>
+                                    <dd class="col-sm-4">
+                                        <span>{{$minAW}}</span>
+                                    </dd>
+                                    <dt class="col-sm-2"><h5><strong>{{trans('general.max') }}</strong></h5></dt>
+                                    <dd class="col-sm-4">
+                                        <span>{{$maxAW}}</span>
+                                    </dd>
+                                    <div id="indicator-chart-" style="height: 350px; width: 100%">
                                     </div>
                                     <div id="chartdata-"></div>
                                 @endif

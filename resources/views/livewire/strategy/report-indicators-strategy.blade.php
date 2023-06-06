@@ -36,14 +36,14 @@
                                         @endphp
                                         <tr>
                                             <td>
-                                            <i class="fas fa-stop-circle mr-3" @if(isset( $score['dataUsed']))
-                                                style="color: {{ $score['dataUsed'][0]['color']}}" @endif></i>
+                                                <i class="fas fa-stop-circle mr-3" @if(isset( $score['dataUsed']))
+                                                    style="color: {{ $score['dataUsed'][0]['color']}}" @endif></i>
                                                 <span>
-                                                     <i class="{{$indicator->unit->getIcon() }}"></i>
+                                                     <i class="{{$indicator->unit ? $indicator->unit->getIcon() :'' }}"></i>
                                                            {{ $indicator->name }}
                                                 </span>
                                             </td>
-                                            <td>  {{ $indicator->unit->name }}</td>
+                                            <td>  {{ $indicator->unit ? $indicator->unit->name :'' }}</td>
                                             @if(isset( $indicator->score($periodId)['dataUsed']))
                                                 <td class="text-center">
                                                     <span style="color: {{ $score['dataUsed'][0]['color'] }}">
@@ -54,32 +54,34 @@
                                                 <td class="text-center"><span></span></td>
                                             @endif
                                             <th class="w-10 text-center table-th">
-                                                <div class="frame-wrap">
-                                                    <div class="d-flex justify-content-start">
-                                                        <div class="p-2">
-                                                            @if($indicator->scores->sum('score')==0)
+                                                @if(Gate::check('strategy-manage-indicator-reports') || Gate::check('strategy-manage'))
+                                                    <div class="frame-wrap">
+                                                        <div class="d-flex justify-content-start">
+                                                            <div class="p-2">
+                                                                @if($indicator->scores->sum('score')==0)
+                                                                    <a href="javascript:void(0)"
+                                                                       data-toggle="modal"
+                                                                       data-target="#measure-edit-modal"
+                                                                       data-measure-id="{{$indicator->id}}">
+                                                                        <i class="fas fa-edit mr-1 text-info"
+                                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                                           data-original-title="Editar"></i>
+                                                                    </a>
+                                                                @endif
+                                                            </div>
+                                                            <div class="p-2">
                                                                 <a href="javascript:void(0)"
                                                                    data-toggle="modal"
-                                                                   data-target="#measure-edit-modal"
+                                                                   data-target="#measure-show-modal"
                                                                    data-measure-id="{{$indicator->id}}">
-                                                                    <i class="fas fa-edit mr-1 text-info"
+                                                                    <i class="fas fa-eye mr-1 text-success"
                                                                        data-toggle="tooltip" data-placement="top" title=""
-                                                                       data-original-title="Editar"></i>
+                                                                       data-original-title="Ver"></i>
                                                                 </a>
-                                                            @endif
-                                                        </div>
-                                                        <div class="p-2">
-                                                            <a href="javascript:void(0)"
-                                                               data-toggle="modal"
-                                                               data-target="#measure-show-modal"
-                                                               data-measure-id="{{$indicator->id}}">
-                                                                <i class="fas fa-eye mr-1 text-success"
-                                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                                   data-original-title="Ver"></i>
-                                                            </a>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                @endif
                                             </th>
                                         </tr>
                                     @endforeach

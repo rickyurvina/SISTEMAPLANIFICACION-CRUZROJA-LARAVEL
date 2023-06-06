@@ -1,17 +1,19 @@
 <div>
     <div class="d-flex flex-wrap w-75">
-        <div class="d-flex flex-column p-2 w-25" wire:ignore>
+        <div class="d-flex flex-column p-2 w-25">
             <x-label-detail>Estado</x-label-detail>
-            <select class="form-control" id="select2-states">
+            <select class="form-control" id="select2-states" wire:ignore.self wire:model="stateSelect">
+                <option value="0">Seleccione</option>
                 <option value="{{ \App\States\Transaction\Draft::label() }}">{{ \App\States\Transaction\Draft::label() }}</option>
                 <option value="{{ \App\States\Transaction\Approved::label() }}">{{ \App\States\Transaction\Approved::label() }}</option>
                 <option value="{{ \App\States\Transaction\Digited::label() }}">{{ \App\States\Transaction\Digited::label() }}</option>
                 <option value="{{ \App\States\Transaction\Balanced::label() }}">{{ \App\States\Transaction\Balanced::label() }}</option>
             </select>
         </div>
-        <div class="d-flex flex-column p-2  w-25" wire:ignore>
+        <div class="d-flex flex-column p-2  w-25">
             <x-label-detail>Tipo de Reforma</x-label-detail>
-            <select class="form-control" id="select2-reform">
+            <select class="form-control" id="select2-reform" wire:ignore.self wire:model="reformSelect">
+                <option value="0">Seleccione</option>
                 @foreach(\App\Models\Budget\Transaction::REFORMS_TYPES  as $index => $item)
                     <option value="{{$item}}">{{ $item }}</option>
                 @endforeach
@@ -32,7 +34,8 @@
             </label>
         </div>
         <div class="w-15">
-            <select class="form-control" id="select2-registers">
+            <select class="form-control" id="select2-registers" wire:ignore.self wire:model="countRegisterSelect">
+                <option value="0">Seleccione</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -106,10 +109,12 @@
                         <td class="table-th">{{$item->credits}}</td>
                         <td class=" table-th">
                             <div class="d-flex flex-wrap">
-                                <div class="p-2 mr-2">
+                                <div class="p-2 mr-2"  >
                                     <a href="#" data-toggle="modal" data-transaction-id="{{ $item->id }}"
                                        data-target="#show-reform">
-                                        <i class="fas fa-search"></i>
+                                        <i class="fas fa-search" data-toggle="tooltip"
+                                           data-placement="top" title=""
+                                           data-original-title="{{ trans('general.show') }}"></i>
                                     </a>
                                 </div>
                                 @if((!$item->status instanceof \App\States\Transaction\Approved))
@@ -143,19 +148,22 @@
             $('#select2-states').select2({
                 placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
             }).on('change', function (e) {
-            @this.set('stateSelect', $(this).val());
+                @this.
+                set('stateSelect', $(this).val());
             });
 
             $('#select2-reform').select2({
                 placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
             }).on('change', function (e) {
-            @this.set('reformSelect', $(this).val());
+                @this.
+                set('reformSelect', $(this).val());
             });
 
             $('#select2-registers').select2({
                 placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
             }).on('change', function (e) {
-            @this.set('countRegisterSelect', $(this).val());
+                @this.
+                set('countRegisterSelect', $(this).val());
             });
         });
         $('#show-reform').on('show.bs.modal', function (e) {
@@ -163,6 +171,30 @@
             let transactionId = $(e.relatedTarget).data('transaction-id');
             //Livewire event trigger
             Livewire.emit('loadTransaction', transactionId);
+        });
+    </script>
+    <script>
+        window.addEventListener('loadSelects2', event => {
+            $('#select2-states').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('stateSelect', $(this).val());
+            });
+
+            $('#select2-reform').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('reformSelect', $(this).val());
+            });
+
+            $('#select2-registers').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('countRegisterSelect', $(this).val());
+            });
         });
     </script>
 @endpush

@@ -6,6 +6,10 @@
     <h1 class="subheader-title">
         <i class="fal fa-sort-circle text-primary"></i> {{ $plan->name ?? '' }}
     </h1>
+    <div class="subheader-block d-lg-flex align-items-center">
+        <a href="{{ route('strategy.updateScores')}}" class="btn btn-success btn-sm"><span class="fas fa-check-circle mr-2"></span>
+            &nbsp;{{ trans('general.update').'-'.trans('general.strategy') }}</a>
+    </div>
 @endsection
 
 @section('content')

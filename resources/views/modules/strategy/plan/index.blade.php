@@ -6,7 +6,7 @@
     <h1 class="subheader-title">
         <i class="fal fa-align-left text-primary"></i> {{ trans_choice('general.plan', 2) }}
     </h1>
-    @if(Gate::check('strategy-plan-crud-strategy') || Gate::check('strategy-crud-strategy'))
+    @if(Gate::check('strategy-manage-plans') || Gate::check('strategy-manage'))
         <a href="{{ route('plans.create') }}" class="btn btn-success btn-sm" data-toggle="modal"
            data-target="#new-modal-plan"><span class="fas fa-plus mr-1"></span>
             {{ trans('general.add_plan_strategy') }}
@@ -28,9 +28,7 @@
                         <th class="w-15 color-primary-500 ">{{trans('general.end_date')}}</th>
                         <th class="w-5 color-primary-500 ">{{trans('general.status')}}</th>
                         <th class="w-5  color-primary-500 text-center">{{ trans('general.objectives_name')}}</th>
-                        @if(Gate::check('strategy-plan-crud-strategy') || Gate::check('strategy-crud-strategy'))
-                            <th class="text-center color-primary-500 w-5">{{ trans('general.actions') }}</th>
-                        @endif
+                        <th class="text-center color-primary-500 w-5">{{ trans('general.actions') }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -42,17 +40,17 @@
                             <td>
                                 @switch($item->status)
                                     @case(\App\Models\Strategy\Plan::DRAFT)
-                                    <small class="badge badge-info badge-pill text-center w-100"
-                                           style="height: 30px; align-items: center; display: grid">{{ __('general.poa_draft') }}</small>
-                                    @break
+                                        <small class="badge badge-info badge-pill text-center w-100"
+                                               style="height: 30px; align-items: center; display: grid">{{ __('general.poa_draft') }}</small>
+                                        @break
                                     @case(\App\Models\Strategy\Plan::ACTIVE)
-                                    <small class="badge badge-success badge-pill text-center w-100"
-                                           style="height: 30px; align-items: center; display: grid">{{ __('general.enabled') }}</small>
-                                    @break
+                                        <small class="badge badge-success badge-pill text-center w-100"
+                                               style="height: 30px; align-items: center; display: grid">{{ __('general.enabled') }}</small>
+                                        @break
                                     @case(\App\Models\Strategy\Plan::ARCHIVED)
-                                    <small class="badge badge-primary badge-pill text-center w-100"
-                                           style="height: 30px; align-items: center; display: grid">{{ __('general.archived') }}</small>
-                                    @break
+                                        <small class="badge badge-primary badge-pill text-center w-100"
+                                               style="height: 30px; align-items: center; display: grid">{{ __('general.archived') }}</small>
+                                        @break
                                 @endswitch
                             </td>
                             <td class="text-center w-5">
@@ -74,7 +72,7 @@
                                 @endif
 
                             </td>
-                            @if(Gate::check('strategy-plan-crud-strategy') || Gate::check('strategy-crud-strategy'))
+                            @if(Gate::check('strategy-manage'))
                                 <td class="text-center w-20">
                                     @if($item->status != \App\Models\Strategy\Plan::ARCHIVED)
                                         <a href="#" data-toggle="modal" data-plan-id="{{ $item->id }}"

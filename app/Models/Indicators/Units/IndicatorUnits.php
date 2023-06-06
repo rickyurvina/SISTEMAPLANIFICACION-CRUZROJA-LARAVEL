@@ -9,13 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IndicatorUnits extends Model
 {
-    use HasFactory;
-
 
     const PEOPLE_REACHED = "PA";
-    const TRAINED_PEOPLE = 'PCap';
-    const EVALUATION = 'Eva';
-    const DOCUMENTS = 'Doc';
+    const TRAINED_PEOPLE = "PCap";
+    const EVALUATION = "Eva";
+    const DOCUMENTS = "Doc";
 
     protected bool $tenantable = false;
 

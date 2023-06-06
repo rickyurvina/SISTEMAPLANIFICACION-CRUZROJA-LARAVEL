@@ -39,6 +39,8 @@ class BudgetCertificationsIndex extends Component
             ->where('type', Transaction::TYPE_CERTIFICATION)
             ->search('description', $this->search)
             ->paginate(setting('default.list_limit', $this->countRegisterSelect));
+        $this->dispatchBrowserEvent('loadSelects2');
+
         return view('livewire.budget.certifications.budget-certifications-index', compact('transactions'));
     }
 

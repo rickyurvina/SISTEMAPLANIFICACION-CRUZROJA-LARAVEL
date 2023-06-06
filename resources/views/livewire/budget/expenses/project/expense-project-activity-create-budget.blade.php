@@ -28,33 +28,20 @@
                                 <div class="col-md-12 table-responsive">
                                     <table class="table table-bordered detail-table">
                                         <tbody>
-                                        <tr>
-                                            <td class="w-10">Objetivo Estratègico</td>
-                                            <td class="w-5"> {{$this->activity->indicator->indicatorable->parent->parent->parent->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->parent->parent->name}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="w-10">Objetivo Específico</td>
-                                            <td class="w-5"> {{$this->activity->indicator->indicatorable->parent->parent->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->parent->name}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="w-10">Program</td>
-                                            <td class="w-5">  {{$this->activity->indicator->indicatorable->parent->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->parent->name}}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td class="w-10">Resultado Estratégico</td>
-                                            <td class="w-5"> {{$this->activity->indicator->indicatorable->code}}</td>
-                                            <td> {{$this->activity->indicator->indicatorable->name}}</td>
-                                        </tr>
-
+                                        @foreach($tree as $element)
+                                            @php
+                                                $key = array_search($element->planRegistered->name, array_column($this->fields, 'label'));
+                                            @endphp
+                                            <tr>
+                                                <td class="w-10">{{$element->name}}</td>
+                                                <td class="w-5">{{$element->code}}</td>
+                                                <td> {{$element->name}}</td>
+                                            </tr>
+                                        @endforeach
                                         </tbody>
                                     </table>
                                     <table class="table table-bordered detail-table">
                                         <tbody>
-
                                         <tr>
                                             <td class="w-10">Proyecto</td>
                                             <td class="w-5">  {{$this->activity->project->code}}</td>
@@ -149,12 +136,10 @@
                                                 </div>
                                             </div>
                                         @endif
-
-
                                         <div class="form-group col-md-12 required">
                                             <label class="form-label" for="description">{{ trans('general.description') }}</label><br>
                                             <textarea wire:model.defer="itemDescription" id="description" class="form-control @error('itemDescription') is-invalid @enderror">
-                                    </textarea>
+                                            </textarea>
                                             @error('itemDescription')
                                             <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>

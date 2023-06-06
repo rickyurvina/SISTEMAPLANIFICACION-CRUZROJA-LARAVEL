@@ -80,11 +80,6 @@
                 Livewire.emit('actionLoad', id);
                 $('#register-indicator-advance').modal('toggle');
             });
-            @this.
-            on('triggerEdit', id => {
-                Livewire.emit('loadIndicatorEditData', id);
-                $('#indicator-edit-modal').modal('toggle');
-            });
 
             @this.
             on('registerAdvance', id => {

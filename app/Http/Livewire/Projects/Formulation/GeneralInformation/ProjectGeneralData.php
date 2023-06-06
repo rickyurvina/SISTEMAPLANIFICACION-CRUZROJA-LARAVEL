@@ -11,6 +11,7 @@ use App\Models\Projects\Project;
 use App\Models\Projects\ProjectMemberArea;
 use App\Models\Projects\ProjectReferentialBudget;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class ProjectGeneralData extends Component
@@ -50,8 +51,8 @@ class ProjectGeneralData extends Component
     public $founders;
     public $cooperators;
     public $location = [];
-    public $selectLocation='PROVINCE';
-    public $oldSelectLocation='';
+    public $selectLocation = 'PROVINCE';
+    public $oldSelectLocation = '';
     public $messagesList;
 
 
@@ -60,12 +61,8 @@ class ProjectGeneralData extends Component
         $this->project = $project;
         $this->projectLocationId = $this->project->location_id;
         $this->projectLocationDescription = $this->project->location ? $this->project->location->getPath() : '';
-        $time = explode(",", $this->project->estimated_time);
-        $this->years = $time[0] ?? 0;
-        $this->months = $time[1] ?? 0;
-        $this->weeks = $time[2] ?? 0;
-        $this->resultTimeEstimated = $time[3] ?? 0;
-
+        $this->months = $this->project->estimated_time ?? 0;
+        $this->resultTimeEstimated = $this->project->estimated_time ?? 0;
         if (isset($this->project->funders)) {
             $this->existing_founders = $this->project->funders->pluck('id');
             $this->auxFounders = array();
@@ -82,19 +79,15 @@ class ProjectGeneralData extends Component
             }
         }
 
-//        if ($this->project->locations->count() > 0) {
-            $this->existing_locations = $this->project->locations->pluck('id');
-//            $this->selectLocation = $this->project->locations->first()->type;
-//            $this->oldSelectLocation = $this->selectLocation;
-            $type = $this->selectLocation;
-            $this->location = CatalogGeographicClassifier::when($this->selectLocation, function ($q) use ($type) {
-                $q->where('type', $type);
-            })->get();
-            $this->auxLocations = array();
-            foreach ($this->existing_locations as $index => $ind) {
-                $this->auxLocations[$index] = $ind;
-            }
-//        }
+        $this->existing_locations = $this->project->locations->pluck('id');
+        $type = $this->selectLocation;
+        $this->location = CatalogGeographicClassifier::when($this->selectLocation, function ($q) use ($type) {
+            $q->where('type', $type);
+        })->get();
+        $this->auxLocations = array();
+        foreach ($this->existing_locations as $index => $ind) {
+            $this->auxLocations[$index] = $ind;
+        }
 
         $this->areas = Department::with(['parent'])->enabled()->get();
         $this->executorAreas = $this->areas;
@@ -114,64 +107,36 @@ class ProjectGeneralData extends Component
         return view('livewire.projects.formulation.general_information.project-general-data');
     }
 
-//    public function updatedSelectLocation()
-//    {
-//        if ($this->selectLocation != $this->oldSelectLocation) {
-//            $this->reset(['locationsSelect']);
-//            $this->project->locations()->sync($this->locationsSelect);
-//            $this->project->refresh();
-//        }
-//        $type = $this->selectLocation;
-//        $this->location = CatalogGeographicClassifier::when($type, function ($q) use ($type) {
-//            $q->where('type', $type);
-//        })->get();
-//        $this->dispatchBrowserEvent('showLocations', ['data' => $this->location]);
-//
-//    }
-
-    public function updatedYears()
-    {
-        $this->calcMonths();
-
-    }
-
     public function updatedMonths()
     {
-        $this->calcMonths();
-    }
-
-    public function updatedWeeks()
-    {
-        $this->calcMonths();
-    }
-
-
-    public function calcMonths()
-    {
-        $this->resultTimeEstimated = 0;
-        $this->resultTimeEstimated += $this->weeks * 0.229984378073;
-        if ($this->years) {
-            $this->resultTimeEstimated += ($this->years * 12) + ($this->months);
-        } else {
-            $this->resultTimeEstimated += ($this->months);
-            $this->years = 0;
-        }
-        $this->resultTimeEstimated = round($this->resultTimeEstimated, 0);
-        $this->resultTimeEstimated = intval($this->resultTimeEstimated);
-        $this->project->estimated_time = $this->years . "," . $this->months . "," . $this->weeks . "," . $this->resultTimeEstimated;
-        $this->project->save();
-        $this->emit('timeUpdated', $this->project, $this->messagesList);
-        foreach ($this->project->objectives as $objective) {
-            foreach ($objective->results as $result) {
-                $result->planning = null;
-                $result->save();
+        try {
+            DB::beginTransaction();
+            $this->project->estimated_time = $this->months;
+            $this->project->save();
+            $this->emit('timeUpdated', $this->project, $this->messagesList);
+            foreach ($this->project->objectives as $objective) {
+                foreach ($objective->results as $result) {
+                    $result->planning = null;
+                    $result->save();
+                }
             }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            flash($e->getMessage())->error()->livewire($this);
         }
     }
 
     public function updatedFoundersSelect()
     {
-        $this->project->funders()->sync($this->foundersSelect);
+        try {
+            DB::beginTransaction();
+            $this->project->funders()->sync($this->foundersSelect);
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            flash(trans_choice('messages.error.updated', 0, ['type' => trans_choice('general.project', 1)]))->error()->livewire($this);
+        }
         flash(trans_choice('messages.success.updated', 0, ['type' => trans_choice('general.project', 1)]))->success()->livewire($this);
     }
 
@@ -183,15 +148,23 @@ class ProjectGeneralData extends Component
 
     public function updatedLocationsSelect()
     {
-        $this->project->locations()->sync($this->locationsSelect);
-        $this->project->refresh();
-        $type = $this->selectLocation;
-        $this->location = CatalogGeographicClassifier::when($type, function ($q) use ($type) {
-            $q->where('type', $type);
-        })->get();
-
+        try {
+            DB::beginTransaction();
+            $this->project->locations()->sync($this->locationsSelect);
+            $this->project->refresh();
+            DB::commit();
+            if ($this->project->locations()->count() >= 1) {
+                $this->project->location_id = $this->project->locations->first()->id;
+            } else {
+                $this->project->location_id = null;
+            }
+            $this->project->save();
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            flash(trans_choice('messages.error.updated', 0, ['type' => trans_choice('general.project', 1)]))->error()->livewire($this);
+        }
         $this->existing_locations = $this->project->locations->pluck('id');
-        $this->selectLocation = $this->project->locations->first()->type;
         $type = $this->selectLocation;
         $this->location = CatalogGeographicClassifier::when($this->selectLocation, function ($q) use ($type) {
             $q->where('type', $type);
@@ -202,5 +175,6 @@ class ProjectGeneralData extends Component
         }
         $this->dispatchBrowserEvent('showLocations', ['data' => $this->location]);
         flash(trans_choice('messages.success.updated', 0, ['type' => trans_choice('general.project', 1)]))->success()->livewire($this);
+
     }
 }

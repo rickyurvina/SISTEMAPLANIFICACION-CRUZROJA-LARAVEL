@@ -25,6 +25,7 @@ use App\Events\Menu\StrategyCreated;
 use App\Events\Poa\PoaActivityDeleted;
 use App\Events\Poa\PoaActivityIndicatorUpdated;
 use App\Events\Poa\PoaActivityWeightChanged;
+use App\Events\PoaActivityUpdated;
 use App\Events\Projects\Activities\ActivityProcessed;
 use App\Events\Projects\Activities\ResultCreated;
 use App\Events\Projects\Activities\ServicesSelected;
@@ -40,9 +41,12 @@ use App\Events\Projects\ProjectSubsidiaryUpdated;
 use App\Events\Projects\ProjectUpdatedThresholds;
 use App\Events\Projects\Stakeholder\ActionStakeholderCreated;
 use App\Events\Risks\RiskCreatedEvent;
+use App\Events\RoleCreated;
 use App\Events\Strategy\PlanDetailCreated;
+use App\Listeners\Auth\AzureExtendSocialite;
 use App\Listeners\Auth\Login;
 use App\Listeners\Auth\Logout;
+use App\Listeners\CreateRoleInAzure;
 use App\Listeners\Indicators\UpdateAdvanceIndicator;
 use App\Listeners\Indicators\UpdateIndicatorParents;
 use App\Listeners\Measure\CreateMeasureScore;
@@ -91,6 +95,7 @@ use App\Listeners\Risks\CreateTaskOfRisk;
 use App\Listeners\Scores\SubstractAdvanceFromScore;
 use App\Listeners\Scores\UpdateParentScores;
 use App\Listeners\Strategy\CreatePlanDetailScore;
+use App\Listeners\UpdateTypeOfAgregationMeasureAdvances;
 use Illuminate\Auth\Events\Login as LoginEvent;
 use Illuminate\Auth\Events\Logout as LogoutEvent;
 use Illuminate\Auth\Events\Registered;
@@ -193,7 +198,6 @@ class EventServiceProvider extends ServiceProvider
         ProjectUpdatedThresholds::class => [
             UpdateFieldsThresholdProject::class,
             UpdateDurationProject::class
-
         ],
         TaskUpdatedThresholds::class => [
             UpdateFieldsThresholdTask::class
@@ -247,6 +251,13 @@ class EventServiceProvider extends ServiceProvider
 //        ],
         IndicatorUpdated::class => [
             UpdateIndicatorParents::class
+        ],
+
+        PoaActivityUpdated::class=>[
+            UpdateTypeOfAgregationMeasureAdvances::class
+        ],
+        RoleCreated::class=>[
+            CreateRoleInAzure::class
         ]
     ];
 

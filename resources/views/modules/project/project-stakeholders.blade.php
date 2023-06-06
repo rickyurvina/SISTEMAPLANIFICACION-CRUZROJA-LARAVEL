@@ -6,7 +6,7 @@
             <div>
                 <a href="javascript:void(0);" data-toggle="modal" data-target="#project-create-stakeholder" data-project-id="{{$project->id}}"
                    class="btn btn-success btn-sm mb-2 mr-2 ml-auto">
-                 {{ trans('general.create') }} {{ trans('general.stakeholder') }}
+                    {{ trans('general.create') }} {{ trans('general.stakeholder') }}
                 </a>
             </div>
             <div>
@@ -41,45 +41,43 @@
                                         <td>
                                             @switch($item->priority)
                                                 @case(\App\Models\Projects\Stakeholders\ProjectStakeholder::URGENT)
-                                                <span style="color: red">
+                                                    <span style="color: red">
                                     <i class='red fa fa-bell w-10 text-center'></i> {{ trans('general.labels.priority_' . $item->priority) }}
                                 </span>
-                                                @break
+                                                    @break
                                                 @case(\App\Models\Projects\Stakeholders\ProjectStakeholder::IMPORTANT)
-                                                <span style="color: red">
+                                                    <span style="color: red">
                                     <i class='red fa fa-exclamation w-10 text-center'></i> {{ trans('general.labels.priority_' . $item->priority) }}
                                 </span>
-                                                @break
+                                                    @break
                                                 @case(\App\Models\Projects\Stakeholders\ProjectStakeholder::HALF)
-                                                <span style="color: green">
+                                                    <span style="color: green">
                           <i class='green fa fa-minus w-10 text-center'></i> {{ trans('general.labels.priority_' . $item->priority) }}
                                 </span>
-                                                @break
+                                                    @break
                                                 @case(\App\Models\Projects\Stakeholders\ProjectStakeholder::LOW)
-                                                <span style="color: blue">
+                                                    <span style="color: blue">
                                     <i class='color-blue fa fa-long-arrow-down w-10 text-center'></i> {{ trans('general.labels.priority_' . $item->priority) }}
                                 </span>
-                                                @break
+                                                    @break
                                             @endswitch
                                         </td>
                                         <td>{{ $item->interest_level }}</td>
                                         <td>{{ $item->influence_level }}</td>
                                         <td>{{ $item->strategy }}</td>
                                         <td class="text-center">
-                                            @if($item->isMemberOfTask() || user()->hasRole('super-admin'))
-                                                <a href="javascript:void(0);" aria-expanded="false"
-                                                   data-toggle="modal"
-                                                   data-target="#project-create-stakeholder"
-                                                   data-project-id="{{$project->id}}"
-                                                   data-item-id="{{ $item->id }}">
-                                                    <i class="fas fa-edit mr-1 text-info"
-                                                       data-toggle="tooltip" data-placement="top" title=""
-                                                       data-original-title="Editar"></i></a>
-                                                <x-delete-link-icon
-                                                        action="{{ route('project.deleteStakeholder', ['id' => $item->id]) }}"
-                                                        id="{{ $item->id }}">
-                                                </x-delete-link-icon>
-                                            @endif
+                                            <a href="javascript:void(0);" aria-expanded="false"
+                                               data-toggle="modal"
+                                               data-target="#project-create-stakeholder"
+                                               data-project-id="{{$project->id}}"
+                                               data-item-id="{{ $item->id }}">
+                                                <i class="fas fa-edit mr-1 text-info"
+                                                   data-toggle="tooltip" data-placement="top" title=""
+                                                   data-original-title="Editar"></i></a>
+                                            <x-delete-link-icon
+                                                    action="{{ route('project.deleteStakeholder', ['id' => $item->id]) }}"
+                                                    id="{{ $item->id }}">
+                                            </x-delete-link-icon>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -108,7 +106,6 @@
         </div>
 
     </div>
-
 
 @endsection
 @push('page_script')

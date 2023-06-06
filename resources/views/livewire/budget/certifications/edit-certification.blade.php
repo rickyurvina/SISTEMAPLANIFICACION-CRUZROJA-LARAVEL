@@ -20,7 +20,7 @@
                         </a>
                     </div>
                     <div>
-                        <a href="{{ route('budgets.certifications', $transactionPr->id) }}"  class="btn btn-sm btn-outline-secondary" wire:click="closeActivity()">Cerrar</a>
+                        <a href="{{ route('budgets.certifications', $transactionPr->id) }}"  class="btn btn-sm btn-outline-secondary">Cerrar</a>
                     </div>
                 </div>
             </div>

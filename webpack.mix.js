@@ -15,6 +15,7 @@ mix
     // .copyDirectory('vendor/tinymce/tinymce', 'public/js/tinymce')
 
     // vendors
+    .copy('node_modules/bootstrap/dist', 'public/vendor/bootstrap', false)
     .copy('node_modules/quill/dist', 'public/vendor/quill', false)
     .copy('node_modules/echarts/dist', 'public/vendor/echarts', false)
 

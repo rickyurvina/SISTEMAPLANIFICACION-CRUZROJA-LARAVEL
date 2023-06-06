@@ -50,16 +50,18 @@ class PoaActivityGoalEdit extends Component
         $count = 1;
         $this->indicatorUnit = $activity->measure->unit;
         foreach ($poaActivityDetails as $poaActivityDetail) {
-            $element = [];
-            $element['id'] = $poaActivityDetail->id;
-            $element['year'] = now()->format('Y');
-            $element['monthName'] = Indicator::FREQUENCIES[12][$count];
-            $element['goal'] = $poaActivityDetail->goal;
-            $element['actual'] = $poaActivityDetail->actual;
-            $element['men'] = $poaActivityDetail->men;
-            $element['women'] = $poaActivityDetail->women;
-            array_push($this->goals, $element);
-            $count++;
+            if ($count<=12){
+                $element = [];
+                $element['id'] = $poaActivityDetail->id;
+                $element['year'] = now()->format('Y');
+                $element['monthName'] = Indicator::FREQUENCIES[12][$count];
+                $element['goal'] = $poaActivityDetail->goal;
+                $element['actual'] = $poaActivityDetail->actual;
+                $element['men'] = $poaActivityDetail->men;
+                $element['women'] = $poaActivityDetail->women;
+                array_push($this->goals, $element);
+                $count++;
+            }
         }
     }
 

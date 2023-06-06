@@ -29,10 +29,16 @@ class UpdateDurationProject
         try {
             DB::beginTransaction();
             $project = Project::find($event->project->id);
-            if ($project->start_date < $project->end_date) {
-                $hours = $project->start_date->diffInHours($project->end_date);
-                $project->duration = $hours;
-                $project->save();
+            if ($project->start_date && $project->end_date){
+                if ($project->start_date < $project->end_date) {
+                    $hours = $project->start_date->diffInHours($project->end_date);
+                    $project->duration = $hours;
+                    $months = $project->start_date->diffInMonths($project->end_date);
+                    if ($months>0){
+                        $project->estimated_time = $months;
+                    }
+                    $project->save();
+                }
             }
             DB::commit();
         } catch (\Exception $exception) {

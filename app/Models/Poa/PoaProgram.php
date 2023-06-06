@@ -28,6 +28,14 @@ class PoaProgram extends Model
     public static function boot()
     {
         parent::boot();
+
+        static::created(function ($model){
+           $poaPrograms=PoaProgram::where('poa_id',$model->poa_id);
+           $countPoaPrograms=$poaPrograms->count();
+           $weight=100/$countPoaPrograms;
+           $poaPrograms->update(['weight' => $weight]);
+        });
+
     }
 
     /**

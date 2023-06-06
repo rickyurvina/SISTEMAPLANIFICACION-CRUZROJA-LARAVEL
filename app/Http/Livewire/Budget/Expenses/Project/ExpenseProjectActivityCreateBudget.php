@@ -8,6 +8,8 @@ use App\Models\Budget\Structure\BudgetStructure;
 use App\Models\Budget\Transaction;
 use App\Models\Measure\Measure;
 use App\Models\Projects\Activities\Task;
+use App\Models\Strategy\Plan;
+use App\Models\Strategy\PlanRegisteredTemplateDetails;
 use App\States\Transaction\Approved;
 use App\Traits\Jobs;
 use Illuminate\Support\Facades\Artisan;
@@ -25,6 +27,8 @@ class ExpenseProjectActivityCreateBudget extends Component
     public int $transactionId;
     public $activity;
     public $transaction;
+    public $indicator;
+    public $tree;
     public $code;
     public $ids = array();
     public $isDraft = false;
@@ -50,114 +54,24 @@ class ExpenseProjectActivityCreateBudget extends Component
     {
         $this->activity = Task::with(['project.location', 'parentOfTask', 'location'])->find($activityId);
         $this->transaction = $transaction;
-        $indicator = Measure::with(['indicatorable'])->findOrFail($this->activity->measure_id);
+        $this->indicator = Measure::with(['indicatorable'])->findOrFail($this->activity->measure_id);
         $this->transactionId = $transaction->id;
         if ($this->transaction->status instanceof Approved) {
             $this->isDraft = false;
         } else {
             $this->isDraft = true;
         }
-        $this->loadBudgetStructure();
-        if ($indicator) {
-            foreach ($this->fields as $key => $field) {
-                $item = '';
-                if ($field['level'] == '10') {
-                    $item .= $this->activity->project->location->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $this->activity->project->location->id;
-                }
-                if ($field['level'] == '9') {
-                    $item .= $this->activity->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $this->activity->id;
-                }
-                if ($field['level'] == '8') {
-                    $item .= $this->activity->parentOfTask->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $this->activity->parentOfTask->id;
-                }
-                if ($field['level'] == '7') {
-                    $item .= $this->activity->location->full_code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $this->activity->location->id;
-                }
-                if ($field['level'] == '6') {
-                    $item .= $this->activity->project->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $this->activity->project->id;
-                }
-                if ($field['level'] == '5') {
-                    $item .= $indicator->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $indicator->id;
-                }
-                if ($field['level'] == '4') {
-                    $item .= $indicator->indicatorable->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $indicator->indicatorable->id;
-                }
-                if ($field['level'] == '3') {
-                    $item .= $indicator->indicatorable->parent->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $indicator->indicatorable->parent->id;
-                }
-                if ($field['level'] == '2') {
-                    $item .= $indicator->indicatorable->parent->parent->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $indicator->indicatorable->parent->parent->id;
-                }
-                if ($field['level'] == '1') {
-                    $item .= $indicator->indicatorable->parent->parent->parent->code;
-                    $this->fields[$key]['format'] = $item;
-                    $this->fields[$key]['value'] = $item;
-                    $this->fields[$key]['id'] = $indicator->indicatorable->parent->parent->parent->id;
-                }
-                if ($field['level'] == '11') {
-                    array_push($this->fieldsOptionals, $field);
-                }
-                if ($field['level'] == '12') {
-                    array_push($this->fieldsOptionals, $field);
-                }
-            }
-            foreach ($this->fieldsOptionals as $key => $field2) {
-                if (isset($field2['meta']['source']) && $field['meta']['source']['type'] == BudgetStructure::SOURCE_TYPE_MODEL) {
-
-                    $model = app($field2['meta']['source']['class']);
-
-                    $query = $model->query();
-
-                    foreach ($field2['meta']['source']['conditions'] as $condition) {
-                        $query->where($condition['field'], $condition['op'], $condition['value']);
-                    }
-
-                    $result = $query->pluck($field2['meta']['source']['field_display'], $field2['meta']['source']['field']);
-
-                    $options = [];
-                    foreach ($result as $index => $value) {
-                        $options[] = [
-                            $field2['meta']['source']['field'] => $index,
-                            $field2['meta']['source']['field_display'] => $value,
-                        ];
-                    }
-                    $this->fieldsOptionals[$key]['meta']['source']['options'] = $options;
-                }
-            }
-        }
-
         $this->transaction = $transaction;
+
     }
+
 
     public function render()
     {
+        if (!$this->fieldsOptionals) {
+            self::loadBudgetStructure();
+            self::chargeFieldOptionals();
+        }
         return view('livewire.budget.expenses.project.expense-project-activity-create-budget', ['budgetItem' => $this->getItem()]);
     }
 
@@ -171,6 +85,10 @@ class ExpenseProjectActivityCreateBudget extends Component
     {
         $item2 = '';
         $this->ids = [];
+        $maxLevel = max(array_column($this->fields, 'level'));
+        $keyMaxLevel = array_search($maxLevel, array_column($this->fields, 'level'));
+        $keyMaxLevel_1 = array_search($maxLevel - 1, array_column($this->fields, 'level'));
+
         foreach ($this->fieldsOptionals as $field2) {
             if ($field2['value']) {
                 $item2 .= $field2['value'] . '.';
@@ -198,19 +116,19 @@ class ExpenseProjectActivityCreateBudget extends Component
         $item = '';
 
         if ($this->fieldsOptionals) {
-            $this->fields[10]['format'] = $this->fieldsOptionals[0]['value'];
-            $this->fields[10]['value'] = $this->fieldsOptionals[0]['value'];
-            $this->fields[10]['id'] = $this->fieldsOptionals[0]['id'];
-            $this->fields[11]['format'] = $this->fieldsOptionals[1]['value'];
-            $this->fields[11]['value'] = $this->fieldsOptionals[1]['value'];
-            $this->fields[11]['id'] = $this->fieldsOptionals[1]['id'];
+            $this->fields[$keyMaxLevel_1]['format'] = $this->fieldsOptionals[0]['value'];
+            $this->fields[$keyMaxLevel_1]['value'] = $this->fieldsOptionals[0]['value'];
+            $this->fields[$keyMaxLevel_1]['id'] = $this->fieldsOptionals[0]['id'];
+            $this->fields[$keyMaxLevel]['format'] = $this->fieldsOptionals[1]['value'];
+            $this->fields[$keyMaxLevel]['value'] = $this->fieldsOptionals[1]['value'];
+            $this->fields[$keyMaxLevel]['id'] = $this->fieldsOptionals[1]['id'];
         }
 
         foreach ($this->fields as $key => $field) {
             if ($field['format']) {
                 $item .= $field['format'] . '.';
             } else {
-                if ($field['level'] != '11' || $field['level'] != '12')
+                if ($field['level'] != $keyMaxLevel_1 || $field['level'] != $keyMaxLevel)
                     $item .= '999' . '.';
             }
         }
@@ -218,14 +136,9 @@ class ExpenseProjectActivityCreateBudget extends Component
         return substr($item, 0, -1);
     }
 
-    public function hydrate()
-    {
-        $this->emit('initSelect');
-    }
-
     public function resetForm()
     {
-        $this->reset(['itemName', 'itemDescription', 'itemAmount']);
+        $this->reset(['itemName', 'itemDescription', 'itemAmount', 'fieldsOptionals', 'fields']);
         $this->resetErrorBag();
         $this->resetValidation();
     }
@@ -267,6 +180,111 @@ class ExpenseProjectActivityCreateBudget extends Component
         } else {
             flash($response['message'])->error()->livewire($this);
         }
+    }
+
+    public function chargeFieldOptionals()
+    {
+        if ($this->indicator) {
+            $maxLevel = max(array_column($this->fields, 'level'));
+            $keyMaxLevel = array_search($maxLevel, array_column($this->fields, 'level'));
+            $keyMaxLevel_1 = array_search($maxLevel - 1, array_column($this->fields, 'level'));
+            $keyIndicators = array_search('Indicadores', array_column($this->fields, 'label'));
+            $keyProjects = array_search('Proyectos', array_column($this->fields, 'label'));
+            $keyCatalogGeographic = array_search('Juntas Provinciales', array_column($this->fields, 'label'));
+            $keyResults = array_search('Resultados Proyecto', array_column($this->fields, 'label'));
+            $keyActivity = array_search('Actividad', array_column($this->fields, 'label'));
+            $keyLocation = array_search('Localidad', array_column($this->fields, 'label'));
+            $indicator = $this->indicator;
+            $planElementOfIndicator = $indicator->indicatorable;
+            $this->tree = $planElementOfIndicator->ancestorsAndSelf;
+
+            foreach (  $this->tree as $planElement) {
+                $key = array_search($planElement->planRegistered->name, array_column($this->fields, 'label'));
+                $this->fields[$key]['format'] = $planElement->code;
+                $this->fields[$key]['value'] = $planElement->code;
+                $this->fields[$key]['id'] = $planElement->id;
+            }
+
+            if ($keyIndicators) {
+                $item = '';
+                $item .= $indicator->code;
+                $this->fields[$keyIndicators]['format'] = $item;
+                $this->fields[$keyIndicators]['value'] = $item;
+                $this->fields[$keyIndicators]['id'] = $indicator->id;
+            }
+
+            if ($keyProjects) {
+                $item = '';
+                $item .= $this->activity->project->code;
+                $this->fields[$keyProjects]['format'] = $item;
+                $this->fields[$keyProjects]['value'] = $item;
+                $this->fields[$keyProjects]['id'] = $this->activity->project->id;
+            }
+
+            if ($keyCatalogGeographic) {
+                $item = '';
+                $item .= $this->activity->location->full_code;
+                $this->fields[$keyCatalogGeographic]['format'] = $item;
+                $this->fields[$keyCatalogGeographic]['value'] = $item;
+                $this->fields[$keyCatalogGeographic]['id'] = $this->activity->location->id;
+            }
+
+            if ($keyResults) {
+                $item = '';
+                $item .= $this->activity->parentOfTask->code;
+                $this->fields[$keyResults]['format'] = $item;
+                $this->fields[$keyResults]['value'] = $item;
+                $this->fields[$keyResults]['id'] = $this->activity->parentOfTask->id;
+            }
+
+            if ($keyActivity) {
+                $item = '';
+                $item .= $this->activity->code;
+                $this->fields[$keyResults]['format'] = $item;
+                $this->fields[$keyResults]['value'] = $item;
+                $this->fields[$keyResults]['id'] =  $this->activity->id;
+            }
+
+            if ($keyLocation) {
+                $item = '';
+                $item .= $this->activity->project->location->code;
+                $this->fields[$keyResults]['format'] = $item;
+                $this->fields[$keyResults]['value'] = $item;
+                $this->fields[$keyResults]['id'] =   $this->activity->project->location->id;
+            }
+
+            if ($this->fields[$keyMaxLevel_1]) {
+                array_push($this->fieldsOptionals, $this->fields[$keyMaxLevel_1]);
+            }
+            if ($this->fields[$keyMaxLevel]) {
+                array_push($this->fieldsOptionals, $this->fields[$keyMaxLevel]);
+            }
+
+            foreach ($this->fieldsOptionals as $key => $field2) {
+                if (isset($field2['meta']['source']) && $field2['meta']['source']['type'] == BudgetStructure::SOURCE_TYPE_MODEL) {
+
+                    $model = app($field2['meta']['source']['class']);
+
+                    $query = $model->query();
+
+                    foreach ($field2['meta']['source']['conditions'] as $condition) {
+                        $query->where($condition['field'], $condition['op'], $condition['value']);
+                    }
+
+                    $result = $query->pluck($field2['meta']['source']['field_display'], $field2['meta']['source']['field']);
+
+                    $options = [];
+                    foreach ($result as $index => $value) {
+                        $options[] = [
+                            $field2['meta']['source']['field'] => $index,
+                            $field2['meta']['source']['field_display'] => $value,
+                        ];
+                    }
+                    $this->fieldsOptionals[$key]['meta']['source']['options'] = $options;
+                }
+            }
+        }
+
     }
 
 }

@@ -135,7 +135,7 @@
 
         <div id="myCover">
             <div class="d-flex align-items-center mb-1">
-                <div class="w-25 mr-auto">
+                <div class="w-75 mr-auto">
                     @foreach($project->subsidiaries as $item)
                         <a type="button" href="{{route('projects.activities', [$project->id, $item->company->id])}}"
                            class="btn btn-sm btn-outline-secondary waves-effect waves-themed {{$company==$item->company->id ? 'active':''}}">
@@ -151,12 +151,6 @@
             <div class="gantt_control">
                 <button id="toggle_fullscreen" onclick="gantt.ext.fullscreen.toggle();">Pantalla completa</button>
                 <button onclick="updateCriticalPath(this)">Ver ruta crítica</button>
-                <button type="button" data-toggle="modal" data-target="#project-activities-weight" data-id="{{ $project->id }}">
-                    {{ __('general.weight') }} {{ trans_choice('general.result', 2) }}
-                </button>
-                <button type="button" data-toggle="modal" data-target="#project-activities-wbs" data-id="{{ $project->id }}">
-                    WBS
-                </button>
             </div>
 
             <div id="gantt_here" style='width:100%;height: 100%' class="gantt_skin_terrace"></div>
@@ -165,12 +159,6 @@
             </div>
             <div wire:ignore>
                 <livewire:projects.activities.project-show-activity-weight :project="$project"/>
-            </div>
-            <div wire:ignore>
-                <livewire:projects.activities.project-show-activities-wbs :projectId="$project->id"/>
-            </div>
-            <div wire:ignore>
-                <livewire:projects.activities.project-register-advance-activity/>
             </div>
         </div>
     </div>

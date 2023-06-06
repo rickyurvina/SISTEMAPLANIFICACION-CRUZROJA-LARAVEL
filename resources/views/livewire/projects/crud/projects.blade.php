@@ -13,7 +13,7 @@
             </div>
         @endif
         <div class="subheader-block d-lg-flex align-items-end ml-auto">
-            @can('project-crud-project')
+            @can('project-super-admin')
                 <livewire:projects.c-r-u-d.create-project/>
             @endcan
         </div>

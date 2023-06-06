@@ -84,7 +84,7 @@
                                                    <i class="{{$activity->measure->unit->getIcon() }}"></i>
                                                     {{ $activity->measure->name }}
                                                 </span>
-                                         </x-content-detail>
+                                        </x-content-detail>
                                     </div>
                                     <x-label-section>{{ trans('general.poa_edit_activity_goal_title_planning') }}</x-label-section>
                                     <div class="section-divider"></div>
@@ -145,10 +145,17 @@
                         </x-content-detail>
                     </div>
 
-                    <div class="d-flex flex-wrap">
-                        <x-label-detail>{{ trans('general.poa_activity_cost') }}</x-label-detail>
-                        <x-content-detail>{{ $activity->cost }}</x-content-detail>
-                    </div>
+                    @if($transaction && $activity->getTotalBudget($transaction)->getAmount()>0)
+                        <div class="d-flex flex-wrap">
+                            <x-label-detail>{{ trans('general.module_budget') }}</x-label-detail>
+                            <x-content-detail>{{ $activity->getTotalBudget($transaction) }}</x-content-detail>
+                        </div>
+                    @else
+                        <div class="d-flex flex-wrap">
+                            <x-label-detail>{{ trans('general.poa_activity_cost') }}</x-label-detail>
+                            <x-content-detail>{{ $activity->cost }}</x-content-detail>
+                        </div>
+                    @endif
                     <div class="d-flex flex-wrap">
                         <x-label-detail>{{ trans('general.weight') }}</x-label-detail>
                         <div class="detail">

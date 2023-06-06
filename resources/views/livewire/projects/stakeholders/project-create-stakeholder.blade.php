@@ -26,7 +26,6 @@
                                     </a>
                                 </li>
                             @endif
-
                         </ul>
 
                         <div class="tab-content border border-top-0 p-3">
@@ -35,6 +34,13 @@
                                     <div class="row">
                                         <div class="form-group col-3 required">
                                             <label class="form-label" for="user_id">{{ trans('general.contact') }}</label>
+                                            <a href="javascript:void(0);" aria-expanded="false"
+                                               data-toggle="modal"
+                                               data-target="#add_contact_modal">
+                                                <i class="fal fa-plus color-success-800 ml-3" data-toggle="tooltip" data-placement="top"
+                                                   title="" data-original-title="Agregar nuevo contacto"></i>
+                                            </a>
+
                                             <div class="input-group bg-white shadow-inset-2">
                                                 <div class="input-group-prepend">
                                                 <span class="input-group-text bg-transparent border-right-0">
@@ -121,7 +127,6 @@
                                                 </div>
                                             </div>
                                         @endif
-
 
                                     </div>
                                     @if($isUpdating)
@@ -295,31 +300,40 @@
                 </div>
             </div>
         </div>
-
+        <div wire:ignore.self>
+            <livewire:admin.contact-create-modal :projectId="$prj_project_id"/>
+        </div>
     </div>
 </div>
 
 @push('page_script')
     <script>
+        $('#add_contact_modal').on('show.bs.modal', function (e) {
+
+        });
+        Livewire.on('toggleContactAddModal', () => $('#add_contact_modal').modal('toggle'));
+
         document.addEventListener('DOMContentLoaded', function () {
 
-        @this.on(' stakeholderActionDelete', id => {
+            @this.
+            on(' stakeholderActionDelete', id => {
 
-            Swal.fire({
-                target: document.getElementById('project-create-stakeholder'),
-                title: '{{ trans('messages.warning.sure') }}',
-                text: '{{ trans('messages.warning.delete') }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: 'var(--danger)',
-                confirmButtonText: '<i class="fas fa-trash"></i> {{ trans('general.yes') . ', ' . trans('general.delete') }}',
-                cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
-            }).then((result) => {
-                if (result.value) {
-                @this.call('deleteAction', id);
-                }
+                Swal.fire({
+                    target: document.getElementById('project-create-stakeholder'),
+                    title: '{{ trans('messages.warning.sure') }}',
+                    text: '{{ trans('messages.warning.delete') }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--danger)',
+                    confirmButtonText: '<i class="fas fa-trash"></i> {{ trans('general.yes') . ', ' . trans('general.delete') }}',
+                    cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
+                }).then((result) => {
+                    if (result.value) {
+                        @this.
+                        call('deleteAction', id);
+                    }
+                });
             });
-        });
         })
     </script>
 @endpush

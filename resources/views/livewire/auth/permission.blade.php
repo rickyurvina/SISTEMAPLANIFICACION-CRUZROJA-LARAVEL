@@ -39,7 +39,7 @@
                                             <input name="permissions[]" id="permissions-{{ $item['id'] }}" type="checkbox" class="custom-control-input"
                                                    wire:model="selectedPermissions" value="{{ $item['id'] }}">
                                             <label class="custom-control-label" for="permissions-{{ $item['id'] }}">
-                                                {{$item['spanish_label'] }}
+                                                {{$item['display_name'] }}
                                             </label>
                                         </div>
                                     </div>

@@ -58,11 +58,11 @@ class Dashboard extends Component
         $this->scores = collect([]);
 
         foreach ($periods->reverse() as $value) {
-//            if ($this->model::class != Measure::class) {
-//                $this->scores->push($this->model->scoreDashboard($value, $this->model));
-//            } else {
-            $this->scores->push($this->model->score($value->id));
-//            }
+            if ($this->model::class != Measure::class) {
+                $this->scores->push($this->model->scoreDashboard($value, $this->model));
+            } else {
+                $this->scores->push($this->model->score($value->id));
+            }
         }
 
         $this->currentScore = $this->scores->firstWhere('period_id', $id);

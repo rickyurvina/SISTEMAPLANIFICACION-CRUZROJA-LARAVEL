@@ -49,4 +49,6 @@ return [
      * Laravel database.default will be used instead.
      */
     'database_connection' => env('ACTIVITY_LOGGER_DB_CONNECTION'),
+//    'log_ip_address' => true,
+
 ];

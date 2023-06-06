@@ -43,7 +43,8 @@
                     <div class="tab-pane fade show active" id="v-pills-general-data" role="tabpanel"
                          aria-labelledby="v-pills-home-tab">
                         <div class="mr-2 mw-100 w-100">
-                            <livewire:projects-internal.formulation.general-information.project-general-data :project="$project" :messages="$messages"/>
+                            <livewire:projects.formulation.general-information.project-general-data :project="$project"
+                                                                                                    :messages="$messages"/>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="v-pills-problem-identified" role="tabpanel"
@@ -106,7 +107,8 @@
                     <div class="tab-pane fade" id="v-pills-activities" role="tabpanel"
                          aria-labelledby="v-pills-profile-tab">
                         <div>
-                            <livewire:projects-internal.formulation.activities.project-activities :project="$project" :messages="$messages"/>
+                            <livewire:projects.formulation.activities.project-activities :project="$project"
+                                                                                         :messages="$messages"/>
                         </div>
                     </div>
                 </div>
@@ -118,10 +120,10 @@
         <livewire:projects.formulation.objectives.project-create-specific-objective
                 :id="$project->id"/>
     </div>
-    <div wire:ignore>
-        <livewire:projects-internal.logic-frame.project-create-result-activity :project="$project" />
-    </div>
 
+    <div wire:ignore>
+        <livewire:projects.formulation.objectives.project-create-results-modal/>
+    </div>
 
 @endsection
 
@@ -129,7 +131,7 @@
 @push('page_script')
     <script>
         Livewire.on('toggleCreateObjective', () => $('#project-create-specific-objective').modal('toggle'));
-        Livewire.on('toggleCreateActivity', () => $('#project-create-result-activity').modal('toggle'));
+        Livewire.on('toggleCreateResult', () => $('#project-create-results').modal('toggle'));
 
 
 
@@ -142,15 +144,11 @@
             }
         });
 
-        $('#project-create-result-activity').on('show.bs.modal', function (e) {
+        $('#project-create-results').on('show.bs.modal', function (e) {
             //get level ID & plan registered template detail ID
             let objectiveId = $(e.relatedTarget).data('objective-id');
-            let activityId = $(e.relatedTarget).data('activity-id');
             //Livewire event trigger
-            if(objectiveId){
-                Livewire.emit('loadObjective', objectiveId, activityId);
-            }
+            Livewire.emit('loadResults', objectiveId);
         });
-
     </script>
 @endpush

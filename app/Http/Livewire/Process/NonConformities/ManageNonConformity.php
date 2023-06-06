@@ -29,7 +29,7 @@ class ManageNonConformity extends Component
         $state = $this->nonConformity->state;
         if ($state == NonConformities::TYPE_OPEN) {
             $this->state = false;
-        } else if (NonConformities::TYPE_WILL_CLOSED) {
+        } else if (NonConformities::TYPE_CLOSED_PROCESS) {
             $this->stateWillClosed = true;
         } else {
             $this->state = true;
@@ -77,7 +77,7 @@ class ManageNonConformity extends Component
         if ($this->stateWillClosed == false) {
             $state = NonConformities::TYPE_OPEN;
         } else {
-            $state = NonConformities::TYPE_WILL_CLOSED;
+            $state = NonConformities::TYPE_CLOSED_PROCESS;
         }
         $this->nonConformity->state = $state;
         $this->nonConformity->save();

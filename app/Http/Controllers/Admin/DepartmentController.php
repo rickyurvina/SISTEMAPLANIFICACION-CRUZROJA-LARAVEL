@@ -17,6 +17,19 @@ use Illuminate\Http\RedirectResponse;
 
 class DepartmentController extends Controller
 {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:admin-manage-structure-organizational|admin-view-structure-organizational', ['only' => ['index', 'show']]);
+        $this->middleware('permission:admin-manage-structure-organizational', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -24,12 +37,9 @@ class DepartmentController extends Controller
      */
     public function index(): View
     {
-        if (user()->can('admin-crud-admin') && user()->can('admin-read-admin') || user()->can('admin-manage-departments')) {
-            $departments = Department::collect();
-            return view('modules.admin.departments.index', compact('departments'));
-        }else{
-            abort(403);
-        }
+        $departments = Department::collect();
+        return view('modules.admin.departments.index', compact('departments'));
+
     }
 
     /**
@@ -39,24 +49,21 @@ class DepartmentController extends Controller
      */
     public function create(): View
     {
-        if (user()->can('admin-crud-admin')) {
-            $companies = Company::collect();
-            $departments = Department::where('enabled', 1)->get();
-            $allPrograms = PlanDetail::get();
-            $programs = [];
-            foreach ($allPrograms as $program) {
-                $programTemplateId = PlanRegisteredTemplateDetails::where('program', true)
-                    ->where('id', $program->plan_registered_template_detail_id)
-                    ->first();
-                if ($programTemplateId) {
-                    $elements = array_push($programs, $program);
-                }
+        $companies = Company::collect();
+        $departments = Department::where('enabled', 1)->get();
+        $allPrograms = PlanDetail::get();
+        $programs = [];
+        foreach ($allPrograms as $program) {
+            $programTemplateId = PlanRegisteredTemplateDetails::where('program', true)
+                ->where('id', $program->plan_registered_template_detail_id)
+                ->first();
+            if ($programTemplateId) {
+                $elements = array_push($programs, $program);
             }
-            $users = User::all();
-            return view('modules.admin.departments.create', compact('companies', 'departments', 'programs', 'users'));
-        }else{
-            abort(403);
         }
+        $users = User::all();
+        return view('modules.admin.departments.create', compact('companies', 'departments', 'programs', 'users'));
+
     }
 
     /**
@@ -105,31 +112,26 @@ class DepartmentController extends Controller
      */
     public function edit(Department $department): View
     {
-        if (user()->can('admin-crud-admin')) {
-            $departments = Department::enabled()->get();
-            $allPrograms = PlanDetail::get();
-            $programs = [];
-            foreach ($allPrograms as $program) {
-                $programTemplateId = PlanRegisteredTemplateDetails::where('program', true)
-                    ->where('id', $program->plan_registered_template_detail_id)
-                    ->first();
-                if ($programTemplateId) {
-                    $elements = array_push($programs, $program);
-                }
+        $departments = Department::enabled()->get();
+        $allPrograms = PlanDetail::get();
+        $programs = [];
+        foreach ($allPrograms as $program) {
+            $programTemplateId = PlanRegisteredTemplateDetails::where('program', true)
+                ->where('id', $program->plan_registered_template_detail_id)
+                ->first();
+            if ($programTemplateId) {
+                $elements = array_push($programs, $program);
             }
-            if (isset($department->programs)) {
-                $existing_departments = $department->programs->pluck('id');
-                $selected_programs = array();
-                foreach ($existing_departments as $index => $ind) {
-                    $selected_programs[$index] = $ind;
-                }
-            }
-
-            $users = User::all();
-            return view('modules.admin.departments.edit', compact('department', 'departments', 'programs', 'users'), ['selected_programs' => $selected_programs]);
-        }else{
-            abort(403);
         }
+        if (isset($department->programs)) {
+            $existing_departments = $department->programs->pluck('id');
+            $selected_programs = array();
+            foreach ($existing_departments as $index => $ind) {
+                $selected_programs[$index] = $ind;
+            }
+        }
+        $users = User::all();
+        return view('modules.admin.departments.edit', compact('department', 'departments', 'programs', 'users'), ['selected_programs' => $selected_programs]);
     }
 
     /**

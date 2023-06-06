@@ -12,6 +12,17 @@ use Throwable;
 
 class PerspectiveController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:admin-manage-catalogs', ['only' => ['index','create','store']]);
+    }
+
     public function index()
     {
         return view('modules.admin.perspectives.index');

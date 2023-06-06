@@ -124,10 +124,12 @@
     @if($taskDetail)
         <div class="w-100 mt-2" wire:key="{{time().$taskDetail->id}}">
             <div class="mt-2">
-                <livewire:components.files :modelId="$taskDetail->id"
-                                           model="{{\App\Models\Measure\MeasureAdvances::class}}"
-                                           :key="time().$taskDetail->id"
-                                           folder="measureAdvances"/>
+                <livewire:components.files-in-modal :modelId="$taskDetail->id"
+                                                    model="{{\App\Models\Measure\MeasureAdvances::class}}"
+                                                    folder="measureAdvances"
+                                                    event="fileAdded"
+                                                    :key="time().$taskDetail->id"
+                />
             </div>
             <div class="mt-2">
                 <x-label-section>{{ trans('general.comments') }}</x-label-section>

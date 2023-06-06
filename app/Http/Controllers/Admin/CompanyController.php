@@ -18,7 +18,17 @@ class CompanyController extends Controller
 {
     use Users;
 
-    //Uploads
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:admin-manage-companies|admin-view-companies', ['only' => ['index']]);
+        $this->middleware('permission:admin-manage-companies', ['only' => ['create','update','destroy']]);
+    }
 
     /**
      * Display a listing of the resource.
@@ -27,12 +37,8 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        if (user()->can('admin-crud-admin') || user()->can('admin-read-admin') || user()->can('admin-manage-companies')) {
-            $companies = Company::collect();
-            return view('modules.admin.companies.index', compact('companies'));
-        }else{
-            abort(403);
-        }
+        $companies = Company::collect();
+        return view('modules.admin.companies.index', compact('companies'));
     }
 
     /**
@@ -52,24 +58,9 @@ class CompanyController extends Controller
      */
     public function create()
     {
-        if (user()->can('admin-crud-admin')) {
-            return view('modules.admin.companies.create');
-        }else{
-            abort(403);
-        }
+        return view('modules.admin.companies.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param CompanyRequest $request
-     *
-     * @return RedirectResponse
-     */
-    public function store(CompanyRequest $request)
-    {
-
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -80,18 +71,15 @@ class CompanyController extends Controller
      */
     public function edit(Company $company)
     {
-        if (user()->can('admin-crud-admin')) {
-            $levels = config('constants.catalog.LEVELS');
-            $list_parents = [];
-            if ($company->level > 1) {
-                $list_parents = Company::getParents($company->level);
-            }
-            return view('modules.admin.companies.edit')
-                ->with(compact('company','levels', 'list_parents'))
-                ->with('id',$company->id);
-        }else{
-            abort(403);
+
+        $levels = config('constants.catalog.LEVELS');
+        $list_parents = [];
+        if ($company->level > 1) {
+            $list_parents = Company::getParents($company->level);
         }
+        return view('modules.admin.companies.edit')
+            ->with(compact('company', 'levels', 'list_parents'))
+            ->with('id', $company->id);
 
     }
 
@@ -118,30 +106,6 @@ class CompanyController extends Controller
         ]));
         flash(trans_choice('messages.success.updated', 1, ['type' => trans_choice('general.companies', 1)]))->success();
         return redirect(route('companies.index'));
-    }
-
-    /**
-     * Enable the specified resource.
-     *
-     * @param Company $company
-     *
-     * @return Response
-     */
-    public function enable(Company $company)
-    {
-
-    }
-
-    /**
-     * Disable the specified resource.
-     *
-     * @param Company $company
-     *
-     * @return Response
-     */
-    public function disable(Company $company)
-    {
-
     }
 
     /**

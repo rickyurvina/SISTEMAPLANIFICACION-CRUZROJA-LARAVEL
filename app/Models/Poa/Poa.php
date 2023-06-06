@@ -6,6 +6,7 @@ use App\Abstracts\Model;
 use App\Models\Admin\Company;
 use App\Models\Admin\Department;
 use App\Models\Auth\User;
+use App\Models\Budget\Transaction;
 use App\Models\Comment;
 use App\States\Poa\Approved;
 use App\States\Poa\Closed;
@@ -27,7 +28,7 @@ use Spatie\ModelStates\HasStates;
 
 class Poa extends Model
 {
-    use Mediable, HasStates, HasFactory;
+    use Mediable, HasStates;
 
     const PHASE_PLANNING = 'PLANIFICACIÓN';
     const PHASE_EXECUTION = 'EJECUCIÓN';
@@ -112,6 +113,10 @@ class Poa extends Model
             $model->name = strtoupper($model->name);
             $model->phase = strtoupper($model->phase);
             $model->status = strtoupper($model->status);
+        });
+
+        static::addGlobalScope('sortOrder', function ($builder) {
+            $builder->orderBy('year', 'desc');
         });
     }
 
@@ -326,6 +331,12 @@ class Poa extends Model
         if (in_array($yearToBeReplicate, $yearsPoa))
             return false;
         return true;
+    }
 
+    public function validateBudget()
+    {
+        $transaction = Transaction::where('year', $this->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->withoutGlobalScopes()->first();
+        return (bool)$transaction;
     }
 }

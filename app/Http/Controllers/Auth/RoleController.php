@@ -23,6 +23,19 @@ use Microsoft\Graph\Model;
 
 class RoleController extends Controller
 {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:admin-manage-users|admin-view-users', ['only' => ['index', 'show']]);
+        $this->middleware('permission:admin-manage-users', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -30,13 +43,8 @@ class RoleController extends Controller
      */
     public function index()
     {
-        if (user()->can('admin-crud-admin') && user()->can('admin-read-admin')) {
-            $roles = Role::notSuperAdmin()->collect();
-
-            return view('auth.roles.index', compact('roles'));
-        }else{
-            abort(403);
-        }
+        $roles = Role::notSuperAdmin()->collect();
+        return view('auth.roles.index', compact('roles'));
     }
 
     /**
@@ -46,19 +54,22 @@ class RoleController extends Controller
      */
     public function create()
     {
-        if (user()->can('admin-crud-admin')) {
-            $permissions = [];
-            $actions = ['project','strategy','budget', 'poa', 'admin','process'];
+        $permissions = [];
+        $actions = [
+            'project',
+            'strategy',
+            'budget',
+            'poa',
+            'admin',
+            'process',
+            'administrative',
+            'audit',
+        ];
 
-            foreach ($actions as $action) {
-                $permissions[$action] = Permission::action($action)->get()->sortBy('title')->all();
-            }
-            return view('auth.roles.create', compact('actions', 'permissions'));
-        }else{
-            abort(403);
+        foreach ($actions as $action) {
+            $permissions[$action] = Permission::action($action)->get()->sortBy('title')->all();
         }
-
-
+        return view('auth.roles.create', compact('actions', 'permissions'));
     }
 
     /**
@@ -70,8 +81,6 @@ class RoleController extends Controller
      */
     public function store(RoleRequest $request): RedirectResponse
     {
-//        $res = $this->addRoleToAzure($request->request->get('name'));
-//        $request->request->set('id_azuread_rol', strtolower($res->idAzureadRol));
         $response = $this->ajaxDispatch(new CreateRole($request));
 
         if ($response['success']) {
@@ -92,20 +101,15 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        if (user()->can('admin-crud-admin')||user()->can('admin-manage-roles')) {
-            $permissions = [];
-            $actions = ['project','strategy','budget', 'poa', 'admin','process'];
-
-            foreach ($actions as $action) {
-                $permissions[$action] = Permission::action($action)->get()->sortBy('title')->all();
-            }
-
-            return view('auth.roles.edit', compact('role', 'actions', 'permissions'));
-        }else{
+        if (!$role->can_edit) {
             abort(403);
         }
-
-
+        $permissions = [];
+        $actions = ['project', 'strategy', 'budget', 'poa', 'admin', 'process'];
+        foreach ($actions as $action) {
+            $permissions[$action] = Permission::action($action)->get()->sortBy('title')->all();
+        }
+        return view('auth.roles.edit', compact('role', 'actions', 'permissions'));
     }
 
     /**
@@ -118,6 +122,7 @@ class RoleController extends Controller
      */
     public function update(Role $role, RoleRequest $request): RedirectResponse
     {
+
         $response = $this->ajaxDispatch(new UpdateRole($role, $request));
 
         if ($response['success']) {
@@ -138,103 +143,40 @@ class RoleController extends Controller
      */
     public function destroy(Role $role): RedirectResponse
     {
-//        $res = $this->deleteRoleToAzure($role->id_azuread_rol);
         $response = $this->ajaxDispatch(new DeleteRole($role));
-
         if ($response['success']) {
             flash(trans_choice('messages.success.deleted', 0, ['type' => trans_choice('general.roles', 1)]))->success();
         } else {
             flash($response['message'])->error();
         }
-
         return redirect()->route('roles.index');
     }
 
-    /**
-     * Get roles list from Azure AD.
-     *
-     * @return array
-     */
-//    public function getRolesFromAzure() {
-//        $azureToken = session('azureToken');
-//        $graph = new Graph();
-//        $graph->setApiVersion("v1.0")
-//            ->setAccessToken($azureToken);
-//
-//        $resourceId = env('AZURE_RESOURCE_ID', '4e7537c4-af92-490d-a339-849cc9ecb821');
-//        $uri = '/servicePrincipals' . '/' . $resourceId;
-//        $allRoles = $graph->createRequest("GET", $uri)
-//                    ->addHeaders(array("Content-Type" => "application/json"))
-//                    ->setReturnType(Model\ServicePrincipal::class)
-//                    ->execute();
-//        return $allRoles->getAppRoles();
-//    }
-
-    /**
-     * Add role from cre to Azure AD.
-     *
-     * @param String $rolName
-     */
-//    public function addRoleToAzure($rolName) {
-//        $azureToken = session('azureToken');
-//        $graph = new Graph();
-//        $graph->setApiVersion("v1.0")
-//            ->setAccessToken($azureToken);
-//
-//        $auxArray = $this->getRolesFromAzure();
-//        $guid = $this->getGUID();
-//        array_push($auxArray, [
-//            "allowedMemberTypes"=> [
-//                "User"
-//            ],
-//            "description"=> $rolName,
-//            "displayName"=> $rolName,
-//            "id"=> $guid,
-//            "isEnabled"=> true,
-//            "origin"=> "Application",
-//            "value"=> $rolName
-//        ]);
-//
-//        $resource = env('AZURE_RESOURCE', '6fb16186-4560-4eb7-acc6-6681d2bc1963');
-//        $uri = '/applications' . '/' . $resource;
-//        $body = json_encode(['appRoles' => $auxArray]);
-//        try{
-//        $serviceRol = $graph->createRequest("PATCH", $uri)
-//                    ->addHeaders(array("Content-Type" => "application/json"))
-//                    ->attachBody($body)
-//                    ->setReturnType(Model\Application::class)
-//                    ->execute();
-//        } catch(Exception $e) {
-//            return redirect()->back()->withErrors(new MessageBag(['Hubo un error al ejecutar su transacción']));
-//        }
-//
-//        $serviceRol->idAzureadRol = $guid;
-//
-//        return $serviceRol;
-//    }
 
     /**
      * Set unavailable a rol in Azure AD.
      *
      */
-    public function deleteRoleToAzure($rolIdAzure) {
+    public function deleteRoleToAzure($rolIdAzure)
+    {
         $azureToken = session('azureToken');
         $graph = new Graph();
         $graph->setApiVersion("v1.0")
-            ->setAccessToken($azureToken);
+            ->setAccessToken(user()->remember_token);
+
 
 
         $auxArray = $this->getRolesFromAzure();
         $rolesArray = [];
-        foreach($auxArray as $aux) {
-            if($aux['id'] == $rolIdAzure) {
+        foreach ($auxArray as $aux) {
+            if ($aux['id'] == $rolIdAzure) {
                 $aux['isEnabled'] = false;
             }
             array_push($rolesArray, $aux);
         }
 
         $resource = env('AZURE_RESOURCE', '');
-        $uri = '/applications' . '/' . $resource;
+        $uri = $resource . '/v1.0/applications' . '/';
         $body = json_encode(['appRoles' => $rolesArray]);
         try {
             $serviceRol = $graph->createRequest("PATCH", $uri)
@@ -242,7 +184,7 @@ class RoleController extends Controller
                 ->attachBody($body)
                 ->setReturnType(Model\Application::class)
                 ->execute();
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->withErrors(new MessageBag(['Hubo un error al ejecutar su transacción']));
         }
 
@@ -253,17 +195,18 @@ class RoleController extends Controller
      * Return a guid string.
      *
      */
-    public function getGUID() {
-        if (function_exists('com_create_guid')){
+    public function getGUID()
+    {
+        if (function_exists('com_create_guid')) {
             return com_create_guid();
-        }else{
+        } else {
             $charid = strtoupper(md5(uniqid(rand(), true)));
             $hyphen = chr(45);
-            $uuid = substr($charid, 0, 8).$hyphen
-                .substr($charid, 8, 4).$hyphen
-                .substr($charid,12, 4).$hyphen
-                .substr($charid,16, 4).$hyphen
-                .substr($charid,20,12);
+            $uuid = substr($charid, 0, 8) . $hyphen
+                . substr($charid, 8, 4) . $hyphen
+                . substr($charid, 12, 4) . $hyphen
+                . substr($charid, 16, 4) . $hyphen
+                . substr($charid, 20, 12);
             return $uuid;
         }
     }

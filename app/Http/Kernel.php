@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Azure\Azure;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -148,8 +149,12 @@ class Kernel extends HttpKernel
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
 
         //Azure AD
-        // 'azure' => \RootInc\LaravelAzureMiddleware\Azure::class,
-        'azure' => \App\Http\Middleware\AppAzure::class
+        'azure' => Azure::class,
 
+        //check some roles
+        'roles' => \App\Http\Middleware\CheckRoles::class,
+
+        //check project phase
+        'checkProjectPhase' => \App\Http\Middleware\CheckProjectPhase::class,
     ];
 }

@@ -15,6 +15,29 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PoaReportController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:poa-manage|poa-view-reports',
+            [
+                'only' => ['
+                index',
+                    'getPoaSession',
+                    'reportObjectives',
+                    'showEvaluationReport',
+                    'goals',
+                    'activityStatus',
+                    'exportActivityStatus',
+                    'generateActivityStatusReport',
+                    'showActivitiesReport',
+                ]
+            ]);
+    }
 
     public function index()
     {
@@ -34,11 +57,8 @@ class PoaReportController extends Controller
 
     public function showEvaluationReport()
     {
-        if (user()->can('poa-view-all-poas')) {
-            return view('modules.poa.reports.general-evaluation.evaluation');
-        } else {
-            abort(403);
-        }
+        return view('modules.poa.reports.general-evaluation.evaluation');
+
     }
 
     public function goals()

@@ -13,11 +13,21 @@
                 <div class="row">
                     <x-form.inputs.text id="name" label="{{ trans('general.name') }}" class="col-6"
                                         value="{{ $role->name }}" placeholder="{{ trans('general.form.enter', ['field' => trans('general.name')]) }}"/>
-                    <div class="custom-control custom-checkbox">
-                        <input name="is_project_role" id="is_project_role" type="checkbox" class="custom-control-input"
-                               wire:model="is_project_role" value="true">
-                        <label class="custom-control-label" for="is_project_role">
-                            {{trans('general.project_role')}} </label>
+                    <div class="col-md-4">
+                        <div class="custom-control custom-checkbox">
+                            <input name="is_project_role" id="is_project_role" type="checkbox" class="custom-control-input"
+                                   wire:model="is_project_role" value="true" {{$role->is_project_role? 'checked':''}}>
+                            <label class="custom-control-label" for="is_project_role">
+                                {{trans('general.project_role')}} </label>
+                        </div>
+                        @if(user()->isSuperAdmin())
+                            <div class="custom-control custom-checkbox">
+                                <input name="can_edit" id="can_edit" type="checkbox" class="custom-control-input"
+                                       wire:model="can_edit" value="true" {{$role->can_edit? 'checked':''}}>
+                                <label class="custom-control-label" for="can_edit">
+                                    {{trans('general.can_edit')}} </label>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

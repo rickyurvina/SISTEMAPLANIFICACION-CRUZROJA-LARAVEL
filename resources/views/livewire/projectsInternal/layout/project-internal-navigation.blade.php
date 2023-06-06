@@ -68,7 +68,7 @@
                 </li>
                 <li class="@if($project->phase->isActive(\App\States\Project\Implementation::class)) active @endif">
                     <a href="#" @if($project->phase->isActive(\App\States\Project\Planning::class ))
-                    x-on:click="show = true; phase = true; transition='Implementación';" @endif>
+                        x-on:click="show = true; phase = true; transition='Implementación';" @endif>
                         <i class="fas fa-play"></i>
                         <span class="hidden-md-down">{{ \App\States\Project\Implementation::label() }}</span>
                     </a>
@@ -119,13 +119,22 @@
                                                            data-original-title="Documento Formulado"
                                                      > <i class="fas fa-file mr-1"></i>Documento Formulado</span>
                 </a>
-
-                <a href="{{ route('projects.showReferentialBudgetInternal', $project->id) }}">
+                @if($project->phase     instanceof  \App\States\Project\StartUp)
+                    <a href="{{ route('projects.showReferentialBudgetInternal', $project->id) }}">
                                                    <span class="btn btn-sm {{ $page == 'budget' ? 'btn-success':' btn-info' }} mr-2"
                                                          data-placement="top" title="Presupuesto"
                                                          data-original-title="Presupuesto"
                                                    > <i class="fas fa-dollar-sign mr-1"></i>Presupuesto Referencial</span>
-                </a>
+                    </a>
+                @else
+                    <a href="{{ route('projectsInternal.budgetDocumentReport', $project->id) }}">
+                                                   <span class="btn btn-sm {{ $page == 'budget' ? 'btn-success':' btn-info' }} mr-2"
+                                                         data-placement="top" title="Presupuesto"
+                                                         data-original-title="Presupuesto"
+                                                   > <i class="fas fa-dollar-sign mr-1"></i>Presupuesto</span>
+                    </a>
+                @endif
+
 
                 <a href="{{ route('projects.calendarInternal', $project->id) }}">
                                     <span class="btn btn-sm {{ $page == 'calendar' ? 'btn-success':' btn-info' }} mr-2"
@@ -187,7 +196,11 @@
                             <div class="d-flex align-items-center flex-column">
                                 <x-label-section>{{ trans('general.to') }}</x-label-section>
                                 <span class="badge @if($transition) {{ $project->phase->to($transition)->color() }}   @else     {{ $project->phase->to()->color() }} @endif fs-2x">
-                                    @if($transition) {{$transition}}  @else      {{ $project->phase->to()->label() }} @endif
+                                    @if($transition)
+                                        {{$transition}}
+                                    @else
+                                        {{ $project->phase->to()->label() }}
+                                    @endif
                             </span>
                             </div>
                         </div>
@@ -211,7 +224,11 @@
                             <div class="d-flex align-items-center flex-column">
                                 <x-label-section>{{ trans('general.to') }}</x-label-section>
                                 <span class="badge @if($transition) {{ $project->status->to($transition)->color() }}   @else     {{ $project->status->to()->color() }} @endif fs-2x">
-                                    @if($transition) {{$transition}}  @else      {{ $project->status->to()->label() }} @endif
+                                    @if($transition)
+                                        {{$transition}}
+                                    @else
+                                        {{ $project->status->to()->label() }}
+                                    @endif
                             </span>
                             </div>
                         </div>

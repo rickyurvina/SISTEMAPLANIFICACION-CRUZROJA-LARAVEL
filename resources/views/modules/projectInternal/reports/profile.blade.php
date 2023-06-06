@@ -84,7 +84,7 @@
 <body>
 
 <div class="logo">
-    <img src="{{ asset('img/logo_cre.jpg') }}" alt="logo"/>
+    <img src="{{ public_path('img/logo_cre.jpg') }}" alt="logo"/>
 </div>
 
 <h1 class="title-project">

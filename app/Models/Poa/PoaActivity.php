@@ -4,6 +4,7 @@ namespace App\Models\Poa;
 
 use App\Abstracts\Model;
 use App\Events\Poa\PoaActivityDeleted;
+use App\Events\PoaActivityUpdated;
 use App\Models\Admin\Company;
 use App\Models\Auth\User;
 use App\Models\Budget\Account;
@@ -64,6 +65,10 @@ class PoaActivity extends Model
             'icon' => 'fal fa-chevron-down color-blue',
         ]
     ];
+    const TYPE_OF_AGGREGATIONS = [
+        'sum' => 'sum',
+        'ave' => 'ave',
+    ];
 
     /**
      * Fillable fields.
@@ -112,6 +117,12 @@ class PoaActivity extends Model
             $model->name = mb_strtoupper($model->name);
             $model->code = mb_strtoupper($model->code);
             $model->description = mb_strtoupper($model->description);
+        });
+
+        static::updated(function ($model) {
+            if (isset($model->getChanges()['aggregation_type'])) {
+                PoaActivityUpdated::dispatch($model);
+            }
         });
     }
 
@@ -482,7 +493,9 @@ class PoaActivity extends Model
      */
     public function validateCrateBudget()
     {
-        if ($this->measure && $this->location_id) {
+        $transaction = Transaction::where('year', $this->program->poa->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->first();
+        if ($this->measure && $this->location_id && $transaction) {
             return true;
         } else {
             return false;

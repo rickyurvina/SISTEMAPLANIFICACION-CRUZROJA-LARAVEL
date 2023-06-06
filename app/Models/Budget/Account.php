@@ -52,6 +52,11 @@ class Account extends Model
     public static function boot()
     {
         parent::boot();
+        static::creating(function ($model) {
+            $model->name = mb_strtoupper($model->name);
+            $model->description = mb_strtoupper($model->description);
+        });
+
         static::created(function ($model) {
             $model->name = strtoupper($model->name);
             $model->code = strtoupper($model->code);
@@ -64,7 +69,6 @@ class Account extends Model
         });
         static::updating(function ($model) {
             $model->name = strtoupper($model->name);
-            $model->code = strtoupper($model->code);
             $model->description = strtoupper($model->description);
         });
 

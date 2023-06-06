@@ -183,7 +183,9 @@
                                             </a>
                                         </div>
                                         <div class="p-2">
-                                            <a href="{{route('project.piat_index',$item)}}">
+                                            <a @if($project->isMisional()) href="{{route('project.piat_index',$item)}}" @else
+                                                href="{{route('internal.piat_index',$item)}}"
+                                                    @endif>
                                                 <i class="fas fa-house mr-1 text-info"
                                                    data-toggle="tooltip" data-placement="top" title=""
                                                    data-original-title="Matrices Piat"></i>
@@ -191,11 +193,19 @@
                                         </div>
                                         @if($item->validateCrateBudget())
                                             <div class="p-2">
-                                                <a href="{{route('projects.expenses_activity',$item)}}">
-                                                    <i class="fas fa-money-bill mr-1 text-success"
-                                                       data-toggle="tooltip" data-placement="top" title=""
-                                                       data-original-title="Presupuesto"></i>
-                                                </a>
+                                                @if($project->isMisional())
+                                                    <a href="{{route('projects.expenses_activity',$item)}}">
+                                                        <i class="fas fa-money-bill mr-1 text-success"
+                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                           data-original-title="Presupuesto"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{route('projectsInternal.expenses_activity',$item)}}">
+                                                        <i class="fas fa-money-bill mr-1 text-success"
+                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                           data-original-title="Presupuesto"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         @endif
 

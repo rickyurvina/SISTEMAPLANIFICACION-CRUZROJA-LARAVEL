@@ -7,6 +7,10 @@
         <i class="fal fa-sort-circle text-primary"></i> {{ $model->name ?? '' }}
     </h1>
     <div class="subheader-block d-lg-flex align-items-center">
+        <a href="{{ route('strategy.updateScores')}}" class="btn btn-success btn-sm"><span class="fas fa-check-circle mr-2"></span>
+            &nbsp;{{ trans('general.update').'-'.trans('general.strategy') }}</a>
+    </div>
+    <div class="subheader-block d-lg-flex align-items-center">
         <a href="{{ URL::previous()}}" class="btn btn-info btn-sm"><span class="fas fa-house-return mr-1"></span>
             &nbsp;{{ trans('general.return_back') }}</a>
     </div>

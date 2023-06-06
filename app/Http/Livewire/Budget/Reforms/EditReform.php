@@ -214,7 +214,7 @@ class EditReform extends Component
     {
         $this->validate(
             [
-                'newValue' => 'required|regex:/^\d*(\.\d{2})?$/|numeric|gt:0',
+                'newValue' => 'required|regex:/^\d*(\.\d{2})?$/|numeric|min:-1',
             ]
         );
         $this->arrayReformsExpenses[$index][$type] = $value;
@@ -225,7 +225,7 @@ class EditReform extends Component
     {
         $this->validate(
             [
-                'newValue' => 'required|regex:/^\d*(\.\d{2})?$/|numeric|gt:0',
+                'newValue' => 'required|regex:/^\d*(\.\d{2})?$/|numeric|min:-1',
             ]
         );
         $this->arrayReformsIncomes[$index][$type] = $value;

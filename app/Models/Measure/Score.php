@@ -56,7 +56,7 @@ class Score extends Model
     {
         parent::boot();
 
-        static::updating(function ($model) {
+        static::saving(function ($model) {
             if ($model->scoreable_type == Measure::class) {
                 $model->actual = $model->actual == '' ? null : $model->actual;
                 $model->score = self::getScore($model->actual, $model->scoreable, $model->thresholds);
@@ -64,10 +64,6 @@ class Score extends Model
             $model->color = self::getColor($model);
         });
     }
-
-    protected $dispatchesEvents = [
-        'updated' => ScoreUpdated::class,
-    ];
 
 
     /**

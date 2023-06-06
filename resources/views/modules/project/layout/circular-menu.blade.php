@@ -8,19 +8,19 @@
                     <i class="fa fa-bars"></i>
                 </a>
                 <menu class="items-wrapper">
-                    @can('project-view-files'||'manage-files')
+                    @can('project-view-files' || 'project-manage-files')
                         <a href="{{ route('projects.files', $project->id) }}"
                            class="menu-item fal fa-paperclip" data-toggle="tooltip"
                            data-original-title="Ver Archivos"></a>
                     @endcan
 
-                    @can('project-view-events'||'project-manage-events')
+                    @can('project-manage')
                         <a href="{{ route('projects.events', $project->id) }}"
                            class="menu-item fal fa-line-height" data-toggle="tooltip"
                            data-original-title="Ver Sucesos"></a>
                     @endcan
 
-                    @can('project-view-reports')
+                    @can('project-view-reports' ||'project-manage-reports')
                         <a href="{{ route('projects.reportsIndex', $project->id) }}"
                            class="menu-item fal fa-table" data-toggle="tooltip"
                            data-original-title="Reportes"></a>

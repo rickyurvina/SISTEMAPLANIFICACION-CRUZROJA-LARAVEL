@@ -28,10 +28,10 @@ class AddPoaItems
             ->link->attr(['title' => trans('general.poa'), 'data-filter-tags' => strtolower(trans('general.start'))]);
 
         // POAs CONTROL DE CAMBIOS
-        $menu->add(trans('general.change_control'), ['route' => 'poa.change_control'])
-            ->append('</span>')
-            ->prepend('<i class="fal fa-exchange"></i> <span class="nav-link-text">')
-            ->link->attr(['title' => trans('general.change_control'), 'data-filter-tags' => strtolower(trans('general.change_control'))]);
+//        $menu->add(trans('general.change_control'), ['route' => 'poa.change_control'])
+//            ->append('</span>')
+//            ->prepend('<i class="fal fa-exchange"></i> <span class="nav-link-text">')
+//            ->link->attr(['title' => trans('general.change_control'), 'data-filter-tags' => strtolower(trans('general.change_control'))]);
 
         // POAs CARD REPORTS
         $menu->add(trans('general.card_report'), ['route' => 'poa.reports.index'])

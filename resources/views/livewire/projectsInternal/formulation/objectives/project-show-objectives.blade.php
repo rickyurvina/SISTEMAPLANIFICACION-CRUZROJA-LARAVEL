@@ -103,7 +103,7 @@
                                                     <i class="fas fa-edit mr-2"></i> {{ trans('general.edit') . ' ' . trans('general.objective') }}
                                                 </div>
                                                 <div class="dropdown-item cursor-pointer" style="border-radius: 4px" data-toggle="modal"
-                                                     data-target="#project-create-result-activity"
+                                                     data-target="#project-create-results"
                                                      data-objective-id="{{ $objective['id'] }}">
                                                     <i class="fas fa-plus-circle mr-2"></i> {{ trans('general.create') . ' ' . trans_choice('general.task_type.milestone', 1) }}
                                                     <x-tooltip-help message="{{$messages->where('code','resultados')->first()->description}}"></x-tooltip-help>

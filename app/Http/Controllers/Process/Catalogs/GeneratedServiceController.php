@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Process\Catalogs;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
 use App\Http\Requests\StoreGeneratedServiceRequest;
 use App\Http\Requests\UpdateGeneratedServiceRequest;
 use App\Jobs\Process\Catalogs\GeneratedServices\CreateGeneratedService;
@@ -13,6 +14,26 @@ use Illuminate\Http\Request;
 
 class GeneratedServiceController extends Controller
 {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:process-manage');
+        $this->middleware('permission:process-settings',
+            [
+                'only' => [
+                    'index',
+                    'create',
+                    'store',
+                    'destroy',
+                ]]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -46,7 +67,7 @@ class GeneratedServiceController extends Controller
      * @param \App\Http\Requests\StoreGeneratedServiceRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreGeneratedServiceRequest $request)
+    public function store(Request $request)
     {
         try {
             $response = $this->ajaxDispatch(new CreateGeneratedService($request));
@@ -65,39 +86,6 @@ class GeneratedServiceController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Process\Catalogs\GeneratedService $generatedService
-     * @return \Illuminate\Http\Response
-     */
-    public function show(GeneratedService $generatedService)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Models\Process\Catalogs\GeneratedService $generatedService
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\UpdateGeneratedServiceRequest $request
-     * @param \App\Models\Process\Catalogs\GeneratedService $generatedService
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateGeneratedServiceRequest $request, $id)
-    {
-
-    }
 
     /**
      * Remove the specified resource from storage.

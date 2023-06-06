@@ -52,6 +52,9 @@
                         <li class="nav-item">
                             <a class="nav-link" data-toggle="tab" href="#tab-budget" role="tab" aria-selected="false">{{ trans('budget.expense') }}</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#tab-matrix-piat" role="tab" aria-selected="false">{{ trans('poa.piat_matrix_tag') }}</a>
+                        </li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane fade active show" id="tab-general" role="tabpanel">
@@ -149,6 +152,11 @@
                                 </div>
                             </div>
                         </div>
+                        @if (!$activity->program->poa->isClosed())
+                            <div class="tab-pane fade" id="tab-matrix-piat" role="tabpanel">
+                                <livewire:piat.poa-activity-piat-matrix-index class="{{\App\Models\Poa\PoaActivity::class}}" :idModel="$activity->id"/>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -188,6 +196,18 @@
                                                                  :defaultValue="\App\Models\Poa\PoaActivity::CATEGORIES[$activity->complexity]"/>
                         </div>
                     </div>
+
+                    <div class="d-flex flex-wrap">
+                        <x-label-detail>{{ trans('general.type_of_action') }}</x-label-detail>
+                        <div class="detail">
+                            <livewire:components.dropdown :modelId="$activity->id"
+                                                          modelClass="\App\Models\Poa\PoaActivity"
+                                                          :values="\App\Models\Poa\PoaActivity::TYPE_OF_AGGREGATIONS"
+                                                          field="aggregation_type"
+                                                          :defaultValue="$activity->aggregation_type"/>
+                        </div>
+                    </div>
+
                     <div class="d-flex flex-wrap">
                         <x-label-detail>{{ trans('general.poa_activity_cost') }}</x-label-detail>
                         <div class="detail">

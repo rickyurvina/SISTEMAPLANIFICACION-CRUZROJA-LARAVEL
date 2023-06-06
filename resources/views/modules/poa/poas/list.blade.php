@@ -7,7 +7,7 @@
         <i class="fal fa-align-left text-primary"></i> {{ __('poa.list_poas') }}
     </h1>
     @if($companyFind->level!=2)
-        @can('poa-crud-poa')
+        @can('poa-manage')
             <a href="javascript:void(0);" data-toggle="modal" data-target="#create-modal-poa" class="btn btn-success btn-sm">
                 <span class="fas fa-plus mr-1"></span>
                 {{ trans('general.add_new') }}
@@ -29,9 +29,9 @@
                     <th class="w-10 table-th text-info">{{trans('poa.status')}}</th>
                     <th class="w-10 table-th text-info">{{trans('poa.reviewed')}}</th>
                     <th class="w-10 table-th text-info">{{trans('poa.progress')}}</th>
-                    @can('poa-crud-poa')
-                        <th class="w-15 table-th"><a href="#">{{ trans('general.actions') }}</a></th>
-                    @endcan
+
+                    <th class="w-15 table-th"><a href="#">{{ trans('general.actions') }}</a></th>
+
                 </tr>
                 </thead>
                 <tbody>
@@ -56,14 +56,16 @@
                         <td class="w-10">
                             {!! $item->thresholdProgress() !!}
                         </td>
-                        @can('poa-crud-poa')
+                        @can('poa-manage')
                             <td>
-                                <span data-toggle="modal" data-target="#approve-modal-poa" data-id="{{ $item->id }}">
+                                @can('poa-approve')
+                                    <span data-toggle="modal" data-target="#approve-modal-poa" data-id="{{ $item->id }}">
                                     <a class="mr-2" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title=""
                                        data-original-title="Aprobar">
                                         <i class="fas fa-check-circle mr-1 text-success @if($item->approved) text-success @else text-info @endif "></i>
                                     </a>
                                 </span>
+                                @endcan
                                 @if(!$item->isClosed())
                                     <span data-toggle="modal" data-target="#edit-modal-poa" data-id="{{ $item->id }}">
                                         <a class="mr-2" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title=""
@@ -100,18 +102,17 @@
                                         <i class="fas fa-file-signature text-danger"></i>
                                     </a>
                                 @endif
-                                <a class="mr-2" href="{{ route('poa.budget', $item->id) }}"
-                                   data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Presupuesto"
-                                >
-                                    <i class="fas fa-money-bill text-success"></i>
-                                </a>
-                                @can('poa-crud-poa')
-                                    @if(!$item->isClosed())
-                                        <x-delete-link action="{{ route('poas.destroy', $item->id) }}" id="{{ $item->id }}"/>
-                                    @endif
-                                @endcan
-
+                                @if($item->validateBudget())
+                                    <a class="mr-2" href="{{ route('poa.budget', $item->id) }}"
+                                       data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Presupuesto"
+                                    >
+                                        <i class="fas fa-money-bill text-success"></i>
+                                    </a>
+                                @endif
+                                @if(!$item->isClosed())
+                                    <x-delete-link action="{{ route('poas.destroy', $item->id) }}" id="{{ $item->id }}"/>
+                                @endif
                             </td>
                         @endcan
                     </tr>

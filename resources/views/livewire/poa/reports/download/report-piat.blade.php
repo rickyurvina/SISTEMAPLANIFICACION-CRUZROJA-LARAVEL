@@ -316,7 +316,7 @@
                 <tbody>
                 <tr>
                     <td class="w-30">
-                        <img style="height: 50px" src="{{ asset('img/logo_cre_trans.png') }}">
+                        <img style="height: 50px" src="{{ public_path('img/logo_cre_trans.png') }}">
                     </td>
                 </tr>
                 </tbody>

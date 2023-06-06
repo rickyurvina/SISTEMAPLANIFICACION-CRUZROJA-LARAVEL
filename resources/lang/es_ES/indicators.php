@@ -25,6 +25,7 @@ return [
         'goal_description' => 'Descripcción Meta Final',
         'interpretation_of_the_indicator' => 'Interpretación del Indicador',
         'results' => 'Resultados',
+        'indicator_detail' => 'Detalle del indicador',
         'measurement_type' => 'Tipo de Medición',
         'FREQUENCY_weekly' => 'Semanalmente',
         'FREQUENCY_monthly' => 'Mensual',

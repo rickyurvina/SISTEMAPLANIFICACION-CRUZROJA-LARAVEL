@@ -47,32 +47,35 @@ class ProcessEvaluation extends Component
         $this->data = [];
         $dataY = [];
         $dataX = [];
-        foreach ($this->scale_of_performances[0]->properties as $item) {
-            $dataY[] = $item['y'];
-            $dataX[] = $item['x'];
-            if ($this->performance == $item['performance'] && $this->importance == $item['importance']) {
-                $this->data[] = array_merge($item,
-                    [
-                        'radius' => 15,
-                        'x' => $item['importance'],
-                        'y' => $item['performance'],
-                    ]);
-                $this->color=$item['color'];
+        if ($this->scale_of_performances->count()){
+            foreach ($this->scale_of_performances[0]->properties as $item) {
+                $dataY[] = $item['y'];
+                $dataX[] = $item['x'];
+                if ($this->performance == $item['performance'] && $this->importance == $item['importance']) {
+                    $this->data[] = array_merge($item,
+                        [
+                            'radius' => 15,
+                            'x' => $item['importance'],
+                            'y' => $item['performance'],
+                        ]);
+                    $this->color=$item['color'];
+                }
+                else {
+                    $this->data[] = array_merge($item,
+                        [
+                            'radius' => 0,
+                            'x' => $item['importance'],
+                            'y' => $item['performance'],
+                        ]);
+                }
             }
-            else {
-                $this->data[] = array_merge($item,
-                    [
-                        'radius' => 0,
-                        'x' => $item['importance'],
-                        'y' => $item['performance'],
-                    ]);
-            }
+            $dataY = array_unique($dataY);
+            $dataX = array_unique($dataX);
+            $this->scalesY = array_reverse($dataY);
+            $this->scalesX = array_reverse($dataX);
+            $this->scalesX = array_reverse($this->scalesX);
         }
-        $dataY = array_unique($dataY);
-        $dataX = array_unique($dataX);
-        $this->scalesY = array_reverse($dataY);
-        $this->scalesX = array_reverse($dataX);
-        $this->scalesX = array_reverse($this->scalesX);
+
     }
 
     public function updateStatus($data)

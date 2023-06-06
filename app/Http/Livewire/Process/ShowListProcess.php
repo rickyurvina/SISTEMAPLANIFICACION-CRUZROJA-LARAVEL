@@ -34,10 +34,11 @@ class ShowListProcess extends TableComponent
     public function render()
     {
         $processes = Process::with(['owner', 'indicators', 'department', 'activitiesProcess'])
-            ->where('department_id', $this->departmentId)
-            ->whereHas('department', function ($q) {
-                $q->whereIn('id', \user()->departments->pluck('id'));
-            })->when($this->sortField, function ($q) {
+//            ->where('department_id', $this->departmentId)
+//            ->whereHas('department', function ($q) {
+//                $q->whereIn('id', \user()->departments->pluck('id'));
+//            })
+            ->when($this->sortField, function ($q) {
                 $q->orderBy($this->sortField, $this->sortDirection);
             })->when(count($this->selectType) > 0, function (Builder $query) {
                 $query->whereIn('type', $this->selectType);

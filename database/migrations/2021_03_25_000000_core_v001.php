@@ -260,7 +260,7 @@ class CoreV001 extends Migration
         Schema::create('indicator_units', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name')->unique();
-            $table->char('abbreviation')->unique();
+            $table->string('abbreviation')->unique();
             $table->softDeletes();
             $table->timestamps();
         });

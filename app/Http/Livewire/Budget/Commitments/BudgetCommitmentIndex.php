@@ -13,7 +13,6 @@ class BudgetCommitmentIndex extends Component
 
     public $certification;
     public $stateSelect;
-    public $reformSelect;
     public $start_date;
     public $end_date;
     public $countRegisterSelect = 25;
@@ -23,7 +22,7 @@ class BudgetCommitmentIndex extends Component
         'search' => ['except' => ''],
     ];
 
-    protected $listeners = ['refreshCertifications' => '$refresh'];
+    protected $listeners = ['refreshCommitments' => 'render'];
 
     public function mount(int $certificationId)
     {
@@ -37,6 +36,8 @@ class BudgetCommitmentIndex extends Component
                 $query->where('status', $this->stateSelect);
             })->search('description', $this->search)
             ->paginate(setting('default.list_limit', $this->countRegisterSelect));
+        $this->dispatchBrowserEvent('loadSelects2');
+
         return view('livewire.budget.commitments.budget-commitment-index', compact('commitments'));
     }
 
@@ -49,7 +50,7 @@ class BudgetCommitmentIndex extends Component
 
     public function clearFilters()
     {
-        $this->reset(['stateSelect', 'reformSelect', 'countRegisterSelect']);
+        $this->reset(['stateSelect', 'countRegisterSelect']);
     }
 
 }

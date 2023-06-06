@@ -42,7 +42,7 @@
                                     </div>
                                     <div class="form-group w-25 mb-0 pr-1">
                                         <label class="form-label fw-700 required"
-                                               for="date">{{ trans('poa.piat_matrix_create_placeholder_date') }}</label>
+                                               for="date">{{ trans('poa.piat_matrix_create_placeholder_end_date') }}</label>
                                         <input type="date" wire:model.defer="endDate"
                                                class="form-control bg-transparent @error('endDate') is-invalid @enderror"
                                                placeholder="{{ trans('general.form.enter', ['field' => trans('poa.piat_matrix_create_placeholder_endDate')]) }}"/>
@@ -431,9 +431,9 @@
 
                                     <div class="form-group w-25 mb-0">
                                         <label class="form-label fw-700 required"
-                                               for="planEndDate">{{ trans('poa.piat_matrix_create_placeholder_date') }}</label>
+                                               for="planEndDate">{{ trans('poa.piat_matrix_create_placeholder_end_date') }}</label>
                                         <input type="date" wire:model.defer="planEndDate" class="form-control"
-                                               placeholder="{{ trans('general.form.enter', ['field' => trans('poa.piat_matrix_create_placeholder_date')]) }}"/>
+                                               placeholder="{{ trans('general.form.enter', ['field' => trans('poa.piat_matrix_create_placeholder_end_date')]) }}"/>
                                         <div class="invalid-feedback" style="display: block;">{{ $errors->first('planEndDate') }}</div>
                                     </div>
                                     <div class="form-group w-25 mb-0">
@@ -470,6 +470,7 @@
                                             <tr>
                                                 <th>{{ __('poa.piat_matrix_create_placeholder_task') }}</th>
                                                 <th>{{ __('poa.piat_matrix_create_placeholder_date') }}</th>
+                                                <th>{{ __('poa.piat_matrix_create_placeholder_end_date') }}</th>
                                                 <th>{{ __('poa.piat_matrix_create_placeholder_initial_time') }}</th>
                                                 <th>{{ __('poa.piat_matrix_create_placeholder_end_time') }}</th>
                                             </tr>
@@ -489,6 +490,13 @@
                                                             <span
                                                                     class="color-item shadow-hover-5 mr-2 cursor-default"></span>
                                                             <span>{{ $item['date'] }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex float-left">
+                                                            <span
+                                                                    class="color-item shadow-hover-5 mr-2 cursor-default"></span>
+                                                            <span>{{ $item['end_date'] }}</span>
                                                         </div>
                                                     </td>
                                                     <td>

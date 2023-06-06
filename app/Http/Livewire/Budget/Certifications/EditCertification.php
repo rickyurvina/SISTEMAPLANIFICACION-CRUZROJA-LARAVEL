@@ -9,6 +9,7 @@ use App\Models\Poa\PoaActivity;
 use App\Models\Projects\Activities\Task;
 use App\Models\Projects\Project;
 use App\States\Poa\Approved;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class EditCertification extends Component
@@ -32,7 +33,7 @@ class EditCertification extends Component
     public function mount(Transaction $transaction)
     {
         $transaction->load(['transactions.account']);
-        $this->transactionPr=Transaction::where('year',$transaction->year)->whereStatus(Approved::label())->first();
+        $this->transactionPr = Transaction::where('year', $transaction->year)->whereStatus(Approved::label())->first();
         $this->transaction = $transaction;
         $this->transactionDetails = $transaction->transactions;
         $account = $this->transaction->transactions->first()->account;
@@ -92,35 +93,54 @@ class EditCertification extends Component
         }
     }
 
+    /**
+     * @return bool
+     */
     public function updatedCertificationsValues()
     {
+        $validate = true;
         foreach ($this->certificationsValues as $index => $item) {
             if ($this->expensesPoa) {
                 $expense = $this->expensesPoa->find($index);
             } else {
                 $expense = $this->expensesProject->find($index);
             }
-            if ($expense->balanceDraft($this->transaction->status)->getAmount() / 100 < $item) {
+            if ($expense->balance->getAmount() / 100 < $item) {
                 flash('El valor no puede ser mayor al valor por comprometer')->warning()->livewire($this);
-                unset($this->certificationsValues[$index]);
+                $this->certificationsValues[$index] = 0;
+                $validate = false;
             }
+
         }
+        return $validate;
     }
 
     public function saveCertification()
     {
         $this->validate();
+
         if (count($this->certificationsValues) === 0) {
             flash('No se han asignado valores a la certificación')->warning()->livewire($this);
         } else {
-            foreach ($this->certificationsValues as $index => $item) {
-                $transactionDetail = $this->transactionDetails->where('account_id', $index)->first();
-                $this->transaction->debitUpdate($item, $this->description, $transactionDetail->id);
+            if (self::updatedCertificationsValues()) {
+                try {
+                    DB::beginTransaction();
+                    foreach ($this->certificationsValues as $index => $item) {
+                        $transactionDetail = $this->transactionDetails->where('account_id', $index)->first();
+                        if ($transactionDetail) {
+                            $this->transaction->debitUpdate($item, $this->description, $transactionDetail->id);
+                        }
+                    }
+                    $this->transaction->description = $this->description;
+                    $this->transaction->save();
+                    flash('Guardado Exitosamente')->success();
+                    DB::commit();
+                    return redirect()->route('budgets.certifications', $this->transaction);
+                } catch (\Exception $exception) {
+                    DB::rollBack();
+                    flash($exception->getMessage())->error()->livewire($this);
+                }
             }
-            $this->transaction->description = $this->description;
-            $this->transaction->save();
-            flash('Guardado Exitosamente')->success();
-            return redirect()->route('budgets.certifications', $this->transaction);
         }
     }
 }

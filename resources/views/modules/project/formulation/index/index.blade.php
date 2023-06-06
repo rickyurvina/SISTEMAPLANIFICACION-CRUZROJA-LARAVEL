@@ -85,7 +85,9 @@
                             <div class="col-6 border-right border-dark">
                                 <div class="d-flex align-items-center">
                                     <span class="fs-2x w-40px"><i class="fal fa-comment-dots"></i></span>
-                                    <span class="fs-2x fw-700">Comentarios</span>
+                                    <span class="fs-2x fw-700">Comentarios
+                                            <x-tooltip-help message="Permite ingresar comentarios en esta sección"></x-tooltip-help>
+                                    </span>
                                 </div>
 
                                 <livewire:components.comments :modelId="$project->id"

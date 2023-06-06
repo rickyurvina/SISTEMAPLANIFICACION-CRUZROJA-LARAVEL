@@ -28,74 +28,72 @@
                         </thead>
                         <tbody>
                         @foreach($project->reschedulings as $item)
-                            @if($project->phase != $item->phase)
-                                <tr class="tr-hover text-center">
-                                    <td>{{$item->description}}</td>
-                                    <td>
-                                        <div class="d-flex justify-content-center">
+                            <tr class="tr-hover text-center">
+                                <td>{{$item->description}}</td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
                                 <span class="badge badge- {{ \App\Models\Projects\Project::PHASE_BG[$item->phase] }}
                                         badge-pill">
                                     {{ $item->phase }}
                                 </span>
-                                        </div>
-                                    </td>
+                                    </div>
+                                </td>
 
-                                    <td>
-                                        <span class="badge badge- {{ \App\Models\Projects\ProjectRescheduling::STATUSES_BG[$item->status] }} badge-pill">{{ $item->status }}</span>
-                                    </td>
-                                    <td>
+                                <td>
+                                    <span class="badge badge- {{ \App\Models\Projects\ProjectRescheduling::STATUSES_BG[$item->status] }} badge-pill">{{ $item->status }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <div class="" @if($item->applicant) data-toggle="tooltip" data-placement="top"
+                                             title="{{ $item->applicant->getFullName() }}" data-original-title="{{ $item->applicant->getFullName() }}" @endif>
+                                            <div class="dropdown-item">
+                                                            <span class="mr-2">
+                                                                <img src="{{ asset_cdn("img/user.svg") }}" class="rounded-circle width-1">
+                                                            </span>
+                                                <span class="pt-1">{{ $item->applicant->getFullName() }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($item->approver)
                                         <div class="d-flex justify-content-center">
-                                            <div class="" @if($item->applicant) data-toggle="tooltip" data-placement="top"
-                                                 title="{{ $item->applicant->getFullName() }}" data-original-title="{{ $item->applicant->getFullName() }}" @endif>
+                                            <div class="" @if($item->approver) data-toggle="tooltip" data-placement="top"
+                                                 title="{{ $item->approver->getFullName() }}" data-original-title="{{ $item->approver->getFullName() }}" @endif>
                                                 <div class="dropdown-item">
                                                             <span class="mr-2">
                                                                 <img src="{{ asset_cdn("img/user.svg") }}" class="rounded-circle width-1">
                                                             </span>
-                                                    <span class="pt-1">{{ $item->applicant->getFullName() }}</span>
+                                                    <span class="pt-1">{{ $item->approver->getFullName() }}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        @if($item->approver)
-                                            <div class="d-flex justify-content-center">
-                                                <div class="" @if($item->approver) data-toggle="tooltip" data-placement="top"
-                                                     title="{{ $item->approver->getFullName() }}" data-original-title="{{ $item->approver->getFullName() }}" @endif>
-                                                    <div class="dropdown-item">
-                                                            <span class="mr-2">
-                                                                <img src="{{ asset_cdn("img/user.svg") }}" class="rounded-circle width-1">
-                                                            </span>
-                                                        <span class="pt-1">{{ $item->approver->getFullName() }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if($item->status==\App\Models\Projects\ProjectRescheduling::STATUS_OPENED)
-                                            <a href="javascript:void(0)"
-                                               data-toggle="modal"
-                                               data-target="#project-approve-rescheduling"
-                                               data-item-id="{{$item->id}}">
-                                                <i class="fas fa-check-circle mr-1 text-info"
-                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                   data-original-title="Aprobar"></i>
-                                            </a>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($item->status==\App\Models\Projects\ProjectRescheduling::STATUS_OPENED)
+                                        <a href="javascript:void(0)"
+                                           data-toggle="modal"
+                                           data-target="#project-approve-rescheduling"
+                                           data-item-id="{{$item->id}}">
+                                            <i class="fas fa-check-circle mr-1 text-info"
+                                               data-toggle="tooltip" data-placement="top" title=""
+                                               data-original-title="Aprobar"></i>
+                                        </a>
 
-                                            <a href="javascript:void(0)"
-                                               data-toggle="modal"
-                                               data-target="#project-edit-rescheduling"
-                                               data-item-id="{{$item->id}}">
-                                                <i class="fas fa-edit mr-1 text-info"
-                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                   data-original-title="Editar"></i>
-                                            </a>
-                                            <x-delete-link action="{{ route('projects.delete_rescheduling', $item->id) }}" id="{{ $item->id }}"/>
-                                        @endif
+                                        <a href="javascript:void(0)"
+                                           data-toggle="modal"
+                                           data-target="#project-edit-rescheduling"
+                                           data-item-id="{{$item->id}}">
+                                            <i class="fas fa-edit mr-1 text-info"
+                                               data-toggle="tooltip" data-placement="top" title=""
+                                               data-original-title="Editar"></i>
+                                        </a>
+                                        <x-delete-link action="{{ route('projects.delete_rescheduling', $item->id) }}" id="{{ $item->id }}"/>
+                                    @endif
 
-                                    </td>
-                                </tr>
-                            @endif
+                                </td>
+                            </tr>
                         @endforeach
                         </tbody>
                     </table>

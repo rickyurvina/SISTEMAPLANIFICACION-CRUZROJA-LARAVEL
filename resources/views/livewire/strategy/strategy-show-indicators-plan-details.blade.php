@@ -17,18 +17,20 @@
     <div>
         <div class="panel-hdr">
             <h2>{{ $planDetail->fullCode . ' - ' . $planDetail->name }}</h2>
-            @if($planDetail->plan->status != \App\Models\Strategy\Plan::ARCHIVED)
-                <div class="panel-toolbar ml-auto">
-                    <a href="#indicator-create-modal"
-                       class="btn btn-success btn-sm"
-                       data-toggle="modal"
-                       data-target="#indicator-create-modal"
-                       data-detail-id="{{$planDetailId}}"
-                       data-detail-type="{{$type}}">
-                        <span class="fas fa-plus mr-1"></span>
-                        {{ trans('general.add_new') }}
-                    </a>
-                </div>
+            @if(Gate::check('strategy-manage')||Gate::check('strategy-manage-plans'))
+                @if($planDetail->plan->status != \App\Models\Strategy\Plan::ARCHIVED)
+                    <div class="panel-toolbar ml-auto">
+                        <a href="#indicator-create-modal"
+                           class="btn btn-success btn-sm"
+                           data-toggle="modal"
+                           data-target="#indicator-create-modal"
+                           data-detail-id="{{$planDetailId}}"
+                           data-detail-type="{{$type}}">
+                            <span class="fas fa-plus mr-1"></span>
+                            {{ trans('general.add_new') }}
+                        </a>
+                    </div>
+                @endif
             @endif
         </div>
         <div class="card-header">
@@ -61,33 +63,35 @@
                     <td>{{ $measure->name }}</td>
                     <td>{{ weight($measures->sum('weight'), $measure->weight) }}%</td>
                     <td class="text-center">
-                        @if($planDetail->plan->status != \App\Models\Strategy\Plan::ARCHIVED)
-                            <div class="frame-wrap">
-                                <div class="d-flex justify-content-start">
-                                    <div class="p-2"><a href="#"
-                                                        data-toggle="modal"
-                                                        data-target="#weights">
-                                            <i class="fas fa-balance-scale mr-1 text-info"
-                                               data-toggle="tooltip" data-placement="top"
-                                               data-original-title="Editar Pesos"></i>
-                                        </a></div>
-                                    <div class="p-2">
-                                        <a href="javascript:void(0)"
-                                           data-toggle="modal"
-                                           data-target="#measure-edit-modal"
-                                           data-measure-id="{{$measure->id}}">
-                                            <i class="fas fa-edit mr-1 text-info"
-                                               data-toggle="tooltip" data-placement="top" title=""
-                                               data-original-title="Editar"></i>
-                                        </a>
-                                    </div>
-                                    <div class="p-2">
-                                        <x-delete-link-icon
-                                                action="{{ route('destroy.measure.strategy', $measure->id) }}"
-                                                id="{{ $measure->id }}"></x-delete-link-icon>
+                        @if(Gate::check('strategy-manage')||Gate::check('strategy-manage-plans'))
+                            @if($planDetail->plan->status != \App\Models\Strategy\Plan::ARCHIVED)
+                                <div class="frame-wrap">
+                                    <div class="d-flex justify-content-start">
+                                        <div class="p-2"><a href="#"
+                                                            data-toggle="modal"
+                                                            data-target="#weights">
+                                                <i class="fas fa-balance-scale mr-1 text-info"
+                                                   data-toggle="tooltip" data-placement="top"
+                                                   data-original-title="Editar Pesos"></i>
+                                            </a></div>
+                                        <div class="p-2">
+                                            <a href="javascript:void(0)"
+                                               data-toggle="modal"
+                                               data-target="#measure-edit-modal"
+                                               data-measure-id="{{$measure->id}}">
+                                                <i class="fas fa-edit mr-1 text-info"
+                                                   data-toggle="tooltip" data-placement="top" title=""
+                                                   data-original-title="Editar"></i>
+                                            </a>
+                                        </div>
+                                        <div class="p-2">
+                                            <x-delete-link-icon
+                                                    action="{{ route('destroy.measure.strategy', $measure->id) }}"
+                                                    id="{{ $measure->id }}"></x-delete-link-icon>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endif
                     </td>
                 </tr>

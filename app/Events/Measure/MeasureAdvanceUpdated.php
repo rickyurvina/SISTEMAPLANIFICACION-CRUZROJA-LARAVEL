@@ -12,17 +12,14 @@ class MeasureAdvanceUpdated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $measureAdvamce;
-
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(MeasureAdvances $measureAdvance)
+    public function __construct()
     {
         //
-        $this->measureAdvamce = $measureAdvance;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Project;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
 use App\Models\Projects\Link;
 use App\Models\Projects\Project;
 use App\Models\Projects\Activities\Task;
@@ -11,6 +12,18 @@ use Illuminate\Http\Request;
 
 class LinkController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:project-manage|project-super-admin');
+    }
+
+
     public function store(Request $request, Project $project): JsonResponse
     {
         $link = new Link();

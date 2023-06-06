@@ -2,6 +2,7 @@
 
 namespace App\Models\Auth;
 
+use App\Events\RoleCreated;
 use App\Traits\Tenants;
 use Eloquent;
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
@@ -58,7 +59,7 @@ class Role extends BaseRole
      *
      * @var array
      */
-    protected $fillable = ['name', 'guard_name', 'id_azuread_rol','is_project_role'];
+    protected $fillable = ['name', 'guard_name', 'id_azuread_rol', 'is_project_role','can_edit'];
 
     protected array $sortable = ['name'];
 
@@ -73,16 +74,41 @@ class Role extends BaseRole
     public static function boot()
     {
         parent::boot();
+
         static::creating(function ($model) {
-            $model->name = strtoupper($model->name);
+            $name = self::transformNameRol($model->name);
+            $model->name = $name;
         });
-        static::updating(function ($model){
-            $model->name = strtoupper($model->name);
+
+        static::created(function ($model) {
+            RoleCreated::dispatch($model);
         });
-        static::deleting(function ($model)
-        {
+
+        static::updating(function ($model) {
+            $name = self::transformNameRol($model->name);
+            $model->name = $name;
+        });
+        static::deleting(function ($model) {
             $model->syncPermissions([]);
         });
+    }
+
+    public static function transformNameRol($name)
+    {
+        $name = strtolower($name);
+        $name = trim($name);
+        $arrayName = explode(" ", $name);
+        $name = "";
+        $count = 1;
+        foreach ($arrayName as $item) {
+            if ($count < count($arrayName)) {
+                $name = $name . $item . "-";
+                $count++;
+            } else {
+                $name = $name . $item;
+            }
+        }
+        return $name;
     }
 
     public function scopeCollect(Builder $query)
@@ -116,7 +142,7 @@ class Role extends BaseRole
      */
     public function scopeIsSuperAdmin(Builder $query)
     {
-        return $query->where('name',  'super-admin');
+        return $query->where('name', 'super-admin');
     }
 
 }

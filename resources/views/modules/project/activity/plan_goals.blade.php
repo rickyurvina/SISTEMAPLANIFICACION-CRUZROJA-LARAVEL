@@ -14,7 +14,7 @@
     <div class="w-30 mx-auto">
         <div class="d-flex justify-content-center">
             <x-label-detail>{{ trans('general.total') }}</x-label-detail>
-            <x-content-detail>{{ array_sum($goals) }}</x-content-detail>
+            <x-content-detail>{{ array_sum(array_column($this->goals,'goal')) }}</x-content-detail>
         </div>
     </div>
     <div class="text-center p-2">

@@ -16,22 +16,21 @@ class IndicatorUnitSeeder extends Seeder
     public function run()
     {
         //
-//        IndicatorUnits::factory()->times(10)->create();
         DB::table('indicator_units')->insert([
             'name'=>'Personas Alcanzadas',
-            'abbreviation'=>'PA'
+            'abbreviation'=>IndicatorUnits::PEOPLE_REACHED
         ]);
         DB::table('indicator_units')->insert([
             'name'=>'Personas Capacitadas',
-            'abbreviation'=>'PCap'
+            'abbreviation'=>IndicatorUnits::TRAINED_PEOPLE
         ]);
         DB::table('indicator_units')->insert([
             'name'=>'Documentos',
-            'abbreviation'=>'Doc'
+            'abbreviation'=>IndicatorUnits::DOCUMENTS
         ]);
         DB::table('indicator_units')->insert([
             'name'=>'Evaluación',
-            'abbreviation'=>'Eva'
+            'abbreviation'=>IndicatorUnits::EVALUATION
         ]);
     }
 }

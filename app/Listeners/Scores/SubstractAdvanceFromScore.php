@@ -40,17 +40,17 @@ class SubstractAdvanceFromScore
                 ['period_id', '=', $periodId],
                 ['scoreable_id', '=', $measure->id]
             ])->first();
-            $oldActual = $score->actual;
-            $valueToSubtract = $measureAdvance->actual;
-            $newActual = $oldActual - $valueToSubtract;
-            $score->actual = $newActual;
-            $score->save();
+            if ($score) {
+                $oldActual = $score->actual;
+                $valueToSubtract = $measureAdvance->actual;
+                $newActual = $oldActual - $valueToSubtract;
+                $score->actual = $newActual;
+                $score->save();
+            }
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
             throw new \Exception($exception->getMessage());
         }
-
-
     }
 }

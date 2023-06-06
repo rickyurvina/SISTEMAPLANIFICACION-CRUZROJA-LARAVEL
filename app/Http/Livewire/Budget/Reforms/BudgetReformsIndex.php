@@ -37,6 +37,8 @@ class BudgetReformsIndex extends Component
             ->where('type', Transaction::TYPE_REFORM)
             ->search('description', $this->search)
             ->paginate(setting('default.list_limit', $this->countRegisterSelect));
+        $this->dispatchBrowserEvent('loadSelects2');
+
         return view('livewire.budget.reforms.budget-reforms-index', compact('transactions'));
     }
 

@@ -213,21 +213,12 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-secondary shadow-none" data-dismiss="modal"
                                     x-on:click="show = false; transition=null">{{ trans('general.cancel') }}</button>
-                            @if($phase)
-                                <button type="button" class="btn btn-success border-0 shadow-none"
-                                        wire:click="changePhase">
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-                                              wire:target="changePhase" wire:loading></span>
-                                    {{ trans('general.change') }}
-                                </button>
-                            @else
-                                <button type="button" class="btn btn-success border-0 shadow-none"
-                                        wire:click="changeStatus">
+                            <button type="button" class="btn btn-success border-0 shadow-none"
+                                    wire:click="changeStatus">
                                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                                               wire:target="changeStatus" wire:loading></span>
-                                    {{ trans('general.change') }}
-                                </button>
-                            @endif
+                                {{ trans('general.change') }}
+                            </button>
                         </div>
                     @endif
                 </div>

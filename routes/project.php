@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Route;
 //DB::listen(function ($auery){
 //    var_dump($auery->sql);
 //});
+
 Route::group(['prefix' => 'projects'], function () {
-
     Route::group(['prefix' => 'catalogs'], function () {
-
         Route::view('/', 'modules.project.catalogs.index')->name('projects.catalogs');
         Route::view('line-actions', 'modules.project.catalogs.project-line-actions')->name('line-actions.index');
         Route::view('line-action/services', 'modules.project.catalogs.project-line-action-services')
@@ -28,11 +27,18 @@ Route::group(['prefix' => 'projects'], function () {
     Route::group(['prefix' => 'thresholds'], function () {
         Route::get('/', 'Project\Configuration\ProjectThresholds@index')->name('projects.thresholds');
     });
-
-    Route::get('/your-work', 'Project\HomeController@index')->name('projects.home');
     Route::get('/catalog-purchases', 'Project\PublicPurchasesController@index')->name('projects.purchases');
     Route::get('/', 'Project\ProjectController@index')->name('projects.index');
     Route::get('/lessons-learned', 'Project\ProjectController@indexLessons')->name('projects.indexLessons');
+    //Reportes generales de proyectos
+    Route::get('/reports/index', 'Project\ProjectReportController@reports')->name('projects.reports');
+    Route::get('/reports/portfolioReport', 'Project\ProjectReportController@portfolioReport')->name('projects.portfolioReport');
+
+});
+
+
+Route::prefix('projects')->middleware('checkProjectPhase')->group(function () {
+
     Route::put('/{project}', 'Project\ProjectController@update')->name('projects.update');
     Route::get('/{project}', 'Project\ProjectController@show')->name('projects.show');
     Route::get('/{project}/activities/{company?}', 'Project\ProjectController@showActivities')->name('projects.activities');
@@ -66,7 +72,7 @@ Route::group(['prefix' => 'projects'], function () {
     Route::delete('/destroy/lesson/{id}', 'Project\ProjectController@deleteLesson')->name('projects.delete_lesson');
     Route::delete('/destroy/rescheduling/{id}', 'Project\ProjectController@deleteRescheduling')->name('projects.delete_rescheduling');
     Route::delete('/destroy/evaluation/{id}', 'Project\ProjectController@deleteEvaluation')->name('projects.delete_evaluation');
-    Route::get('/{project}/documentReport', 'Project\ProjectController@showProjectBudgetDocument')->name('projects.budgetDocumentReport');
+    Route::get('/{project}/budget', 'Project\ProjectController@showProjectBudgetDocument')->name('projects.budgetDocumentReport');
 
 
     //formulation
@@ -126,14 +132,8 @@ Route::group(['prefix' => 'projects'], function () {
     Route::get('/{project}/calendarInternal', 'Project\ProjectInternalController@showCalendar')->name('projects.calendarInternal');
     Route::get('/{project}/reports/reportreportInternal', 'Project\ProjectInternalController@reportReport')->name('projects.reportReportInternal');
 
-
     //calendario actividades
     Route::get('/{project}/calendar', 'Project\ProjectController@showCalendar')->name('projects.calendar');
-
-
-    //Reportes generales de proyectos
-    Route::get('/reports/index', 'Project\ProjectReportController@reports')->name('projects.reports');
-    Route::get('/reports/portfolioReport', 'Project\ProjectReportController@portfolioReport')->name('projects.portfolioReport');
 
     //piats
     Route::get('/project/piat/{task?}', 'Project\ProjectController@showPiats')->name('project.piat_index');
@@ -145,5 +145,10 @@ Route::group(['prefix' => 'projects'], function () {
         Route::delete('/destroy/expense/project/{accountId}/{activityId}', 'Project\ProjectController@deleteExpenseActivityProject')->name('projects.expenses_delete');
 
     });
-
+    //budget Internal
+    Route::group(['prefix' => 'budgetInternal'], function () {
+        Route::get('/expenses/activity/{activity}', 'Project\ProjectInternalController@expensesProjectActivity')->name('projectsInternal.expenses_activity');
+        Route::delete('/destroy/expense/project/{accountId}/{activityId}', 'Project\ProjectInternalController@deleteExpenseActivityProject')->name('projectsInternal.expenses_delete');
+        Route::get('/{project}/budget/internal', 'Project\ProjectInternalController@showProjectBudgetDocument')->name('projectsInternal.budgetDocumentReport');
+    });
 });

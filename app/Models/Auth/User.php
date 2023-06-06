@@ -73,6 +73,8 @@ class User extends Authenticatable
         'contract_start',
         'contract_end',
         'company_id',
+        'last_ip_connected',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -85,7 +87,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password'];
 
     /**
      * The attributes that should be mutated to dates.
@@ -117,7 +119,7 @@ class User extends Authenticatable
             $model->name = strtoupper($model->name);
             $model->surname = strtoupper($model->surname);
         });
-        static::updating(function ($model){
+        static::updating(function ($model) {
             $model->name = strtoupper($model->name);
             $model->surname = strtoupper($model->surname);
         });
@@ -125,7 +127,7 @@ class User extends Authenticatable
 
     public function companies(): MorphToMany
     {
-        return $this->morphToMany(Company::class, 'user', 'user_companies', 'user_id', 'company_id');
+        return $this->morphToMany(Company::class, 'user', 'user_companies', 'user_id', 'company_id')->orderBy('level','asc');
     }
 
     /**
@@ -238,7 +240,7 @@ class User extends Authenticatable
 
     public function activitiesPoa(): HasMany
     {
-        return $this->hasMany(PoaActivity::class,'user_id_in_charge');
+        return $this->hasMany(PoaActivity::class, 'user_id_in_charge');
     }
 
 
@@ -317,5 +319,15 @@ class User extends Authenticatable
             return false;
         }
 
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->hasRoles(['super-admin']);
+    }
+
+    public function hasRoles(array $roles)
+    {
+        return $this->roles->pluck('name')->intersect($roles)->count();
     }
 }

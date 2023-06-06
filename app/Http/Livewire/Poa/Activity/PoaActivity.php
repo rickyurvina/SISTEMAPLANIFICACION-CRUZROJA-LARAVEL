@@ -74,6 +74,7 @@ class PoaActivity extends TableComponent
                 $query->whereIn('id', $this->selectedPrograms);
             })
             ->get();
+
         return view('livewire.poa.activity.poa-activities', compact('activities','programsLeftList'));
     }
 

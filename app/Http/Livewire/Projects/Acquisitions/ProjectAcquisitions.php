@@ -24,6 +24,7 @@ class ProjectAcquisitions extends Component
     {
         $this->projectId = $project->id;
         $this->project = $project;
+
     }
 
     public function render()

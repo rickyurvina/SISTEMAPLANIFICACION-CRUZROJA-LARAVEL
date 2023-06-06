@@ -34,15 +34,20 @@ class DeleteIndicator extends Job
         try {
             DB::beginTransaction();
             $this->indicator = Indicator::find($this->id);
-            $goalIndicator = $this->indicator->total_goal_value;
-            $actualValue = $this->indicator->total_actual_value;
-            $goals = $this->indicator->indicatorGoals->sum('goal_value');
-            $progress = $this->indicator->indicatorGoals->sum('actual_value');
-            if ($goalIndicator > 0 || $goals > 0 || $progress > 0 || $actualValue > 0) {
-                flash(trans('general.cant_delete_indicator'))->info();
-            } else {
+            if ($this->indicator->type == Indicator::TYPE_GROUPED) {
                 $this->indicator->delete();
+            } else {
+                $goalIndicator = $this->indicator->total_goal_value;
+                $actualValue = $this->indicator->total_actual_value;
+                $goals = $this->indicator->indicatorGoals->sum('goal_value');
+                $progress = $this->indicator->indicatorGoals->sum('actual_value');
+                if ($progress > 0 || $actualValue > 0) {
+                    throw  new \Exception(trans('general.cant_delete_indicator'));
+                } else {
+                    $this->indicator->delete();
+                }
             }
+
             DB::commit();
             return $this->indicator;
         } catch (\Exception $exception) {

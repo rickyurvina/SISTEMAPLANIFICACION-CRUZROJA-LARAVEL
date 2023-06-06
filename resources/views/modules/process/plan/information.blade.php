@@ -226,7 +226,6 @@
                     </div>
                     <div class="tab-pane fade" id="v-pills-process-map" role="tabpanel"
                          aria-labelledby="v-pills-profile-tab">
-                        <div class="row w-100 justify-content-center">
                             <livewire:components.files :modelId="$process->id"
                                                        model="{{\App\Models\Process\Process::class}}"
                                                        folder="Process/{{$process->id}}/processMaps"
@@ -234,7 +233,6 @@
                                                        :key="time().$process->id"
                                                        identifier="map"
                             />
-                        </div>
                     </div>
                     <div class="tab-pane fade" id="v-pills-process-inputs-outputs" role="tabpanel"
                          aria-labelledby="v-pills-profile-tab">

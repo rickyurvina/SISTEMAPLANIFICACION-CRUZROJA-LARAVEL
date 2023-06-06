@@ -39,7 +39,7 @@ Route::group(['prefix' => 'poa'], function () {
     //budget
     Route::group(['prefix' => 'budget'], function () {
         Route::get('/expenses/activity/{activity}', 'Poa\ActivityController@expensesPoaActivity')->name('poa.expenses_activity');
-        Route::delete('/destroy/expense/poa/{accountId}/{activityId}', 'poa\ActivityController@deleteExpenseActivityPoa')->name('poa.expenses_delete');
+        Route::delete('/destroy/expense/poa/{accountId}/{activityId}', 'Poa\ActivityController@deleteExpenseActivityPoa')->name('poa.expenses_delete');
 
     });
 

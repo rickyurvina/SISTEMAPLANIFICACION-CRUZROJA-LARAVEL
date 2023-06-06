@@ -1,7 +1,8 @@
 <div class="d-flex flex-wrap w-75">
     <div class="d-flex flex-column p-2 w-25" wire:ignore>
         <x-label-detail>Estado</x-label-detail>
-        <select class="form-control" id="select2-states">
+        <select class="form-control" id="select2-states" wire:ignore.self wire:model="stateSelect">
+            <option value="0">Seleccione</option>
             <option value="{{ \App\States\Transaction\Draft::label() }}">{{ \App\States\Transaction\Draft::label() }}</option>
             <option value="{{ \App\States\Transaction\Approved::label() }}">{{ \App\States\Transaction\Approved::label() }}</option>
             <option value="{{ \App\States\Transaction\Rejected::label() }}">{{ \App\States\Transaction\Rejected::label() }}</option>
@@ -22,7 +23,8 @@
         </label>
     </div>
     <div class="w-15">
-        <select class="form-control" id="select2-registers" wire:model="countRegisterSelect">
+        <select class="form-control" id="select2-registers" wire:ignore.self wire:model="countRegisterSelect">
+            <option value="0">Seleccione</option>
             <option value="1">1</option>
             <option value="25">25</option>
             <option value="50">50</option>

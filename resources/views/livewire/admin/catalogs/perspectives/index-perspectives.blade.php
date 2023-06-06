@@ -17,11 +17,9 @@
                 </div>
             @endif
             <div class="d-flex ml-auto">
-                @can('admin-crud-admin')
-                    <button type="button" class="btn btn-success border-0 shadow-0" data-toggle="modal"
-                            data-target="#create-perspective">{{ trans('general.create')}}   {{ trans('general.perspectives')  }}
-                    </button>
-                @endcan
+                <button type="button" class="btn btn-success border-0 shadow-0" data-toggle="modal"
+                        data-target="#create-perspective">{{ trans('general.create')}}   {{ trans('general.perspectives')  }}
+                </button>
             </div>
         </div>
     </div>
@@ -53,25 +51,21 @@
                                 <td class="text-center">
                                     <div class="frame-wrap">
                                         <div class="d-flex justify-content-start">
-                                            @can('admin-crud-admin')
-                                                <div class="p-1 mt-1">
-                                                    <a
-                                                            href="javascript:void(0)"
-                                                            data-toggle="modal"
-                                                            data-target="#update-perspective"
-                                                            data-item-id="{{$item->id}}">
-                                                        <i class="fas fa-edit ml-2 text-info"
-                                                           aria-expanded="false"
-                                                           data-toggle="tooltip" data-placement="top" title=""
-                                                           data-original-title="{{trans('general.edit')}}"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
-                                            @can('admin-crud-admin')
-                                                <div>
-                                                    <x-delete-link-livewire id="{{ $item->id }}"/>
-                                                </div>
-                                            @endcan
+                                            <div class="p-1 mt-1">
+                                                <a
+                                                        href="javascript:void(0)"
+                                                        data-toggle="modal"
+                                                        data-target="#update-perspective"
+                                                        data-item-id="{{$item->id}}">
+                                                    <i class="fas fa-edit ml-2 text-info"
+                                                       aria-expanded="false"
+                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-original-title="{{trans('general.edit')}}"></i>
+                                                </a>
+                                            </div>
+                                            <div>
+                                                <x-delete-link-livewire id="{{ $item->id }}"/>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -92,10 +86,10 @@
     </div>
 </div>
 <div wire:ignore>
-    <livewire:admin.catalogs.perspectives.create-perspective />
+    <livewire:admin.catalogs.perspectives.create-perspective/>
 </div>
 <div wire:ignore>
-    <livewire:admin.catalogs.perspectives.edit-perspective />
+    <livewire:admin.catalogs.perspectives.edit-perspective/>
 </div>
 @push('page_script')
     <script>
@@ -120,7 +114,8 @@
                 cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
             }).then((result) => {
                 if (result.value) {
-                @this.call('delete', id);
+                    @this.
+                    call('delete', id);
                 }
             });
         }

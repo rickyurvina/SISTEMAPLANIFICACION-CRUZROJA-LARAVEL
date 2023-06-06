@@ -45,6 +45,7 @@ return [
 
     'info' => [
         'empty_attachment' => 'Todavía no se ha cargado ningún archivo relacionado con esta actividad.',
+        'no_roles_assigned' => 'Todavía no se han asignado roles. Contacte al administrador.',
         'empty_reports' => 'Todavía no se ha generado el reporte de la Matriz',
         'empty_activities' => 'Todavía no se ha cargado ninguna actividad para el programa',
         'empty_requests' => 'Todavía no se ha generado solicitudes de cambio para este POA',

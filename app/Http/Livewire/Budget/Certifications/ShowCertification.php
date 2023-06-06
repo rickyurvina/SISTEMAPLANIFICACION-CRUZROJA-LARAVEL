@@ -123,6 +123,7 @@ class ShowCertification extends Component
             $this->transaction->save();
             $this->resetForm();
             $this->emit('toggleShowCertification');
+            $this->emit('refreshCertifications');
             DB::commit();
         } catch (\Exception $exception) {
             flash('Error: ' . $exception->getMessage())->error()->livewire($this);
@@ -134,13 +135,13 @@ class ShowCertification extends Component
     public function declineCertification()
     {
         try {
-            DB::beginTransaction();
             $this->transaction->status = Rejected::label();
             $this->transaction->approved_by = user()->id;
             $this->transaction->approved_date = now();
             $this->transaction->save();
             $this->resetForm();
             $this->emit('toggleShowCertification');
+            $this->emit('refreshCertifications');
             DB::commit();
         } catch (\Exception $exception) {
             flash('Error: ' . $exception->getMessage())->error()->livewire($this);

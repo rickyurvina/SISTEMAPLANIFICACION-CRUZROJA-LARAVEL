@@ -20,23 +20,7 @@ class AdvancesByUnitDashboard extends Component
 
     public function mount(int $periodId)
     {
-        try {
-            DB::beginTransaction();
-            $measureAdvances_ = MeasureAdvances::with('measurable.measure')
-                ->where('unit_id', null)->get();
-            foreach ($measureAdvances_ as $measureAdvance_) {
-                $model = $measureAdvance_->measurable;
-                if ($model->measure()->first()) {
-                    $unitId = $model->measure->unit_id;
-                    $measureAdvance_->unit_id = $unitId;
-                    $measureAdvance_->save();
-                }
-            }
-            DB::commit();
-        } catch (\Exception $exception) {
-            DB::rollBack();
-            throw new \Exception($exception->getMessage());
-        }
+
         if ($periodId) {
             $period = Period::find($periodId);
             $periods = Period::query()->with(

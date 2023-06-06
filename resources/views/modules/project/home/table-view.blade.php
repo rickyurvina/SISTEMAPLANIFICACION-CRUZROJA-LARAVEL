@@ -103,7 +103,7 @@
                                 <td>{{$item->start_date? $item->start_date->format('j F, Y'):''}}</td>
                                 <td>{{$item->end_date?$item->end_date->format('j F, Y'):''}}</td>
                                 <td>
-                                    <span class="badge {{ $item->phase->color() }}">{{ $item->phase->label() }}</span>
+                                    <span>{{ $item->phase->label() }}</span>
                                 </td>
                                 @if($item->type!=\App\Models\Projects\Project::TYPE_INTERNAL_DEVELOPMENT)
                                     <td>
@@ -112,14 +112,14 @@
                                 @else
                                     <td class="text-center"><i class="fal fa-minus color-danger-700 fs-2x"></i></td>
                                 @endif
-                                @if( user()->can('project-crud-project')||in_array($companyActive,$item->subsidiaries->pluck('company_id')->toArray()))
+                                @if( user()->can('project-manage')||in_array($companyActive,$item->subsidiaries->pluck('company_id')->toArray()))
                                     <td>
                                         <div class="frame-wrap">
                                             <div class="d-flex justify-content-start">
                                                 @if($item->company_id===$companyActive || in_array($companyActive,$item->subsidiaries->pluck('company_id')->toArray()))
                                                     @if($item->type == \App\Models\Projects\Project::TYPE_MISSIONARY_PROJECT || $item->type == \App\Models\Projects\Project::TYPE_EMERGENCY)
                                                         @if($item->phase instanceof \App\States\Project\StartUp)
-                                                            @if(user()->can('view-indexCard-project')||user()->can('manage-indexCard-project')||
+                                                            @if(user()->can('project-view')||user()->can('project-manage')||
                                                                 in_array($companyActive,$item->subsidiaries->pluck('company_id')->toArray()))
                                                                 <div class="p-2">
                                                                     <a href="{{ route('projects.showIndex', $item->id) }}"
@@ -127,6 +127,14 @@
                                                                        data-toggle="tooltip" data-placement="top" title=""
                                                                        data-original-title="Ficha del Proyecto">
                                                                         <i class="fas fa-eye text-info"></i>
+                                                                    </a>
+                                                                </div>
+                                                                <div class="p-2">
+                                                                    <a href="{{ route('projects.showReferentialBudget', $item->id) }}"
+                                                                       aria-expanded="false"
+                                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                                       data-original-title="Presupuesto del Proyecto">
+                                                                        <i class="fas fa-dollar-sign text-info"></i>
                                                                     </a>
                                                                 </div>
                                                             @endif
@@ -147,14 +155,16 @@
                                                                     <i class="fas fa-analytics text-info"></i>
                                                                 </a>
                                                             </div>
-                                                            <div class="p-2">
-                                                                <a href="{{ route('projects.showReferentialBudget', $item->id) }}"
-                                                                   aria-expanded="false"
-                                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                                   data-original-title="Presupuesto del Proyecto">
-                                                                    <i class="fas fa-dollar-sign text-info"></i>
-                                                                </a>
-                                                            </div>
+                                                            @if($item->hasTransaction())
+                                                                <div class="p-2">
+                                                                    <a href="{{ route('projects.budgetDocumentReport', $item->id) }}"
+                                                                       aria-expanded="false"
+                                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                                       data-original-title=Presupuesto>
+                                                                        <i class="fas fa-dollar-sign text-success mr-1"></i>
+                                                                    </a>
+                                                                </div>
+                                                            @endif
                                                         @endif
                                                         <div class="p-2">
                                                             <a href="{{ route('projects.logic-frame', $item->id) }}"
@@ -181,7 +191,7 @@
                                                             </a>
                                                         </div>
                                                         <div class="p-2">
-                                                            @if( user()->can('project-crud-project'))
+                                                            @if( user()->can('project-manage'))
                                                                 <button class="border-0 bg-transparent"
                                                                         wire:click="$emit('deleteProject', '{{ $item->id }}')"
                                                                         data-toggle="tooltip"
@@ -192,7 +202,7 @@
                                                             @endif
                                                         </div>
                                                     @else
-                                                        @if(user()->can('view-indexCard-project')||user()->can('manage-indexCard-project')||
+                                                        @if(user()->can('project-view')||user()->can('project-manage')||
                                                                in_array($companyActive,$item->subsidiaries->pluck('company_id')->toArray()))
                                                             <div class="p-2">
                                                                 <a href="{{ route('projects.showIndexInternal', $item->id) }}"
@@ -237,7 +247,7 @@
                                                             </a>
                                                         </div>
                                                         <div class="p-2">
-                                                            @if( user()->can('project-crud-project'))
+                                                            @if( user()->can('project-manage'))
                                                                 <button class="border-0 bg-transparent"
                                                                         wire:click="$emit('deleteProject', '{{ $item->id }}')"
                                                                         data-toggle="tooltip"

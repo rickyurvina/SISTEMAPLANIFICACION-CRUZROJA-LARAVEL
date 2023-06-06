@@ -5,6 +5,7 @@ namespace App\Jobs\Poa;
 use App\Abstracts\Job;
 use App\Models\Measure\Measure;
 use App\Models\Poa\Poa;
+use App\Models\Poa\PoaIndicatorConfig;
 use App\Models\Poa\PoaIndicatorConfig as PoaIndicatorConfigs;
 use App\Models\Poa\PoaProgram;
 use App\Models\Strategy\Plan;
@@ -149,63 +150,18 @@ class CreatePoa extends Job
     public function saveConfigAndPrograms()
     {
         try {
-            $arrProgramsIds = array();
-            foreach ($this->data as $item) {
-                $programId = $item['programId'];
-                if (!in_array($programId, $arrProgramsIds)) {
-                    array_push($arrProgramsIds, $programId);
-                }
-            }
-            $contProgramsSelected = count($arrProgramsIds);
-
-            //Recuperar los programas seleccionados
-            if ($contProgramsSelected > 0) {
-                $this->weight = 100.00 / $contProgramsSelected;
-            }
+            $poaId = $this->poa->id;
             for ($i = 0; $i < count($this->data); $i++) {
-                $program = PoaProgram::where('plan_detail_id', $this->data[$i]['planDetailId'])
-                    ->where('poa_id', $this->poa->id)
-                    ->first();
-                if ($program) {
-                    $programId = $program->id;
-                } else {
-                    $poaProgram = $this->createPoaProgram($this->data[$i]['planDetailId']);
-                    $programId = $poaProgram->id;
-                }
-                PoaIndicatorConfigs::updateOrCreate(['poa_id' => $this->poa->id,
-                    'measure_id' => $this->data[$i]['measureId']],
-                    [
-                        'poa_id' => (int)$this->poa->id,
-                        'measure_id' => $this->data[$i]['measureId'],
-                        'program_id' => $programId,
-                        'selected' => false,
-                    ]);
+                PoaIndicatorConfig::create([
+                    'poa_id' => $poaId,
+                    'measure_id' => $this->data[$i]['measureId'],
+                    'selected' => false,
+                    'reason' => 'Ingrese Justificación'
+                ]);
             }
-            $this->poaPrograms = PoaProgram::with(['poaIndicatorConfigs'])->where('poa_id', $this->poa->id)->get();
-            $this->poaIndicatorConfigs = $this->poaPrograms->pluck('poaIndicatorConfigs');
-
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
-
-    }
-
-    private function createPoaProgram(int $id)
-    {
-        try {
-            $data = [
-                'poa_id' => $this->poa->id,
-                'plan_detail_id' => $id,
-                'weight' => $this->weight,
-                'color' => config('constants.catalog.COLOR_PALETTE')[array_rand(config('constants.catalog.COLOR_PALETTE'), 1)],
-                'company_id' => session('company_id'),
-            ];
-            $response = $this->ajaxDispatch(new CreatePoaProgram($data));
-            return $response['data'];
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
-        }
-
     }
 
     private function array_order_by()

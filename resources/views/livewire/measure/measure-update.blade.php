@@ -23,7 +23,7 @@
                                      <i class="{{$score->scoreable->unit->getIcon()}}"></i>
                                      {{ $score->scoreable->name }}
                                 </span>
-                              </td>
+                            </td>
                         @else
                             <td>{{ $score->scoreable->name }}</td>
                         @endif
@@ -53,11 +53,13 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer text-right">
-            <button class="btn btn-success" wire:click="save">
-                <i class="fas fa-save pr-2"></i> {{ trans('general.save') }}
-            </button>
-        </div>
+        @if(Gate::check('strategy-manage') || Gate::check('strategy-update-indicators') )
+            <div class="card-footer text-right">
+                <button class="btn btn-success" wire:click="save">
+                    <i class="fas fa-save pr-2"></i> {{ trans('general.save') }}
+                </button>
+            </div>
+        @endif
     </div>
 </div>
 

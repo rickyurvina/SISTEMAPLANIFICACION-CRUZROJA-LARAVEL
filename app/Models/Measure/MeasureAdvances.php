@@ -42,24 +42,21 @@ class MeasureAdvances extends Model
             'period' => 'datetime:Y-m'
         ];
 
-    protected static function booted()
+    protected static function boot()
     {
+        parent::boot();
         static::updated(function ($model) {
-            if ((isset($model->getChanges()['actual']))) {
-                MeasureAdvanceUpdated::dispatch($model);
-//                if ($model->measurable_type==Task::class){
-//                TaskDetailUpdated::dispatch($model);
-//                    //TODO CALCULAR AVANCE DE REUSLTADOS, OBJETIVOS Y PROYECTO EN CASCADA.
-//                }
+            if (($model->isDirty('men') || $model->isDirty('women')) && !isset($model->getChanges()['actual'])) {
+                $model->actual = $model->men + $model->women;
+                $model->save();
             }
         });
-        static::deleting(function ($model) {
-            if ($model->actual > 0) {
-                MeasureAdvanceDeleted::dispatch($model);
-            }
-        });
-    }
 
+        static::creating(function ($model) {
+            $model->measure_id = $model->measurable->measure_id;
+        });
+
+    }
 
     /**
      * @return MorphTo
@@ -87,7 +84,8 @@ class MeasureAdvances extends Model
 
     public function comments(): MorphMany
     {
-        return $this->morphMany(Comment::class, 'commentable')->withoutGlobalScope(\App\Scopes\Company::class);
+        return $this->morphMany(Comment::class, 'commentable')
+            ->withoutGlobalScope(\App\Scopes\Company::class);
     }
 
 }

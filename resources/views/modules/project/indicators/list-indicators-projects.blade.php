@@ -33,6 +33,8 @@
                                                wire:click="$emit('show', 'App\\Models\\Projects\\Project', '{{ $project->id }}')">
                                                 {{ trans('general.create') }} {{trans_choice('general.indicators',1)}}
                                             </a>
+                                            <x-tooltip-help message="Permite crear indicadores a nivel del proyecto"></x-tooltip-help>
+
                                         </div>
                                     </div>
                                 </td>

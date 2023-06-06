@@ -123,30 +123,33 @@ class ShowCommitment extends Component
 
     public function approveCommitment()
     {
-//        try {
-//            DB::beginTransaction();
+        try {
+            DB::beginTransaction();
             $this->transaction->status = Approved::label();
             $this->transaction->approved_by = user()->id;
             $this->transaction->approved_date = now();
             $this->transaction->save();
             $this->resetForm();
-            $this->emit('toggleShowCommitment');
-//        } catch (\Exception $exception) {
-//            flash('Error: ' . $exception->getMessage())->error()->livewire($this);
-//            DB::rollBack();
-//        }
+            $this->emit('toggleShowCertification');
+            $this->emit('refreshCommitments');
+            DB::commit();
+        } catch (\Exception $exception) {
+            flash('Error: ' . $exception->getMessage())->error()->livewire($this);
+            DB::rollBack();
+        }
     }
 
     public function declineCommitment()
     {
         try {
-            DB::beginTransaction();
             $this->transaction->status = Rejected::label();
             $this->transaction->approved_by = user()->id;
             $this->transaction->approved_date = now();
             $this->transaction->save();
             $this->resetForm();
-            $this->emit('toggleShowCommitment');
+            $this->emit('toggleShowCertification');
+            $this->emit('refreshCommitments');
+            DB::commit();
         } catch (\Exception $exception) {
             flash('Error: ' . $exception->getMessage())->error()->livewire($this);
             DB::rollBack();

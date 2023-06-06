@@ -3,6 +3,7 @@
         <div class="panel-hdr">
             <h2>
                 {{ trans('general.objectives_name') }}
+                <x-tooltip-help message="Permite gestionar los objetivos del proyecto"></x-tooltip-help>
             </h2>
             <div class="panel-toolbar">
 
@@ -27,6 +28,7 @@
                                             <span class="color-item shadow-hover-5 mr-2 cursor-default"
                                                   style="background-color: {{ $objective['color'] }};">
                                             </span>
+                                            <x-tooltip-help message="Permite editar en linea el nombre del objetivo"></x-tooltip-help>
                                             <span wire:ignore wire:key="{{time().$objective->code}}" class="w-75">
                                                  <livewire:components.input-text :modelId="$objective['id']"
                                                                                  class="\App\Models\Projects\Objectives\ProjectObjectives"
@@ -34,7 +36,7 @@
                                                                                  :rules="'required|max:255|min:3'"
                                                                                  defaultValue="{{ $objective['name'] }}"
                                                                                  :key="time().$objective['id']"/>
-                                                        </span>
+                                                </span>
 
                                                         <span class="ml-auto">
                                                             <span class="collapsed-reveal">
@@ -53,13 +55,16 @@
                                              style="border-radius: 4px" data-toggle="modal"
                                              data-target="#project-activities-weight"
                                              data-objective-id="{{ $objective['id'] }}">
-                                            <i class="fas fa-weight mr-2"></i>     {{ __('general.weight') }} {{ trans_choice('general.result', 2) }}
+                                            <i class="fas fa-weight mr-2"></i> {{ __('general.weight') }} {{ trans_choice('general.result', 2) }}
+                                            <x-tooltip-help message="Permite actualizar los pesos de los resultados del objetivo asociado"></x-tooltip-help>
+
                                         </div>
                                         <div class="dropdown-item cursor-pointer"
                                              style="border-radius: 4px" data-toggle="modal"
                                              data-target="#project-create-results"
                                              data-objective-id="{{ $objective['id'] }}">
                                             <i class="fas fa-plus-circle mr-2"></i> {{ trans('general.create') . ' ' . trans_choice('general.result', 1) }}
+                                            <x-tooltip-help message="Permite crear un resultado al objetivo"></x-tooltip-help>
                                         </div>
 
                                         <div class="dropdown-item cursor-pointer"
@@ -74,6 +79,7 @@
                                                         <span class="">
                                                             <span class="bg-gray-50" dir="auto">
                                                                 <span>{{ $objective->indicators->count()>1?  $objective->indicators->count().'-Indicadores':$objective->indicators->count().'-Indicador'}}</span>
+                                                                <x-tooltip-help message="Permite gestionar los indicadores del objetivo"></x-tooltip-help>
                                                             </span>
                                                         </span>
                                                     </div>
@@ -125,7 +131,9 @@
                                                 <i class="fal fa-trash-alt mr-2"></i> {{  trans_choice('general.delete', 1) }}
                                             </div>
                                         @endif
-                                        <h6 class="m-0 text-muted">{{ __('general.color') }}</h6>
+                                        <h6 class="m-0 text-muted">{{ __('general.color') }}
+                                            <x-tooltip-help message="Permite actualizar el color del objetivo y de los resultados asociados"></x-tooltip-help>
+                                        </h6>
                                         <livewire:components.color-palette
                                                 :modelId="$objective['id']"
                                                 :key="time().$loop->index"

@@ -204,7 +204,7 @@
                         </a>
                     </div>
                     <div>
-                        <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary" wire:click="closeActivity()">Cerrar</a>
+                        <a href="{{ route('budgets.commitments', $certification->id) }}"  class="btn btn-sm btn-outline-secondary">Cerrar</a>
                     </div>
                 </div>
             </div>

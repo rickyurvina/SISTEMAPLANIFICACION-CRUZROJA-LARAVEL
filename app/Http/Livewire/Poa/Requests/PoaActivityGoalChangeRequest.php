@@ -46,10 +46,12 @@ class PoaActivityGoalChangeRequest extends Component
                 ->where('status', PoaIndicatorGoalChangeRequest::STATUS_OPEN)
                 ->first();
             if (!$poaIndicatorGoalChangeRequest) {
-                $element['id'] = $item->id;
-                $element['month'] = Indicator::FREQUENCIES[12][$count];
-                array_push($this->activityIndicators, $element);
-                $count++;
+                if ($count<=12){
+                    $element['id'] = $item->id;
+                    $element['month'] = Indicator::FREQUENCIES[12][$count];
+                    array_push($this->activityIndicators, $element);
+                    $count++;
+                }
             }
         }
         $this->goals = [];
@@ -58,16 +60,18 @@ class PoaActivityGoalChangeRequest extends Component
         $poaActivityDetails = $activity->measureAdvances;
         $count = 1;
         foreach ($poaActivityDetails as $poaActivityDetail) {
-            $element = [];
-            $element['id'] = $poaActivityDetail->id;
-            $element['year'] = now()->format('Y');
-            $element['monthName'] = Indicator::FREQUENCIES[12][$count];
-            $element['goal'] = $poaActivityDetail->goal;
-            $element['period'] = $count;
-            $element['poa_activity_id'] = $this->activity->id;
-            $element['request'] = '';
-            array_push($this->goals, $element);
-            $count++;
+            if ($count<=12){
+                $element = [];
+                $element['id'] = $poaActivityDetail->id;
+                $element['year'] = now()->format('Y');
+                $element['monthName'] = Indicator::FREQUENCIES[12][$count];
+                $element['goal'] = $poaActivityDetail->goal;
+                $element['period'] = $count;
+                $element['poa_activity_id'] = $this->activity->id;
+                $element['request'] = '';
+                array_push($this->goals, $element);
+                $count++;
+            }
         }
     }
 

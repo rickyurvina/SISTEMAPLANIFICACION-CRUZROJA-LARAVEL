@@ -56,6 +56,10 @@ class Indicator extends Model
     const QUARTERYLY = 'Trimestral';
     const ANNUAL = 'Anualmente';
 
+    const UPDATED = 'El indicador fue actualizado';
+    const CREATED = 'El indicador fue creado';
+    const DELETED = 'El indicador fue eliminado';
+
 
     protected $casts = [
         'documents' => 'array',
@@ -156,6 +160,9 @@ class Indicator extends Model
         parent::boot();
         static::deleted(function ($model) {
             $model->indicatorGoals->each->delete();
+            if ($model->type == self::TYPE_GROUPED) {
+                $model->indicatorParent->each->delete();
+            }
         });
 
         static::addGlobalScope('order', function (Builder $builder) {
@@ -446,22 +453,6 @@ class Indicator extends Model
     }
 
     /**
-     * Crea el nombre de la frecuencia
-     *
-     * @return
-     */
-    public function getTypeAggregation(): string
-    {
-        if ($this->type_of_aggregation == Indicator::TYPE_AGGREGATION_SUM) {
-            return "Suma";
-        } else if ($this->type_of_aggregation == Indicator::TYPE_AGGREGATION_WEIGHTED) {
-            return "Ponderado";
-        } else if ($this->type_of_aggregation == Indicator::TYPE_AGGREGATION_WIGHTED_SUM) {
-            return "Suma Ponderada";
-        }
-    }
-
-    /**
      *Obtiene el estado en prcentaje del indicador
      *
      * @return
@@ -484,6 +475,7 @@ class Indicator extends Model
     {
         return $this->getPercentageGrouped();
     }
+
     /**
      * Calcula el procentaje de avance para indicadores agrupados
      *
@@ -615,6 +607,12 @@ class Indicator extends Model
         ];
     }
 
+    /**
+     * @param $startDate_
+     * @param $endDate_
+     * @param $frequency
+     * @return array
+     */
     public function calcStartEndDateF($startDate_, $endDate_, $frequency)
     {
         $ts1 = strtotime($startDate_);
@@ -777,14 +775,95 @@ class Indicator extends Model
     {
         switch ($eventName) {
             case 'updated':
-                return Project::UPDATED;
+                return Indicator::UPDATED;
                 break;
             case 'created':
-                return Project::CREATED;
+                return Indicator::CREATED;
                 break;
             case 'deleted':
-                return Project::DELETED;
+                return Indicator::DELETED;
                 break;
         }
+    }
+
+    function calcYear($periods, $frequency)
+    {
+        $data = [];
+        for ($i = 0; $i < count($periods); $i++) {
+            $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
+            $count = 1;
+            $data[] = [
+                'frequency' => Indicator::FREQUENCIES[$frequency][$count] . " (" . ($date->format("Y")) . ")",
+            ];
+        }
+        return $data;
+
+    }
+
+    public function calcSemester($periods, $count, $frequency)
+    {
+        $data = [];
+        for ($i = 0; $i < count($periods); $i++) {
+            $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
+            $data[] = [
+                'frequency' => Indicator::FREQUENCIES[$frequency][$count] . " (" . ($date->format("Y")) . ")",
+            ];
+            $count++;
+            if ($count > 2) {
+                $count = 1;
+            }
+        }
+        return $data;
+
+    }
+
+    public function calcMonthly($periods, $count, $frequency)
+    {
+        $data = [];
+        for ($i = 0; $i < count($periods); $i++) {
+            $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
+            $data[] = [
+                'frequency' => Indicator::FREQUENCIES[$frequency][$count] . " (" . (($date->format("Y"))) . ")",
+            ];
+            $count++;
+            if ($count > 12) {
+                $count = 1;
+            }
+        }
+        return $data;
+
+    }
+
+    public function calcQuarterly($periods, $count, $frequency)
+    {
+        $data = [];
+        for ($i = 0; $i < count($periods); $i++) {
+            $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
+            $data[] = [
+                'frequency' => Indicator::FREQUENCIES[$frequency][$count] . " (" . (($date->format("Y"))) . ")",
+            ];
+            $count++;
+            if ($count > 4) {
+                $count = 1;
+            }
+        }
+        return $data;
+
+    }
+
+    public function calcFourMonths($periods, $count, $frequency)
+    {
+        $data = [];
+        for ($i = 0; $i < count($periods); $i++) {
+            $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
+            $data[] = [
+                'frequency' => Indicator::FREQUENCIES[$frequency][$count] . " (" . (($date->format("Y"))) . ")",
+            ];
+            $count++;
+            if ($count > 3) {
+                $count = 1;
+            }
+        }
+        return $data;
     }
 }

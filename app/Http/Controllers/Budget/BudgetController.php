@@ -237,7 +237,7 @@ class BudgetController extends Controller
 
     public function editReform(Transaction $transaction)
     {
-       if ($transaction->status instanceof Digited || $transaction->status instanceof Balanced ) {
+       if ($transaction->status instanceof Digited || $transaction->status instanceof Balanced || $transaction->status instanceof Draft  ) {
            return view('modules.budget.reforms.edit-reform')->with('transaction', $transaction);
        } else {
            abort(404);

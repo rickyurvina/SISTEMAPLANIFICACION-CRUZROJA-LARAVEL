@@ -33,17 +33,20 @@ class DuplicateActivity
             DB::beginTransaction();
             $task = $event->task;
             $project = $task->project;
-            $subsidiaries = $project->subsidiaries;
-            if ($subsidiaries->count() > 1) {
-                foreach ($subsidiaries->where('company_id', '<>', session('company_id')) as $company) {
-                    $searchTask = Task::where('code', $task->code)->where('company_id', $company->company_id)->pluck('id');
-                    $random = self::searchRandomInTasks($task);
-                    if ($searchTask->count() < 1) {
-                        $newTask = $task->replicate();
-                        $newTask->company_id = $company->company_id;
-                        $newTask->code = $random;
-                        $newTask->save();
-                        break;
+            if ($task->project->company_id == $task->company_id) {
+                $subsidiaries = $project->subsidiaries;
+                if ($subsidiaries->count() > 1) {
+                    foreach ($subsidiaries->where('company_id', '<>', session('company_id')) as $company) {
+                        $searchTask = Task::where('code', $task->code)
+                            ->where('project_id', $project->id)
+                            ->where('company_id', $company->company_id)->pluck('id');
+                        $random = self::searchRandomInTasks($task);
+                        if ($searchTask->count() < 1) {
+                            $newTask = $task->replicate();
+                            $newTask->company_id = $company->company_id;
+                            $newTask->code = $random;
+                            $newTask->save();
+                        }
                     }
                 }
             }
@@ -59,7 +62,10 @@ class DuplicateActivity
     public function searchRandomInTasks($task)
     {
         $random = rand(0, 999);
-        $codeTasks = Task::where('parent', $task->parent)->pluck('code')->toArray();
+        $codeTasks = Task::where('parent', $task->parent)
+            ->where('company_id', $task->company_id)
+            ->where('project_id', $task->project->id)
+            ->pluck('code')->toArray();
         if (in_array($random, $codeTasks)) {
             self::searchRandomInTasks($task);
         } else {

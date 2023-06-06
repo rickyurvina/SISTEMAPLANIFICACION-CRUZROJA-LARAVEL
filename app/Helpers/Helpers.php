@@ -13,9 +13,9 @@ if (!function_exists('user')) {
      *
      * @return Authenticatable
      */
-    function user()
+    function user(): Authenticatable
     {
-        return auth()->user();
+        return Auth::user();
     }
 }
 

@@ -8,7 +8,7 @@
     <h1 class="subheader-title">
         <x-layout.title title="{{ trans_choice('general.templates', 2) }}" class="fal fa-folder-tree text-primary"></x-layout.title>
     </h1>
-    @if(Gate::check('strategy-template-crud-strategy') || Gate::check('strategy-crud-strategy'))
+    @if(Gate::check('strategy-manage-templates') || Gate::check('strategy-manage'))
         <div class="subheader-block d-lg-flex align-items-center">
             <x-layout.button name="{{ __('general.add_template_strategy') }}"
                             class="btn btn-success btn-sm"

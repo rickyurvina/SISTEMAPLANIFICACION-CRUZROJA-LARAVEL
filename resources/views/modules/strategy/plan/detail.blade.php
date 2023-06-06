@@ -124,45 +124,47 @@
                             @endforeach
                             <td class="text-center">{{ weight($planDetails->sum('weight'), $item1->weight) }}%</td>
                             <td class="w-15">
-                                @if($plan->status != \App\Models\Strategy\Plan::ARCHIVED)
-                                    <div class="frame-wrap">
-                                        <div class="d-flex justify-content-center">
-                                            <div class="p-2">
-                                                <a href="{{ route('plan_details.indicators', ['planDetailId' => $item1->id,
+                                @if(Gate::check('strategy-manage')|| Gate::check('strategy-manage-plans-s'))
+                                    @if($plan->status != \App\Models\Strategy\Plan::ARCHIVED)
+                                        <div class="frame-wrap">
+                                            <div class="d-flex justify-content-center">
+                                                <div class="p-2">
+                                                    <a href="{{ route('plan_details.indicators', ['planDetailId' => $item1->id,
                                                                                 'navigation'=>$planRegisteredTemplateDetailsBreadcrumbs]) }}">
-                                                    <i class="fas fa-eye mr-1 text-info"
-                                                       data-toggle="tooltip" data-placement="top"
-                                                       data-original-title="Ver Indicadores"></i>
-                                                </a>
-                                            </div>
-                                            <div class="p-2">
-                                                <a href="#"
-                                                   data-toggle="modal"
-                                                   data-target="#weights">
-                                                    <i class="fas fa-balance-scale mr-1 text-info"
-                                                       data-toggle="tooltip" data-placement="top"
-                                                       data-original-title="Editar Pesos"></i>
-                                                </a>
-                                            </div>
-                                            <div class="p-2">
-                                                <a href="#edit-modal-plan-detail"
-                                                   data-toggle="modal"
-                                                   data-target="#edit-modal-plan-detail"
-                                                   data-id="{{ $item1->id  }}"
-                                                   class="">
-                                                    <i class="fas fa-edit mr-1 text-info"
-                                                       data-toggle="tooltip" data-placement="top" title=""
-                                                       data-original-title="Editar"></i>
-                                                </a>
-                                            </div>
-                                            <div class="p-2">
-                                                <x-delete-link-icon
-                                                        action="{{ route('plans.delete', ['plan' => $item1->id]) }}"
-                                                        id="{{ $item1->id }}">
-                                                </x-delete-link-icon>
+                                                        <i class="fas fa-eye mr-1 text-info"
+                                                           data-toggle="tooltip" data-placement="top"
+                                                           data-original-title="Ver Indicadores"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="p-2">
+                                                    <a href="#"
+                                                       data-toggle="modal"
+                                                       data-target="#weights">
+                                                        <i class="fas fa-balance-scale mr-1 text-info"
+                                                           data-toggle="tooltip" data-placement="top"
+                                                           data-original-title="Editar Pesos"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="p-2">
+                                                    <a href="#edit-modal-plan-detail"
+                                                       data-toggle="modal"
+                                                       data-target="#edit-modal-plan-detail"
+                                                       data-id="{{ $item1->id  }}"
+                                                       class="">
+                                                        <i class="fas fa-edit mr-1 text-info"
+                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                           data-original-title="Editar"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="p-2">
+                                                    <x-delete-link-icon
+                                                            action="{{ route('plans.delete', ['plan' => $item1->id]) }}"
+                                                            id="{{ $item1->id }}">
+                                                    </x-delete-link-icon>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endif
                             </td>
                         </tr>

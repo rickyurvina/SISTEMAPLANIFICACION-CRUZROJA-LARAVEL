@@ -165,60 +165,62 @@
                                     </a>
                                 </td>
                                 <td class="text-center">
-                                    <div class="frame-wrap">
-                                        <div class="d-flex justify-content-start">
-                                            <div class="p-1 mt-1">
-                                                <a href="{{ route('process.showInformation', [$item->id, \App\Models\Process\Process::PHASE_PLAN]) }}"
-                                                   aria-expanded="false"
-                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                   data-original-title=" {{trans('process.plan')}}"><i
-                                                            class="fas fa-calendar-check text-success ml-2"></i>
-                                                </a>
-                                            </div>
-                                            <div class="p-1 mt-1">
-                                                <a href="{{ route('process.showConformities', [$item->id, \App\Models\Process\Process::PHASE_ACT]) }}"
-                                                   aria-expanded="false"
-                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                   data-original-title=" {{trans('process.act')}}"><i
-                                                            class="fas fa-book-open text-info ml-2"></i>
-                                                </a>
-                                            </div>
-                                            <div class="p-1 mt-1">
-                                                <a href="{{ route('process.showIndicators', [$item->id, \App\Models\Process\Process::PHASE_CHECK]) }}"
-                                                   aria-expanded="false"
-                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                   data-original-title="{{trans('process.check')}}"> <i
-                                                            class="fas fa-ballot-check text-dark ml-2"></i>
-                                                </a>
-                                            </div>
-                                            <div class="p-1 mt-1">
-                                                <a href="{{ route('process.showFiles', [$item->id, \App\Models\Process\Process::PHASE_DO_PROCESS]) }}"
-                                                   aria-expanded="false"
-                                                   data-toggle="tooltip" data-placement="top" title=""
-                                                   data-original-title=" {{trans('process.do')}}"><i
-                                                            class="fas fa-pen-alt text-warning ml-2"></i></a>
-                                            </div>
-                                            @can('manage-process')
+                                    @can('process-manage')
+                                        <div class="frame-wrap">
+                                            <div class="d-flex justify-content-start">
                                                 <div class="p-1 mt-1">
-                                                    <a
-                                                            href="javascript:void(0)"
-                                                            data-toggle="modal"
-                                                            data-target="#update-process-modal"
-                                                            data-item-id="{{$item->id}}">
-                                                        <i class="fas fa-edit ml-2 text-info"
-                                                           aria-expanded="false"
-                                                           data-toggle="tooltip" data-placement="top" title=""
-                                                           data-original-title="{{trans('general.edit')}}"></i>
+                                                    <a href="{{ route('process.showInformation', [$item->id, \App\Models\Process\Process::PHASE_PLAN]) }}"
+                                                       aria-expanded="false"
+                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-original-title=" {{trans('process.plan')}}"><i
+                                                                class="fas fa-calendar-check text-success ml-2"></i>
                                                     </a>
                                                 </div>
-                                                @if($item->activitiesProcess->count()<1 && $item->indicators->count()<1)
-                                                    <div>
-                                                        <x-delete-link-livewire id="{{ $item->id }}"/>
+                                                <div class="p-1 mt-1">
+                                                    <a href="{{ route('process.showConformities', [$item->id, \App\Models\Process\Process::PHASE_ACT]) }}"
+                                                       aria-expanded="false"
+                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-original-title=" {{trans('process.act')}}"><i
+                                                                class="fas fa-book-open text-info ml-2"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="p-1 mt-1">
+                                                    <a href="{{ route('process.showIndicators', [$item->id, \App\Models\Process\Process::PHASE_CHECK]) }}"
+                                                       aria-expanded="false"
+                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-original-title="{{trans('process.check')}}"> <i
+                                                                class="fas fa-ballot-check text-dark ml-2"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="p-1 mt-1">
+                                                    <a href="{{ route('process.showFiles', [$item->id, \App\Models\Process\Process::PHASE_DO_PROCESS]) }}"
+                                                       aria-expanded="false"
+                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-original-title=" {{trans('process.do')}}"><i
+                                                                class="fas fa-pen-alt text-warning ml-2"></i></a>
+                                                </div>
+                                                @can('manage-process')
+                                                    <div class="p-1 mt-1">
+                                                        <a
+                                                                href="javascript:void(0)"
+                                                                data-toggle="modal"
+                                                                data-target="#update-process-modal"
+                                                                data-item-id="{{$item->id}}">
+                                                            <i class="fas fa-edit ml-2 text-info"
+                                                               aria-expanded="false"
+                                                               data-toggle="tooltip" data-placement="top" title=""
+                                                               data-original-title="{{trans('general.edit')}}"></i>
+                                                        </a>
                                                     </div>
-                                                @endif
-                                            @endcan
+                                                    @if($item->activitiesProcess->count()<1 && $item->indicators->count()<1)
+                                                        <div>
+                                                            <x-delete-link-livewire id="{{ $item->id }}"/>
+                                                        </div>
+                                                    @endif
+                                                @endcan
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -262,7 +264,8 @@
                 cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
             }).then((result) => {
                 if (result.value) {
-                @this.call('delete', id);
+                    @this.
+                    call('delete', id);
                 }
             });
         }

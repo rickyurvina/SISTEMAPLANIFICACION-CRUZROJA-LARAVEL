@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Project;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
+use App\Jobs\Budgets\Incomes\BudgetIncomeDelete;
+use App\Models\Budget\Transaction;
 use App\Models\Common\Catalog;
 use App\Models\Projects\Activities\Task;
 use App\Models\Projects\Project;
@@ -17,7 +20,63 @@ use DateTime;
 
 class ProjectInternalController extends Controller
 {
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:project-manage');
+        $this->middleware('permission:project-view',
+            [
+                'only' => [
+                    'showIndexInternal',
+                ]]);
+        $this->middleware('permission:project-activities-manage|project-activities-view',
+            ['only' => ['showActivities']]);
+        $this->middleware('permission:project-manage-team',
+            ['only' => ['showTeam']]);
+        $this->middleware('permission:project-logic-frame-manage|project-logic-frame-view',
+            ['only' => ['showLogicFrame']]);
+        $this->middleware('permission:project-manage-risks|project-view-risks',
+            ['only' => ['showRisk']]);
+        $this->middleware('permission:project-view-files|project-manage-files',
+            ['only' => ['showFiles']]);
+        $this->middleware('permission:project-manage-formulatedDocument',
+            ['only' => ['showDocument']]);
+        $this->middleware('permission:project-manage-acquisitions|project-view-acquisitions',
+            ['only' => ['showAcquisitions']]);
+        $this->middleware('permission:project-budget-manage|project-budget-view',
+            ['only' =>
+                [
+                    'showReferentialBudget',
+                    'showProjectBudgetDocument',
+                    'expensesProjectActivity',
+                    'deleteExpenseActivityProject',
+                ]]);
+        $this->middleware('permission:project-events-view',
+            ['only' => ['showEvents']]);
+        $this->middleware('permission:project-view-summary',
+            ['only' => ['showSummary']]);
+        $this->middleware('permission:project-view-stakeholders|project-manage-stakeholders',
+            ['only' => ['showStakeholder','communicationMatrix','deleteCommunication']]);
+        $this->middleware('permission:project-manage-logicFrame|project-view-logicFrame',
+            ['only' => ['showActivitiesLogicFrame']]);
+        $this->middleware('permission:project-manage-learnedLessons|project-view-learnedLessons',
+            ['only' => ['lessonsLearned','deleteLesson','indexLessons']]);
+        $this->middleware('permission:project-validations-manage|project-validations-view',
+            ['only' => ['showValidations']]);
+        $this->middleware('permission:project-view-reschedulings|project-manage-reschedulings',
+            ['only' => ['showReschedulings'.'deleteRescheduling']]);
+        $this->middleware('permission:project-view-reschedulings|project-manage-reschedulings',
+            ['only' => ['showReschedulings']]);
+        $this->middleware('permission:project-manage-evaluations|project-view-evaluations',
+            ['only' => ['showEvaluations','deleteEvaluation']]);
+        $this->middleware('permission:project-manage-calendar|project-view-calendar',
+            ['only' => ['showCalendar']]);
+    }
 
     public function showIndexInternal(Project $project)
     {
@@ -128,10 +187,10 @@ class ProjectInternalController extends Controller
         $plans = [];
 
         if ($project->estimated_time) {
-            $time = explode(',', $project->estimated_time)[3];
+            $time =  $project->estimated_time;
         }
         if ($project->estimated_time) {
-            $time = explode(',', $project->estimated_time)[3];
+            $time = $project->estimated_time;
             foreach ($project->objectives as $objective) {
                 foreach ($objective->results as $result) {
                     if ($result->planning) {
@@ -171,10 +230,10 @@ class ProjectInternalController extends Controller
         $plans = [];
 
         if ($project->estimated_time) {
-            $time = explode(',', $project->estimated_time)[3];
+            $time = $project->estimated_time;
         }
         if ($project->estimated_time) {
-            $time = explode(',', $project->estimated_time)[3];
+            $time = $project->estimated_time;
             foreach ($project->objectives as $objective) {
                 foreach ($objective->results as $result) {
                     if ($result->planning) {
@@ -219,10 +278,10 @@ class ProjectInternalController extends Controller
         $plans = [];
 
         if ($project->estimated_time) {
-            $time = explode(',', $project->estimated_time)[3];
+            $time = $project->estimated_time;
         }
         if ($project->estimated_time) {
-            $time = explode(',', $project->estimated_time)[3];
+            $time = $project->estimated_time;
             foreach ($project->objectives as $objective) {
                 foreach ($objective->results as $result) {
                     if ($result->planning) {
@@ -402,7 +461,9 @@ class ProjectInternalController extends Controller
             $periods[$i] = $date->format("Y-m-d");
             $i++;
         }
-        return view('modules.projectInternal.reports.project-activities-report', compact('project', 'activities', 'periods'))->with('page', 'reports');
+        $transaction = Transaction::where('year', $project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->first();
+        return view('modules.projectInternal.reports.project-activities-report', compact('project', 'activities', 'periods','transaction'))->with('page', 'reports');
     }
 
     public function fundsOriginReport(Project $project)
@@ -472,6 +533,49 @@ class ProjectInternalController extends Controller
         $task->load(['project']);
         $project = $task->project;
 
-        return \view('modules.projectInternal.piat.index', ['task' => $task, 'project' => $project,'page'=>'activities_results']);
+        return \view('modules.projectInternal.piat.index', ['task' => $task, 'project' => $project, 'page' => 'activities_results']);
+    }
+
+    public function expensesProjectActivity(Task $activity)
+    {
+        $project = $activity->project;
+        $transaction = Transaction::where('year', $activity->project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->withoutGlobalScopes()->first();
+        if ($activity->validateCrateBudget() === false) {
+            abort(404);
+        }
+        $source = Transaction::SOURCE_PROJECT;
+        if ($transaction) {
+            return view('modules.projectInternal.budget.index', ['activity' => $activity, 'project' => $project, 'page' => 'activities_results', 'transaction' => $transaction, 'source' => $source]);
+        } else {
+            abort(404);
+        }
+    }
+
+    public function deleteExpenseActivityProject(int $accountId, int $activityId)
+    {
+        $activity = Task::find($activityId);
+        $data = [
+            'id' => $accountId
+        ];
+        $response = $this->ajaxDispatch(new BudgetIncomeDelete($data));
+        if ($response['success']) {
+            flash(trans_choice('messages.success.deleted', 0, ['type' => __('budget.incomes')]))->success();
+            return redirect()->route('projectsInternal.expenses_activity', [$activity]);
+        } else {
+            flash($response['message'])->error();
+            return redirect()->route('projectsInternal.expenses_activity', $activity);
+        }
+    }
+
+    public function showProjectBudgetDocument(Project $project)
+    {
+        $transaction = Transaction::where('year', $project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->withoutGlobalScopes()->first();
+        if ($project->year && $transaction) {
+            return view('modules.projectInternal.budget.projectBudgetDocument', compact('project'), ['page' => 'budget']);
+        } else {
+            abort(404);
+        }
     }
 }

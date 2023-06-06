@@ -1,7 +1,5 @@
 @extends('modules.projectInternal.project')
 
-
-
 @section('title', trans('poa.card_reports'))
 @section('subheader')
 

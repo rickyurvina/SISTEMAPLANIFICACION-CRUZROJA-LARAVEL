@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Auth\Role;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\MessageBag;
 use RootInc\LaravelAzureMiddleware\Azure as Azure;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
@@ -18,19 +19,19 @@ class AppAzure extends Azure
     protected function success(Request $request, $access_token , $refresh_token,  $profile)
     {
         session(['azureToken' => $access_token]);
-        $graph = new Graph();
-        $graph->setApiVersion("v1.0")
-            ->setAccessToken($access_token);
+//        $graph = new Graph();
+//        $graph->setApiVersion("v1.0")
+//            ->setAccessToken($access_token);
+//
+//        $graph_user = $graph->createRequest("GET", "/me")
+//                        ->setReturnType(Model\User::class)
+//                        ->execute();
 
-        $graph_user = $graph->createRequest("GET", "/me")
-                        ->setReturnType(Model\User::class)
-                        ->execute();
-
-        $email = strtolower($graph_user->getMail());
-        $surname = $graph_user->getSurname() ? $graph_user->getSurname() : $graph_user->getDisplayName();
-        $name = $graph_user->getGivenName() ? $graph_user->getGivenName() : $graph_user->getDisplayName();
-        $businessPhone = $graph_user->getBusinessPhones();
-        $userId = $graph_user->getId();
+        $email = strtolower($profile->email);
+//        $surname = $graph_user->getSurname() ? $graph_user->getSurname() : $graph_user->getDisplayName();
+        $name = $profile->name ? $profile->name : $profile->getDisplayName();
+//        $businessPhone = $graph_user->getBusinessPhones();
+//        $userId = $graph_user->getId();
 
         $graphRol = new Graph();
         $graphRol->setApiVersion("v1.0")
@@ -44,9 +45,10 @@ class AppAzure extends Azure
                     ->addHeaders(array("Content-Type" => "application/json"))
                     ->setReturnType(Model\AppRoleAssignment::class)
                     ->execute();
+        $userRoles=$profile->roles;
         $user = User::updateOrCreate(['email' => $email], [
             'name' => $name,
-            'surname' => $surname,
+//            'surname' => $surname,
             'email' => $email,
             'password' => 'password',
             'locale' => 'es_ES',
@@ -66,9 +68,12 @@ class AppAzure extends Azure
             'contract_type' => null,
             'contract_start' => null,
             'contract_end' => null,
+            'last_logged_in_at' => now(),
+            'remember_token' => $access_token,
         ]);
 
         Auth::login($user);
+        session(['user' => $user]);
 
         if (!auth()->check()) {
             return redirect()->route('login/azure');
@@ -96,19 +101,20 @@ class AppAzure extends Azure
 
         $roles = [];
         foreach($userRoles as $uRol) {
-            $auxRol = Role::whereIdAzureadRol(strval($uRol->getAppRoleId()))->first();
-            if(!is_null($auxRol) && !$user->hasRole($auxRol['id'])) {
+            $auxRol = Role::whereIdAzureadRol(strval($uRol))->first();
+            $rolInPlanning=Role::where('name',$uRol)->first();
+            if(!is_null($rolInPlanning)) {
                 $element = [];
-                $element['role_id'] = $auxRol['id'];
+                $element['role_id'] = $rolInPlanning->id;
                 array_push($roles, $element);
             }
         }
-
+//
         if(count($roles) > 0) {
-            $user->roles()->syncWithoutDetaching($roles);
+            $user->roles()->sync($roles);
         }
 
-        return redirect()->intended(route('common.home'));
+        return redirect()->intended(route('home'));
     }
 
     public function getLogoutUrl()

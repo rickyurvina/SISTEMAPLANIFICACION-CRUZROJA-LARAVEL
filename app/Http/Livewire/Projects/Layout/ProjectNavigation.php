@@ -5,14 +5,16 @@ namespace App\Http\Livewire\Projects\Layout;
 use App\Http\Livewire\Components\Modal;
 use App\Models\Projects\Project;
 use App\Models\Projects\ProjectStateValidations;
+use App\States\Project\Completed;
+use App\States\Project\Pending;
 
 class ProjectNavigation extends Modal
 {
 
     public $project;
     public $page;
-    public $viewOpening=false;
-    public $viewSignature=false;
+    public $viewOpening = false;
+    public $viewSignature = false;
     public $accountsOpening = false;
     public $signatureAgreement = false;
     public $phase = false;
@@ -83,9 +85,9 @@ class ProjectNavigation extends Modal
 
     public function changeStatus()
     {
-        if (user()->cannot('project-change-status')) {
-            abort(403);
-        } elseif ($this->departments->validations) {
+        $toPhase = $this->project->status->to($this->transition);
+
+        if ($this->departments->validations) {
             if (count($this->departments->validations) >= 1) {
                 $data = $this->departments->validations;
                 foreach ($this->accept as $index => $item) {
@@ -119,7 +121,7 @@ class ProjectNavigation extends Modal
                     $this->departments->status = ProjectStateValidations::STATUS_VALIDATED;
                     $this->departments->user_id = user()->id;
                     $this->departments->save();
-                    $this->project->status->transitionTo($this->project->status->to($this->transition));
+                    $phase = $this->project->status->transitionTo($toPhase);
                     flash(trans_choice('messages.success.updated', 0, ['type' => trans_choice('general.project', 0)]))->success()->livewire($this);
                 } else {
                     $this->departments->validations = $data;
@@ -129,14 +131,21 @@ class ProjectNavigation extends Modal
                     flash(trans_choice('messages.error.updated', 0, ['type' => trans_choice('general.project', 0)]))->error()->livewire($this);
                 }
             } else {
-                $this->project->status->transitionTo($this->project->status->to($this->transition));
+                $phase = $this->project->status->transitionTo($toPhase);
                 flash(trans_choice('messages.success.updated', 0, ['type' => trans_choice('general.project', 0)]))->success()->livewire($this);
             }
         } else {
-            $this->project->status->transitionTo($this->project->status->to($this->transition));
+            $phase = $this->project->status->transitionTo($toPhase);
             $this->departments->status = ProjectStateValidations::STATUS_VALIDATED;
             $this->departments->user_id = user()->id;
             $this->departments->save();
+            if ($toPhase instanceof Pending) {
+                return redirect()->route('projects.team', $this->project->id);
+            }
+
+            if ($toPhase instanceof Completed) {
+                return redirect()->route('projects.logic-frame', $this->project->id);
+            }
             flash(trans_choice('messages.success.updated', 0, ['type' => trans_choice('general.project', 0)]))->success()->livewire($this);
         }
         $this->mount($this->project);

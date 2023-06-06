@@ -27,12 +27,22 @@ class HomeController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:strategy-view-dashboard|strategy-manage', ['only' => ['index','show']]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
      * @return Application|Factory|View
      * @throws AuthorizationException
      */
     public function index()
     {
-        $this->authorize('strategy-read-strategy');
         $plan = Plan::with(['children.scores'])->type(PlanTemplate::PLAN_STRATEGY_CRE)->first();
 
         return view('modules.strategy.home.index', [
@@ -44,7 +54,6 @@ class HomeController extends Controller
 
     public function showDetail($id, $type)
     {
-        $this->authorize('strategy-read-strategy');
 
         if ($type == 'objective') {
             $model = PlanDetail::with([

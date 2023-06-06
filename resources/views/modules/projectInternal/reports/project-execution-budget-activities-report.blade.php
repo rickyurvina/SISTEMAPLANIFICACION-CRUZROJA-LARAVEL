@@ -100,7 +100,7 @@
                                 @foreach($project->tasks->where('type','task') as $task)
                                     <tr>
                                         <td class="border p-2 text-center">{{$task->text}}</td>
-                                        <td>{{ $task->getBalanceEncodedApproved() }}</td>
+{{--                                        <td>{{ $task->getBalanceEncodedApproved() }}</td>--}}
                                         <td>{{ $task->getBalanceAs() }}</td>
                                         <td class="border p-2 text-center">
                                             <div class="progress">

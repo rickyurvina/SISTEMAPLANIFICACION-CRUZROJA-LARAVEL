@@ -21,16 +21,23 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:admin-manage-users|admin-view-users', ['only' => ['index','show']]);
+        $this->middleware('permission:admin-manage-users', ['only' => ['create','store','edit','update','destroy']]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
      * @return Application|Factory|\Illuminate\Contracts\View\View|View
      */
     public function index()
     {
-        if (user()->cannot('admin-crud-admin') && user()->cannot('admin-read-admin')) {
-            abort(403);
-        }
-
         $users = User::with(['media', 'roles','departments'])->collect();
-
         return view('auth.users.index', compact('users'));
     }
 
@@ -56,7 +63,6 @@ class UserController extends Controller
      */
     public function store(UserRequest $request): RedirectResponse
     {
-
         $response = $this->ajaxDispatch(new CreateUser($request));
 
         if ($response['success']) {
@@ -114,8 +120,6 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
-        $this->authorize('delete', $user);
-
         $response = $this->ajaxDispatch(new DeleteUser($user));
         if ($response['success']) {
             flash(trans_choice('messages.success.deleted', 0, ['type' => trans_choice('general.users', 1)]))->success();

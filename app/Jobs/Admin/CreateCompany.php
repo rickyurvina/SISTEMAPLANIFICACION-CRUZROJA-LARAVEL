@@ -53,12 +53,12 @@ class CreateCompany extends Job
             'company' => $this->company->id
         ]);
 
-        if (!$user = user()) {
-            return;
-        }
+//        if (!$user = user()) {
+//            return;
+//        }
 
         // Attach company to user logged in
-        $user->companies()->attach($this->company->id);
+//        $user->companies()->attach($this->company->id);
     }
 
     protected function updateSettings()

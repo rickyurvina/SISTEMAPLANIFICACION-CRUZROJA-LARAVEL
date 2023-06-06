@@ -118,7 +118,7 @@
                                             <td class="text-center border p-2">{{$task->indicator->indicatorable->parent->name ?? ''}}</td>
                                             <td class="text-center border p-2">{{$task->goal ?? ''}} </td>
                                             <td class="text-center border p-2"> {{$task->indicator->indicatorUnit->name ?? ''}}</td>
-                                            <td class="text-center border p-2">{{ $task->getBalanceEncodedApproved() ?? '' }}</td>
+                                            <td class="text-center border p-2">{{ $task->getTotalBudget($transaction) ?? '' }}</td>
                                             <td class="text-center border p-2">{{ $task->getBalanceAs() ?? '' }}</td>
                                             {{--                                @foreach($periods as $period)--}}
                                             {{--                                    <th class="text-center border p-2 bold-h4">{{ $task->goals->whereBetween('period', [date('Y-m-d', strtotime($period)) ,date('Y-m-d', strtotime($period. "+1 month")) ])->first()->goal ?? '-'}}</th>--}}

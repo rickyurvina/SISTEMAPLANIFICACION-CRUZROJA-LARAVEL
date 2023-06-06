@@ -7,6 +7,8 @@ use App\Models\Budget\Catalogs\BudgetClassifier;
 use App\Models\Budget\Catalogs\FinancingSourceClassifier;
 use App\Models\Budget\Structure\BudgetStructure;
 use App\Models\Projects\Activities\Task;
+use App\Models\Strategy\Plan;
+use App\Models\Strategy\PlanRegisteredTemplateDetails;
 use Illuminate\Support\Facades\DB;
 
 
@@ -39,6 +41,8 @@ class BudgetCreateStructure extends Job
             DB::beginTransaction();
             $budgetClassifier = new BudgetClassifier();
             $financingSource = new FinancingSourceClassifier();
+
+            $plan = Plan::active()->type(Plan::TYPE_STRATEGY)->first();
 
             $budgetItemClassifier = [
                 'name' => $budgetClassifier->getTable(),
@@ -110,155 +114,143 @@ class BudgetCreateStructure extends Job
                         ],
                     ]
                 ];
-            $settingsExpenses =
-                ['fields' =>
-                    [
-                        [
-                            'name' => 'plan_details',
-                            'label' => 'Objetivos Estrategicos',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 1,
-                        ],
-                        [
-                            'name' => 'plan_details',
-                            'label' => 'Objetivos Especificos',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 2,
-                        ],
-                        [
-                            'name' => 'plan_details',
-                            'label' => 'Programas',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 3,
-                        ],
-                        [
-                            'name' => 'plan_details',
-                            'label' => 'Resultados Estrategicos',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 4,
-                        ],
-                        [
-                            'name' => 'indicators',
-                            'label' => 'Indicadores',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 5,
-                        ],
-                        [
-                            'name' => 'prj_projects',
-                            'label' => 'Proyectos',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 6,
-                        ],
-                        [
-                            'name' => 'catalog_geographic_classifiers',
-                            'label' => 'Juntas Provinciales',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 7
-                        ],
-                        [
-                            'name' => 'prj_tasks',
-                            'label' => 'Resultados Proyecto',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 8,
-                            'source' => [
-                                'type' => 'model',
-                                'class' => Task::class,
-                                'field' => 'code',
-                                'field_display' => 'text',
-                                'relation' => [
-                                    'parentOfTask'
-                                ]
-                            ]
-                        ],
-                        [
-                            'name' => 'prj_tasks',
-                            'label' => 'Actividad',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 9,
-                            'source' => [
-                                'type' => 'model',
-                                'class' => Task::class,
-                                'field' => 'code',
-                                'field_display' => 'text',
-                            ]
-                        ],
-                        [
-                            'name' => 'catalog_geographic_classifiers',
-                            'label' => 'Localidad',
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 10
-                        ],
-                        [
-                            'name' => $budgetItemClassifier['name'],
-                            'label' => $budgetItemClassifier['label'],
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 11,
-                            'meta' =>
-                                [
-                                    'content' => '',
-                                    'readonly' => '',
-                                    'type' => 'select',
-                                    'source' => [
-                                        'type' => 'model',
-                                        'class' => BudgetClassifier::class,
-                                        'field' => 'full_code',
-                                        'field_display' => 'title',
-                                        'conditions' =>
-                                            [
-                                                [
-                                                    'field' => 'level',
-                                                    'op' => '=',
-                                                    'value' => '4'
-                                                ]
-                                            ]
-                                    ],
-                                ],
-                        ],
-                        [
-                            'name' => $financingSourceClassifier['name'],
-                            'label' => $financingSourceClassifier['label'],
-                            'value' => '',
-                            'id' => '',
-                            'format' => '',
-                            'level' => 12,
-                            'meta' =>
-                                [
-                                    'content' => '',
-                                    'readonly' => '',
-                                    'type' => 'select',
-                                    'source' => [
-                                        'type' => 'model',
-                                        'class' => FinancingSourceClassifier::class,
-                                        'field' => 'code',
-                                        'field_display' => 'description',
-                                        'conditions' => []
-                                    ],
-                                ],
-                        ],
-                    ]
+            $tree = PlanRegisteredTemplateDetails::where('plan_id', $plan->id)->get();
+            $settingsExpenses['fields'] =[];
+            $count=1;
+            foreach ($tree as $element) {
+                $element = [
+                    'name' => 'plan_details',
+                    'label' => $element->name,
+                    'value' => '',
+                    'id' => $element['id'],
+                    'format' => '',
+                    'level' => $count,
                 ];
+                array_push( $settingsExpenses['fields'] , $element);
+                $count++;
+            }
+            $elements=[
+                [
+                    'name' => 'indicators',
+                    'label' => 'Indicadores',
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+                ],
+                [
+                    'name' => 'prj_projects',
+                    'label' => 'Proyectos',
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+
+                ],
+                [
+                    'name' => 'catalog_geographic_classifiers',
+                    'label' => 'Juntas Provinciales',
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+
+                ],
+                [
+                    'name' => 'prj_tasks',
+                    'label' => 'Resultados Proyecto',
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+
+                    'source' => [
+                        'type' => 'model',
+                        'class' => Task::class,
+                        'field' => 'code',
+                        'field_display' => 'text',
+                        'relation' => [
+                            'parentOfTask'
+                        ]
+                    ]
+                ],
+                [
+                    'name' => 'prj_tasks',
+                    'label' => 'Actividad',
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+
+                    'source' => [
+                        'type' => 'model',
+                        'class' => Task::class,
+                        'field' => 'code',
+                        'field_display' => 'text',
+                    ]
+                ],
+                [
+                    'name' => 'catalog_geographic_classifiers',
+                    'label' => 'Localidad',
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+
+                ],
+                [
+                    'name' => $budgetItemClassifier['name'],
+                    'label' => $budgetItemClassifier['label'],
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+                    'meta' =>
+                        [
+                            'content' => '',
+                            'readonly' => '',
+                            'type' => 'select',
+                            'source' => [
+                                'type' => 'model',
+                                'class' => BudgetClassifier::class,
+                                'field' => 'full_code',
+                                'field_display' => 'title',
+                                'conditions' =>
+                                    [
+                                        [
+                                            'field' => 'level',
+                                            'op' => '=',
+                                            'value' => '4'
+                                        ]
+                                    ]
+                            ],
+                        ],
+                ],
+                [
+                    'name' => $financingSourceClassifier['name'],
+                    'label' => $financingSourceClassifier['label'],
+                    'value' => '',
+                    'id' => '',
+                    'format' => '',
+                    'level' => $count++,
+                    'meta' =>
+                        [
+                            'content' => '',
+                            'readonly' => '',
+                            'type' => 'select',
+                            'source' => [
+                                'type' => 'model',
+                                'class' => FinancingSourceClassifier::class,
+                                'field' => 'code',
+                                'field_display' => 'description',
+                                'conditions' => []
+                            ],
+                        ],
+                ],
+            ];
+            foreach ($elements as $element) {
+                array_push( $settingsExpenses['fields'] , $element);
+            }
 
             $dataIncomes = [
                 'year' => $this->request->year,

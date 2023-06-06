@@ -199,6 +199,16 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
+                                        @if($item->validateCrateBudget())
+                                            <div class="p-2">
+                                                <a href="{{route('poa.expenses_activity',$item)}}" class="mr-2"
+                                                   data-toggle="tooltip"
+                                                   data-placement="top" title=""
+                                                   data-original-title="{{ trans('budget.budget') }}">
+                                                    <i class="fas fa-money-bill text-success"></i>
+                                                </a>
+                                            </div>
+                                        @endif
                                         <div class="p-2">
                                             <button href="#" data-toggle="tooltip" class="color-danger-500 border-0 bg-transparent"
                                                     data-placement="top" title=""

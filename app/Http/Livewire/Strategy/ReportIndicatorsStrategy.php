@@ -51,7 +51,7 @@ class ReportIndicatorsStrategy extends Component
                     $query->whereIn('plan_details.id', $selectedObjectives);
                 });
             },
-            'planDetails.measures.scores' => function ($q) use ($search) {
+            'planDetails.measures' => function ($q) use ($search) {
                 $q->when($search != '', function ($q) use ($search) {
                     $q->where('msr_measures.name', 'iLIKE', '%' . $search . '%');
                 });

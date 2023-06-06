@@ -2,6 +2,7 @@
 
 namespace App\Http\ViewComposers;
 
+use App\Models\Admin\Company;
 use Illuminate\View\View;
 
 class HeaderComposer
@@ -10,7 +11,7 @@ class HeaderComposer
     /**
      * Bind data to the view.
      *
-     * @param  View  $view
+     * @param View $view
      * @return void
      */
     public function compose(View $view)
@@ -20,12 +21,14 @@ class HeaderComposer
 
         if (!empty($user)) {
             // Get user companies
-            $companies = $user->companies()->enabled()->limit(25)->get()->sortBy('name');
+            $companies = Company::whereIn('level', ['1', '2'])->get()->groupBy('level');
+            $userCompanies = $user->companies->pluck('id')->toArray();
         }
 
         $view->with([
             'user' => $user,
             'companies' => $companies,
+            'userCompanies' => $userCompanies ?? [],
         ]);
     }
 }

@@ -17,22 +17,11 @@
                 </tr>
                 <tr>
                     <td class="fs-1x fw-700">Poa</td>
-                    <td class="w-5">
-                        {{$activity->program->poa->year}}
-                    </td>
                     <td class="fs-1x fw-700">
                         {{$activity->program->poa->name}}
                     </td>
                 </tr>
-                <tr>
-                    <td class="fs-1x fw-700">{{trans_choice('general.plan',1)}}</td>
-                    <td>
-                        {{$activity->program->planDetail->plan->code}}
-                    </td>
-                    <td class="fs-1x fw-700">
-                        {{$activity->program->planDetail->plan->name}}
-                    </td>
-                </tr>
+
                 </tbody>
             </table>
         </div>
@@ -40,24 +29,12 @@
             <table class="table table-bordered detail-table">
                 <tbody>
                 <tr>
-                    <td class="fs-1x fw-700 w-20">{{$activity->program->planDetail->parent->parent->planRegistered->name}}
-                    </td>
-                    <td class="w-5">{{$activity->program->planDetail->parent->parent->code}}</td>
-                    <td class="fs-1x fw-700">{{$activity->program->planDetail->parent->parent->name}}</td>
-                </tr>
-                <tr>
-                    <td class="fs-1x fw-700 w-20">{{$activity->program->planDetail->parent->planRegistered->name}}
-                    </td>
-                    <td class="w-5">{{$activity->program->planDetail->parent->code}}</td>
-                    <td class="fs-1x fw-700">{{$activity->program->planDetail->parent->name}}</td>
-                </tr>
-                <tr>
-                    <td class="fs-1x fw-700">{{trans_choice('general.programs',1)}}</td>
+                    <td class="fs-1x fw-700">{{trans_choice('general.plan',1)}}</td>
                     <td>
-                        {{$activity->program->planDetail->code}}
+                        {{$activity->program->planDetail->plan->code}}
                     </td>
                     <td class="fs-1x fw-700">
-                        {{$activity->program->planDetail->name}}
+                        {{$activity->program->planDetail->plan->name}}
                     </td>
                 </tr>
                 <tr>

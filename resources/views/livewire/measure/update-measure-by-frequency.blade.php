@@ -68,31 +68,33 @@
                                 <td>{{$item->unit->name}}</td>
                                 <td>{{$item->responsible->getFullName()}}</td>
                                 <td class="text-center">
-                                    <div class="frame-wrap">
-                                        <div class="d-flex justify-content-start">
-                                            @if($item->scores->sum('actual')<1)
+                                    @if(Gate::check('strategy-manage') || Gate::check('strategy-update-indicators') )
+                                        <div class="frame-wrap">
+                                            <div class="d-flex justify-content-start">
+                                                @if($item->scores->sum('actual')<1)
+                                                    <div class="p-1 mt-1">
+                                                        <a href="javascript:void(0)"
+                                                           data-toggle="modal"
+                                                           data-target="#measure-edit-modal"
+                                                           data-measure-id="{{$item->id}}"><i
+                                                                    class="fas fa-edit text-success ml-2"></i>
+                                                        </a>
+                                                    </div>
+                                                @endif
                                                 <div class="p-1 mt-1">
                                                     <a href="javascript:void(0)"
                                                        data-toggle="modal"
-                                                       data-target="#measure-edit-modal"
-                                                       data-measure-id="{{$item->id}}"><i
-                                                                class="fas fa-edit text-success ml-2"></i>
+                                                       data-target="#measure-update-goals"
+                                                       data-measure-id="{{$item->id}}">
+                                                        <i aria-expanded="false"
+                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                           data-original-title=" {{trans('general.update_frequencies')}}"
+                                                           class="fas fa-book-open text-info ml-2"></i>
                                                     </a>
                                                 </div>
-                                            @endif
-                                            <div class="p-1 mt-1">
-                                                <a href="javascript:void(0)"
-                                                   data-toggle="modal"
-                                                   data-target="#measure-update-goals"
-                                                   data-measure-id="{{$item->id}}">
-                                                    <i aria-expanded="false"
-                                                       data-toggle="tooltip" data-placement="top" title=""
-                                                       data-original-title=" {{trans('general.update_frequencies')}}"
-                                                       class="fas fa-book-open text-info ml-2"></i>
-                                                </a>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

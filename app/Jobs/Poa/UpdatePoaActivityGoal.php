@@ -35,23 +35,21 @@ class UpdatePoaActivityGoal extends Job
     {
         try {
             DB::beginTransaction();
-            $goalTotal = 0;
-            $progressTotal = 0;
+
             foreach ($this->request as $item) {
                 $measureAdvance = MeasureAdvances::find($item['id']);
                 $measureAdvance->goal = $item['goal'];
-                $measureAdvance->men = $item['men'];
-                $measureAdvance->women = $item['women'];
-                $measureAdvance->actual = $item['actual'] + $item['men'] + $item['women'];
+                if (isset($item['men'])) {
+                    $measureAdvance->men = $item['men'];
+                }
+                if (isset($item['women'])) {
+                    $measureAdvance->women = $item['women'];
+                }
+                if (isset($item['actual'])) {
+                    $measureAdvance->actual = $item['actual'];
+                }
                 $measureAdvance->save();
-                $goalTotal += $item['goal'];
-                $progressTotal += $item['actual'] + $item['men'] + $item['women'];
             }
-            PoaActivity::find($this->id)
-                ->update([
-                    'goal' => $goalTotal,
-                    'progress' => $progressTotal,
-                ]);
             DB::commit();
             $this->poaActivityGoalResult = true;
             return $measureAdvance;

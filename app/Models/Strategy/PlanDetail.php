@@ -27,7 +27,7 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
  */
 class PlanDetail extends Model
 {
-    use HasFactory, HasScore, HasMeasure, SoftDeletes, HasRecursiveRelationships;
+    use  HasScore, HasMeasure, SoftDeletes, HasRecursiveRelationships;
 
     /**
      * @var bool

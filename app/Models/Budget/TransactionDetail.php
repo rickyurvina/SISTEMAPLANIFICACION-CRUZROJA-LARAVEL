@@ -5,6 +5,7 @@ namespace App\Models\Budget;
 use App\Abstracts\Model;
 use App\Models\Auth\User;
 use App\Models\Comment;
+use App\States\TransactionDetails\Draft;
 use App\States\TransactionDetails\TransactionDetailsState;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,6 +46,7 @@ class TransactionDetail extends Model
         parent::boot();
         static::creating(function ($model) {
             $model->description = strtoupper($model->description);
+            $model->status = Draft::label();
         });
         static::updating(function ($model) {
             $model->description = strtoupper($model->description);

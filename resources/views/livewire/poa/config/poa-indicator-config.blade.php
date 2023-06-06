@@ -58,7 +58,7 @@
                                 <td><textarea wire:model.defer="data.{{$i}}.reason" rows="4" cols="50"
                                               class="form-control @error('data.'.$i.'.reason') is-invalid @enderror" type="text"
                                               name="data.{{$i}}.reason"
-                                              value="{{$data[$i]['reason']}}" id="data.{{$i}}.reason">
+                                              value="{{$data[$i]['reason']}} ?? 'Justificación'" id="data.{{$i}}.reason">
                             </textarea>
                                 </td>
                             </tr>

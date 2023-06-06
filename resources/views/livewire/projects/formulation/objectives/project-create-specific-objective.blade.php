@@ -16,7 +16,7 @@
                                            placeholder="{{ trans('general.form.enter', ['field' => trans('general.code')]) }}">
                         </x-form.modal.text>
 
-                        <x-form.modal.text id="name" label="{{ __('general.name') }}" class="form-group col-sm-7" required="required"
+                        <x-form.modal.text id="name" label="{{ __('general.name') }}" class="form-group col-sm-12" required="required"
                                            placeholder="{{ trans('general.form.enter', ['field' => trans('general.name')]) }}">
                         </x-form.modal.text>
 

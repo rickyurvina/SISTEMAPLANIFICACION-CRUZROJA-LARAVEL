@@ -39,21 +39,23 @@ class PoaAssignGoals extends Component
             $key2 = $poaActivity->name;
             $count = 1;
             foreach ($poaActivity->measureAdvances as $goalPoaActivity) {
-                $element = [];
-                $element['id'] = $goalPoaActivity->id;
-                $element['year'] =  $this->program->poa->year;
-                $element['monthName'] = Indicator::FREQUENCIES[12][$count];
-                $element['goal'] = $goalPoaActivity->goal;
-                $element['icon'] = $icon;
-                if ($goalPoaActivity->goal > 0) {
-                    $this->goals[$goalPoaActivity->id] = ['goal' => $goalPoaActivity->goal];
+                if ($count<=12){
+                    $element = [];
+                    $element['id'] = $goalPoaActivity->id;
+                    $element['year'] =  $this->program->poa->year;
+                    $element['monthName'] = Indicator::FREQUENCIES[12][$count];
+                    $element['goal'] = $goalPoaActivity->goal;
+                    $element['icon'] = $icon;
+                    if ($goalPoaActivity->goal > 0) {
+                        $this->goals[$goalPoaActivity->id] = ['goal' => $goalPoaActivity->goal];
+                    }
+                    if (!array_key_exists($key, $this->elementos)) {
+                        $this->elementos[$key][$key2][] = $element;
+                    } else {
+                        $this->elementos[$key][$key2][] = $element;
+                    }
+                    $count++;
                 }
-                if (!array_key_exists($key, $this->elementos)) {
-                    $this->elementos[$key][$key2][] = $element;
-                } else {
-                    $this->elementos[$key][$key2][] = $element;
-                }
-                $count++;
             }
         }
     }

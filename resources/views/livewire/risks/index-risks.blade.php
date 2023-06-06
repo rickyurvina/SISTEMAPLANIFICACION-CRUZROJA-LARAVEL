@@ -13,12 +13,14 @@
                             <div class="card">
                                 <div class="card-header d-flex flex-wrap w-100">
                                     <div class="d-flex position-relative" style="width: 90%">
-                                        <i class="spinner-border spinner-border-sm position-absolute pos-left mx-3" style="margin-top: 0.75rem" wire:target="search" wire:loading></i>
+                                        <i class="spinner-border spinner-border-sm position-absolute pos-left mx-3" style="margin-top: 0.75rem" wire:target="search"
+                                           wire:loading></i>
                                         <i class="fal fa-search position-absolute pos-left fs-lg mx-3" style="margin-top: 0.75rem" wire:loading.remove></i>
                                         <input type="text" wire:model.debounce.300ms="search" class="form-control bg-subtlelight pl-6"
                                                placeholder="Buscar...">
                                     </div>
                                     <div class="d-flex ml-auto w-10">
+                                        <x-tooltip-help message="Permite crear riesgos asociados"></x-tooltip-help>
                                         <livewire:risks.create-risk :modelId="$modelId" :class="$class" :messages="$messages"/>
                                     </div>
                                 </div>
@@ -90,13 +92,11 @@
                                                         <div class="frame-wrap">
                                                             <div class="d-flex justify-content-start">
                                                                 <div class="p-1">
-                                                                    @if($item->isMemberOfTask()||user()->hasRole('super-admin'))
-                                                                        <a href="#" data-toggle="modal" data-risk-id="{{ $item->id }}"
-                                                                           data-target="#edit-modal-risk">
-                                                                            <i class="fas fa-edit mr-1 text-info"
-                                                                               data-toggle="tooltip" data-placement="top" title=""
-                                                                               data-original-title="Editar"></i></a>
-                                                                    @endif
+                                                                    <a href="#" data-toggle="modal" data-risk-id="{{ $item->id }}"
+                                                                       data-target="#edit-modal-risk">
+                                                                        <i class="fas fa-edit mr-1 text-info"
+                                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                                           data-original-title="Editar"></i></a>
                                                                 </div>
                                                                 <div class="p-1">
                                                                     @if($item->actions->count()==0)

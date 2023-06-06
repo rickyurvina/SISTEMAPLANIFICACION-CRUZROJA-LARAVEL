@@ -321,16 +321,18 @@ class PoaActivitiesImport implements ToCollection, WithHeadingRow, WithValidatio
             $poaActivityDetails = $poaActivity->measureAdvances;
             $count = 1;
             foreach ($poaActivityDetails as $poaActivityDetail) {
-                $element = [];
-                $element['id'] = $poaActivityDetail->id;
-                $element['year'] = now()->format('Y');
-                $element['monthName'] = Indicator::FREQUENCIES[12][$count];
-                $element['goal'] = $goalsCharged[$count];
-                $element['men'] = $menByMonths[$count];
-                $element['women'] = $womenByMonths[$count];
-                $element['actual'] = $actualMonths[$count];
-                array_push($goals, $element);
-                $count++;
+                if ($count<=12){
+                    $element = [];
+                    $element['id'] = $poaActivityDetail->id;
+                    $element['year'] = now()->format('Y');
+                    $element['monthName'] = Indicator::FREQUENCIES[12][$count];
+                    $element['goal'] = $goalsCharged[$count];
+                    $element['men'] = $menByMonths[$count];
+                    $element['women'] = $womenByMonths[$count];
+                    $element['actual'] = $actualMonths[$count];
+                    array_push($goals, $element);
+                    $count++;
+                }
             }
             $this->ajaxDispatch(new UpdatePoaActivityGoal($poaActivity->id, $goals));
         } catch (Exception $e) {

@@ -17,7 +17,9 @@
     <hr>
     <div class="row">
         <div class="col-6 border-right border-dark">
-            <x-label-section> Comentarios</x-label-section>
+            <x-label-section> Comentarios
+                <x-tooltip-help message="Permite ingresar comentarios en esta sección"></x-tooltip-help>
+            </x-label-section>
             <livewire:components.comments :modelId="$project->id" class="\App\Models\Projects\Project" identifier="problem_identified"
                                           :key="time().$project->id"/>
         </div>

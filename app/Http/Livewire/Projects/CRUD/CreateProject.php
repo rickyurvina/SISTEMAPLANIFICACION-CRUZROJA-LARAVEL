@@ -23,6 +23,7 @@ class CreateProject extends Modal
 
     protected $rules = [
         'name' => 'required|min:3|max:255',
+        'type' => 'required',
     ];
 
     public function mount()
@@ -73,10 +74,7 @@ class CreateProject extends Modal
 
     public function render()
     {
-        if (user()->cannot('project-crud-project')) {
-            abort(403);
-        } else {
-            return view('livewire.projects.crud.create-project');
-        }
+        $this->dispatchBrowserEvent('loadTypes');
+        return view('livewire.projects.crud.create-project');
     }
 }

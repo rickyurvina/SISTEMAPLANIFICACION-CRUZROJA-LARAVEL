@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Project;
 
 
+use App\Http\Middleware\Azure\Azure;
 use App\Models\Admin\Department;
 use App\Models\Auth\User;
+use App\Models\Budget\Transaction;
 use App\Models\Indicators\Indicator\Indicator;
 use App\Models\Projects\Activities\Task;
 use App\Models\Projects\Catalogs\ProjectLineAction;
@@ -19,6 +21,30 @@ use Illuminate\Support\Facades\Config;
 
 class ProjectReportController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:project-manage|project-super-admin');
+        $this->middleware('permission:project-view-reports',['only'=>[
+            'reports',
+            'portfolioReport',
+            'index',
+            'executiveReport',
+            'indicatorsReport',
+            'activitiesExecutionBudgetReport',
+            'activitiesReport',
+            'fundsOriginReport',
+            'budgetNeedReport',
+            'budgetReport',
+            'reportReport',
+        ]]);
+    }
+
 
     public function reports()
     {
@@ -83,7 +109,9 @@ class ProjectReportController extends Controller
 
         $activities = Task::all()->where('project_id', $project->id)
             ->where('type', 'task');
-        return view('modules.project.project-execution-budget-activities-report', compact('project', 'activities'))->with('page', 'reports');
+        $transaction = Transaction::where('year', $project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->first();
+        return view('modules.project.project-execution-budget-activities-report', compact('project', 'activities','transaction'))->with('page', 'reports');
     }
 
     public function activitiesReport(Project $project)
@@ -101,8 +129,9 @@ class ProjectReportController extends Controller
             $periods[$i] = $date->format("Y-m-d");
             $i++;
         }
-
-        return view('modules.project.project-activities-report', compact('project', 'activities', 'periods'))->with('page', 'reports');
+        $transaction = Transaction::where('year', $project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->first();
+        return view('modules.project.project-activities-report', compact('project', 'activities', 'periods','transaction'))->with('page', 'reports');
     }
 
     public function fundsOriginReport(Project $project)

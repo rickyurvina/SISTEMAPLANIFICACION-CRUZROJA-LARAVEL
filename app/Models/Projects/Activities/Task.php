@@ -431,7 +431,10 @@ class Task extends Model
 //funcion para validar si se puede crear una partida presupuestaria a la actividad
     public function validateCrateBudget()
     {
-        if ($this->measure && $this->location_id && $this->project->locations) {
+        $transaction = Transaction::where('year', $this->project->year)
+            ->where('type', Transaction::TYPE_PROFORMA)->first();
+        $project=$this->project;
+        if ($this->measure && $this->location_id && $this->project->locations && $transaction && $project->location) {
             return true;
         } else {
             return false;
@@ -460,6 +463,7 @@ class Task extends Model
         $total = 0;
         foreach ($accounts as $account) {
             $total += $account->getBalanceEncodedApproved()->getAmount();
+
         }
         $total = money($total);
         return $total;
@@ -476,9 +480,9 @@ class Task extends Model
         return $total;
     }
 
-    public function getPercentageBudget()
+    public function getPercentageBudget(Transaction $transaction)
     {
-        if ($this->getBalanceEncodedApproved()->getAmount() > 0) {
+        if ($this->getTotalBudget($transaction)->getAmount() > 0) {
             return intval($this->getBalanceAs()->getAmount() / $this->getBalanceEncoded()->getAmount() * 100) ?? 0;
         } else {
             return 0;

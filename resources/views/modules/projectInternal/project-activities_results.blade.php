@@ -27,7 +27,9 @@
             <livewire:indicators.indicator-show/>
         </div>
     </div>
-
+    <div wire:ignore>
+        <livewire:projects.logic-frame.weight-objetives :projectId="$project->id" />
+    </div>
 @endsection
 @push('page_script')
     <script>
@@ -37,7 +39,15 @@
         Livewire.on('toggleCreateObjective', () => $('#project-create-specific-objective').modal('toggle'));
         Livewire.on('toggleRegisterAdvanceActivity', () => $('#register-advance-activity').modal('toggle'));
         Livewire.on('closeModalResultsWeight', () => $('#project-activities-weight').modal('toggle'));
+        Livewire.on('closeModalResultsWeight', () => $('#project-activities-weight').modal('toggle'));
+        Livewire.on('closeModalObjectivesWeight', () => $('#project-objectives-weight').modal('toggle'));
 
+        $('#project-activities-weight').on('show.bs.modal', function (e) {
+            //get level ID & plan registered template detail ID
+            let objectiveId = $(e.relatedTarget).data('objective-id');
+            //Livewire event trigger
+            Livewire.emit('newActivity', objectiveId);
+        });
     </script>
 @endpush
 

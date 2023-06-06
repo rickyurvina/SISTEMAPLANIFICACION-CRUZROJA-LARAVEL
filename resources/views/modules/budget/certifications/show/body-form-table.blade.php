@@ -3,10 +3,20 @@
     </td>
     <td>{{ $item->id }}</td>
     <td>{{ $item->description }}</td>
-    <td class="@if($item->balance->getAmount()< $transaction->expenseCertifications($item->id)->getAmount() )color-danger-700 @endif">
-        {{ $item->balance }}
-    </td>
-    <td class="@if($item->balance->getAmount()< $transaction->expenseCertifications($item->id)->getAmount() )color-danger-700 @endif">
-        {{ $transaction->expenseCertifications($item->id) }}
-    </td>
+    @if($transaction->status instanceof  \App\States\Transaction\Approved)
+        <td>
+            {{ $item->balance }}
+        </td>
+        <td>
+            {{ $transaction->expenseCertifications($item->id) }}
+        </td>
+    @else
+        <td class="@if($item->balance->getAmount()< $transaction->expenseCertifications($item->id)->getAmount() )color-danger-700 @endif">
+            {{ $item->balance }}
+        </td>
+        <td class="@if($item->balance->getAmount()< $transaction->expenseCertifications($item->id)->getAmount() )color-danger-700 @endif">
+            {{ $transaction->expenseCertifications($item->id) }}
+        </td>
+    @endif
+
 </tr>

@@ -52,7 +52,7 @@ class ProjectCreateStakeholder extends Component
     public $results;
     public $rule;
 
-    protected $listeners = ['createStakeholder' => 'mount', 'open' => 'mount'];
+    protected $listeners = ['createStakeholder' => 'mount', 'open' => 'mount', 'updateModalCreateStakeholder' => 'mount'];
 
     protected $rules = [
         'user_id' => 'required',

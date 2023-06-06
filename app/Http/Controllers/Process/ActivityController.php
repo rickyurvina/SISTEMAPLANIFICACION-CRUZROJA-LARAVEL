@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Process;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
 use App\Http\Requests\Process\ActivityRequest;
 use App\Jobs\Process\CreateActivity;
 use App\Models\Process\Activity;
@@ -11,6 +12,23 @@ use Illuminate\Http\RedirectResponse;
 
 class ActivityController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:process-manage');
+        $this->middleware('permission:process-manage-activities',
+            [
+                'only' => [
+                    'store',
+                    'destroyActivity',
+                ]]);
+    }
+
     /**
      * Store a newly created resource in storage.
      *

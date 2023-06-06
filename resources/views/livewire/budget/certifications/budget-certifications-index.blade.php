@@ -39,10 +39,14 @@
                             <td class="text-center">
                                 <div class="frame-wrap">
                                     <div class="d-flex justify-content-center">
-                                        <div class="p-2">
+                                        <div class="p-2"  data-toggle="tooltip"
+                                             data-placement="top" title=""
+                                             data-original-title="{{ trans('general.show') }}">
                                             <a href="#" data-toggle="modal" data-transaction-id="{{ $item->id }}"
-                                               data-target="#show-certification" class="mr-2 p-2 bg-">
-                                                <i class="fas fa-search"></i>
+                                               data-target="#show-certification" class="mr-2 p-2">
+                                                <i class="fas fa-search" data-toggle="tooltip"
+                                                   data-placement="top" title=""
+                                                   data-original-title="{{ trans('general.show') }}"></i>
                                             </a>
                                         </div>
                                         @if($item->status instanceof \App\States\Transaction\Draft)
@@ -56,10 +60,10 @@
                                             </div>
                                             <div class="p-2">
                                                 <a href="{{route('budget.edit-certification',$item)}}"
-                                                   data-toggle="tooltip"
-                                                   data-placement="top" title=""
-                                                   data-original-title="{{ trans('general.edit') }}">
-                                                    <i class="fas fa-pencil-alt text-info"></i>
+                                                >
+                                                    <i class="fas fa-pencil-alt text-info" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="{{ trans('general.edit') }}"></i>
                                                 </a>
                                             </div>
                                         @endif
@@ -95,10 +99,14 @@
                             <td class="text-center">
                                 <div class="frame-wrap">
                                     <div class="d-flex justify-content-center">
-                                        <div class="p-2">
+                                        <div class="p-2"   data-toggle="tooltip"
+                                             data-placement="top" title=""
+                                             data-original-title="{{ trans('general.show') }}">
                                             <a href="#" data-toggle="modal" data-transaction-id="{{ $item->id }}"
                                                data-target="#show-certification" class="mr-2 p-2">
-                                                <i class="fas fa-search"></i>
+                                                <i class="fas fa-search" data-toggle="tooltip"
+                                                   data-placement="top" title=""
+                                                   data-original-title="{{ trans('general.show') }}"></i>
                                             </a>
                                         </div>
                                         @if(($item->status instanceof \App\States\Transaction\Draft))
@@ -111,10 +119,10 @@
                                             </div>
                                             <div class="p-2">
                                                 <a href="{{route('budget.edit-certification',$item)}}" class="mr-2 p-2"
-                                                   data-toggle="tooltip"
-                                                   data-placement="top" title=""
-                                                   data-original-title="{{ trans('general.edit') }}">
-                                                    <i class="fas fa-pencil-alt text-info"></i>
+                                                >
+                                                    <i class="fas fa-pencil-alt text-info" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="{{ trans('general.edit') }}"></i>
                                                 </a>
                                             </div>
                                         @endif
@@ -167,7 +175,8 @@
             //Livewire event trigger
             Livewire.emit('loadTransaction', transactionId);
         });
-
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             @this.
             on('openSwalOverRide', id => {
@@ -189,5 +198,23 @@
                 });
             });
         })
+    </script>
+
+    <script>
+        window.addEventListener('loadSelects2', event => {
+            $('#select2-states').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('stateSelect', $(this).val());
+            });
+
+            $('#select2-registers').select2({
+                placeholder: "{{ trans('general.select').' '.trans_choice('general.state',2) }}"
+            }).on('change', function (e) {
+                @this.
+                set('countRegisterSelect', $(this).val());
+            });
+        });
     </script>
 @endpush

@@ -50,67 +50,20 @@ class BudgetCreateGeneralExpense extends Component
         $this->budgetGeneralExpensesStructure = $budgetGeneralExpensesStructure;
         $this->transaction = $budgetGeneralExpensesStructure->transaction;
         $this->transactionId = $this->transaction->id;
-        $this->loadBudgetStructure();
-        foreach ($this->fields as $key => $field) {
-            $item = '';
-            if ($field['level'] == '8') {
-                $item .= $budgetGeneralExpensesStructure->parent->parent->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $budgetGeneralExpensesStructure->parent->parent->id;
-            }
-            if ($field['level'] == '9') {
-                $item .= $budgetGeneralExpensesStructure->parent->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $budgetGeneralExpensesStructure->parent->id;
-            }
-            if ($field['level'] == '10') {
-                $item .= $budgetGeneralExpensesStructure->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $budgetGeneralExpensesStructure->id;
-            }
-            if ($field['level'] == '11') {
-                array_push($this->fieldsOptionals, $field);
-            }
-            if ($field['level'] == '12') {
-                array_push($this->fieldsOptionals, $field);
-            }
-        }
-        foreach ($this->fieldsOptionals as $key => $field2) {
-            if (isset($field2['meta']['source']) && $field['meta']['source']['type'] == BudgetStructure::SOURCE_TYPE_MODEL) {
 
-                $model = app($field2['meta']['source']['class']);
-
-                $query = $model->query();
-
-                foreach ($field2['meta']['source']['conditions'] as $condition) {
-                    $query->where($condition['field'], $condition['op'], $condition['value']);
-                }
-
-                $result = $query->pluck($field2['meta']['source']['field_display'], $field2['meta']['source']['field']);
-
-                $options = [];
-                foreach ($result as $index => $value) {
-                    $options[] = [
-                        $field2['meta']['source']['field'] => $index,
-                        $field2['meta']['source']['field_display'] => $value,
-                    ];
-                }
-                $this->fieldsOptionals[$key]['meta']['source']['options'] = $options;
-            }
-        }
     }
 
     public function render()
     {
+        if (!$this->fieldsOptionals) {
+            self::chargeFieldOptionals();
+        }
         return view('livewire.budget.expenses.general.budget-create-general-expense', ['budgetItem' => $this->getItem()]);
     }
 
     public function resetForm()
     {
-        $this->reset(['itemName', 'itemDescription', 'itemAmount']);
+        $this->reset(['itemName', 'itemDescription', 'itemAmount', 'fields', 'fieldsOptionals']);
         $this->resetErrorBag();
         $this->resetValidation();
         $this->loadBudgetStructure();
@@ -126,6 +79,10 @@ class BudgetCreateGeneralExpense extends Component
     {
         $item2 = '';
         $this->ids = [];
+        $maxLevel = max(array_column($this->fields, 'level'));
+        $keyMaxLevel = array_search($maxLevel, array_column($this->fields, 'level'));
+        $keyMaxLevel_1 = array_search($maxLevel - 1, array_column($this->fields, 'level'));
+
         foreach ($this->fieldsOptionals as $field2) {
             if ($field2['value']) {
                 $item2 .= $field2['value'] . '.';
@@ -153,19 +110,19 @@ class BudgetCreateGeneralExpense extends Component
         $item = '';
 
         if ($this->fieldsOptionals) {
-            $this->fields[10]['format'] = $this->fieldsOptionals[0]['value'];
-            $this->fields[10]['value'] = $this->fieldsOptionals[0]['value'];
-            $this->fields[10]['id'] = $this->fieldsOptionals[0]['id'];
-            $this->fields[11]['format'] = $this->fieldsOptionals[1]['value'];
-            $this->fields[11]['value'] = $this->fieldsOptionals[1]['value'];
-            $this->fields[11]['id'] = $this->fieldsOptionals[1]['id'];
+            $this->fields[$keyMaxLevel_1]['format'] = $this->fieldsOptionals[0]['value'];
+            $this->fields[$keyMaxLevel_1]['value'] = $this->fieldsOptionals[0]['value'];
+            $this->fields[$keyMaxLevel_1]['id'] = $this->fieldsOptionals[0]['id'];
+            $this->fields[$keyMaxLevel]['format'] = $this->fieldsOptionals[1]['value'];
+            $this->fields[$keyMaxLevel]['value'] = $this->fieldsOptionals[1]['value'];
+            $this->fields[$keyMaxLevel]['id'] = $this->fieldsOptionals[1]['id'];
         }
 
         foreach ($this->fields as $key => $field) {
             if ($field['format']) {
                 $item .= $field['format'] . '.';
             } else {
-                if ($field['level'] != '11' || $field['level'] != '12')
+                if ($field['level'] != $keyMaxLevel_1 || $field['level'] != $keyMaxLevel)
                     $item .= '999' . '.';
             }
         }
@@ -207,6 +164,70 @@ class BudgetCreateGeneralExpense extends Component
         } else {
             flash($response['message'])->error();
             return redirect()->route('budgets.createBudgetGeneralExpenses', $this->budgetGeneralExpensesStructure);
+        }
+    }
+
+    public function chargeFieldOptionals()
+    {
+        $this->loadBudgetStructure();
+        $budgetGeneralExpensesStructure = $this->budgetGeneralExpensesStructure;
+        $maxLevel = max(array_column($this->fields, 'level'));
+        $keyResultsProject = array_search('Resultados Proyecto', array_column($this->fields, 'label'));
+        $keyActivity = array_search('Actividad', array_column($this->fields, 'label'));
+        $keyLocation = array_search('Localidad', array_column($this->fields, 'label'));
+        $keyMaxLevel = array_search($maxLevel, array_column($this->fields, 'level'));
+        $keyMaxLevel_1 = array_search($maxLevel - 1, array_column($this->fields, 'level'));
+        if ($keyResultsProject) {
+            $item = '';
+            $item .= $budgetGeneralExpensesStructure->parent->parent->code;
+            $this->fields[$keyResultsProject]['format'] = $item;
+            $this->fields[$keyResultsProject]['value'] = $item;
+            $this->fields[$keyResultsProject]['id'] = $budgetGeneralExpensesStructure->parent->parent->id;
+        }
+        if ($keyActivity) {
+            $item = '';
+            $item .= $budgetGeneralExpensesStructure->parent->code;
+            $this->fields[$keyActivity]['format'] = $item;
+            $this->fields[$keyActivity]['value'] = $item;
+            $this->fields[$keyActivity]['id'] = $budgetGeneralExpensesStructure->parent->id;
+        }
+
+        if ($keyLocation) {
+            $item = '';
+            $item .= $budgetGeneralExpensesStructure->code;
+            $this->fields[$keyLocation]['format'] = $item;
+            $this->fields[$keyLocation]['value'] = $item;
+            $this->fields[$keyLocation]['id'] = $budgetGeneralExpensesStructure->id;
+        }
+        if ($this->fields[$keyMaxLevel_1]) {
+            array_push($this->fieldsOptionals, $this->fields[$keyMaxLevel_1]);
+        }
+        if ($this->fields[$keyMaxLevel]) {
+            array_push($this->fieldsOptionals, $this->fields[$keyMaxLevel]);
+        }
+
+        foreach ($this->fieldsOptionals as $key => $field2) {
+            if (isset($field2['meta']['source']) && $field2['meta']['source']['type'] == BudgetStructure::SOURCE_TYPE_MODEL) {
+
+                $model = app($field2['meta']['source']['class']);
+
+                $query = $model->query();
+
+                foreach ($field2['meta']['source']['conditions'] as $condition) {
+                    $query->where($condition['field'], $condition['op'], $condition['value']);
+                }
+
+                $result = $query->pluck($field2['meta']['source']['field_display'], $field2['meta']['source']['field']);
+
+                $options = [];
+                foreach ($result as $index => $value) {
+                    $options[] = [
+                        $field2['meta']['source']['field'] => $index,
+                        $field2['meta']['source']['field_display'] => $value,
+                    ];
+                }
+                $this->fieldsOptionals[$key]['meta']['source']['options'] = $options;
+            }
         }
     }
 

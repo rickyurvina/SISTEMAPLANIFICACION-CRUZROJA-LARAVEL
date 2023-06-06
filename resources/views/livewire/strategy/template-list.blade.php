@@ -12,7 +12,7 @@
                     <div class="card-body">
                         <p class="card-text">{{ $planTemplate->description }}</p>
                     </div>
-                    @if(Gate::check('strategy-template-crud-strategy') || Gate::check('strategy-crud-strategy'))
+                    @if(Gate::check('strategy-manage-templates') || Gate::check('strategy-manage'))
                         <div class="card-footer text-right">
                             <x-form.inputs.link route="{{ route('templates.edit', ['template' => $planTemplate->id]) }}"
                                                 label="{{ __('general.edit_template_strategy') }}" icon="fa-edit">

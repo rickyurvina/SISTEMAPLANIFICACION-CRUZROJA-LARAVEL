@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\Azure\Azure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -11,16 +14,11 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'auth'], function () {
     Route::get('login', 'Auth\LoginController@create')->name('login');
     Route::post('login', 'Auth\LoginController@store');
-
-//
-//    Route::get('forgot', 'Auth\Forgot@create')->name('forgot');
-//    Route::post('forgot', 'Auth\Forgot@store');
-//
-//    //Route::get('reset', 'Auth\Reset@create');
-//    Route::get('reset/{token}', 'Auth\Reset@create')->name('reset');
-//    Route::post('reset', 'Auth\Reset@store')->name('reset.store');
-
 });
 
-//Route::get('/login/azure', '\App\Http\Middleware\AppAzure@azure')->name('azure.login');
-//Route::get('/login/azurecallback', '\App\Http\Middleware\AppAzure@azurecallback')->name('azure.callback');
+Route::get('/auth/azure', [Azure::class, 'azure'])->name('azure.login');
+Route::get('/auth/callback', [Azure::class, 'azureCallback'])->name('azure.callback');
+
+Route::get('/logout/azure/callback', [Azure::class, 'azureLogoutCallback']);
+Route::get('/verifyAzureUser', 'Common\HomeController@verifyAzureUser')->name('common.verify-azure-user');
+

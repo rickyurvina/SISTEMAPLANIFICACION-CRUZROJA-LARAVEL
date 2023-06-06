@@ -30,22 +30,53 @@
         </a>
     </div>
     <div>
-        <a class="nav-link dropdown-toggle text-white fs-xl" href="#" id="navbarDropdownMenuLink"
-           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {{ Str::limit(setting('company.name'), 70) }}
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            @foreach($companies as $com)
-                <a class="dropdown-item"  href="{{ route('companies.switch', $com->id) }}">
-                    <i class="fas fa-building"></i>
-                    <span data-toggle="tooltip" data-placement="top" title="{{$com->name}}"
-                          data-original-title="{{$com->name}}">{{ Str::limit($com->name, 50) }}</span>
-                </a>
-            @endforeach
-        </div>
+        @if($user->companies->count()==1)
+            <a class="text-white fs-xl" href="#"
+               role="button">
+                {{ Str::limit(setting('company.name'), 70) }}
+            </a>
+        @else
+            <a class="nav-link dropdown-toggle text-white fs-xl" href="#" id="navbarDropdownMenuLink"
+               role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ Str::limit(setting('company.name'), 70) }}
+            </a>
+            <div class="dropdown-menu" x-placement="bottom-start"
+                 aria-labelledby="navbarDropdownMenuLink">
+                @foreach($companies as $group)
+                    @if($group->first()->level==1)
+                        @foreach($group as $com)
+                            @if(in_array($com->id,$userCompanies))
+                                <a class="dropdown-item" href="{{ route('companies.switch', $com->id) }}">
+                                    <i class="fas fa-building"></i>
+                                    <span data-toggle="tooltip" data-placement="top" title="{{$com->name}}"
+                                          data-original-title="{{$com->name}}">{{ Str::limit($com->name, 50) }}</span>
+                                </a>
+                            @endif
+                        @endforeach
+                    @else
+                        @foreach($group as $com)
+                            @if(array_intersect($userCompanies, $com->children()->get()->pluck('id')->toArray()))
+                                <div class="dropdown-multilevel">
+                                    <a class="dropdown-item" @if(in_array($com->id,$userCompanies))  href="{{ route('companies.switch', $com->id) }}" @else href="#" @endif>
+                                        {{Str::limit($com->name, 50)}}
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        @foreach($com->children()->get() as $child)
+                                            @if(in_array($child->id,$userCompanies))
+                                                <a href="{{ route('companies.switch', $child->id) }}" class="dropdown-item">{{Str::limit($child->name, 50)}}</a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    @endif
+                @endforeach
+            </div>
+        @endif
     </div>
     <div>
-        <span class="text-white fs-xl">{{ session('module', '') }}</span>
+        <span class="ml-2 text-white fs-xl">{{ session('module', '') }}</span>
     </div>
     <div class="ml-auto d-flex">
         <div>
@@ -61,8 +92,7 @@
                 </div>
                 <div class="custom-scroll h-100">
                     <ul class="app-list">
-                        @if(Gate::check('strategy-read-strategy') || Gate::check('strategy-crud-strategy') || Gate::check('strategy-plan-crud-strategy')
-                            || Gate::check('strategy-template-crud-strategy'))
+                        @if(Gate::check('strategy-view') || Gate::check('strategy-manage') )
                             <li>
                                 <a href="{{ route('strategy.home') }}" class="app-list-item hover-white">
                                     <span class="icon-stack">
@@ -76,7 +106,7 @@
                                 </a>
                             </li>
                         @endif
-                        @if(Gate::check('project-read-project') || Gate::check('project-crud-project'))
+                        @if(Gate::check('project-view') || Gate::check('project-manage') )
                             <li>
                                 <a href="{{ route('projects.index') }}" class="app-list-item hover-white">
                                     <span class="icon-stack">
@@ -90,7 +120,7 @@
                                 </a>
                             </li>
                         @endif
-                        @if(Gate::check('budget-crud-budget') || Gate::check('budget-read-budget'))
+                        @if(Gate::check('budget-view') || Gate::check('budget-manage') )
                             <li>
                                 <a href="{{ route('budget.home') }}" class="app-list-item hover-white">
                                     <span class="icon-stack">
@@ -104,7 +134,7 @@
                                 </a>
                             </li>
                         @endif
-                        @if(Gate::check('poa-crud-poa') || Gate::check('poa-read-poa'))
+                        @if(Gate::check('poa-view') || Gate::check('poa-manage') )
                             <li>
                                 <a href="{{ route('poa.poas') }}" class="app-list-item hover-white">
                                 <span class="icon-stack">
@@ -118,7 +148,7 @@
                                 </a>
                             </li>
                         @endif
-                        @if(Gate::check('admin-crud-adminTasks') || Gate::check('admin-read-adminTasks'))
+                        @if(Gate::check('administrative-view') || Gate::check('administrative-manage') )
                             <li>
                                 <a href="{{ route('admin.administrativeTasks') }}" class="app-list-item hover-white">
                                 <span class="icon-stack">
@@ -130,7 +160,7 @@
                                 </a>
                             </li>
                         @endif
-{{--                        @if(Gate::check('process-manage-process') || Gate::check('process-view-process'))--}}
+                        @if(Gate::check('process-view') || Gate::check('process-manage') )
                             <li>
                                 <a href="{{ route('processes.index') }}" class="app-list-item hover-white">
                                  <span class="icon-stack">
@@ -141,10 +171,10 @@
                                     </span>
                                 </a>
                             </li>
-{{--                        @endcan--}}
-                        @if(Gate::check('admin-read-admin') || Gate::check('admin-crud-admin'))
+                        @endif
+                        @if(Gate::check('admin-view') || Gate::check('admin-manage') )
                             <li>
-                                <a href="{{ route('admin.home') }}" class="app-list-item hover-white">
+                                <a href="{{ route('companies.index') }}" class="app-list-item hover-white">
                                 <span class="icon-stack">
                                     <i class="base-9 icon-stack-3x color-success-400"></i>
                                     <i class="base-2 icon-stack-2x color-success-500"></i>
@@ -156,61 +186,19 @@
                                 </a>
                             </li>
                         @endcan
-                        {{--                        @can('read-module-audit')--}}
-                        {{--                            <li>--}}
-                        {{--                                <a href="{{ route('audit.home') }}" class="app-list-item hover-white">--}}
-                        {{--                                <span class="icon-stack">--}}
-                        {{--                                    <i class="base-18 icon-stack-3x color-info-700"></i>--}}
-                        {{--                                    <span class="position-absolute pos-top pos-left pos-right color-white fs-md mt-2 fw-400">28</span>--}}
-                        {{--                                </span>--}}
-                        {{--                                    <span class="app-list-name">--}}
-                        {{--                                    {{ trans('general.module_audit') }}--}}
-                        {{--                                </span>--}}
-                        {{--                                </a>--}}
-                        {{--                            </li>--}}
-                        {{--                        @endcan--}}
-                        {{--                        @can('read-module-process')--}}
-                        {{--                            <li>--}}
-                        {{--                                <a href="{{ route('process.home') }}" class="app-list-item hover-white">--}}
-                        {{--                                                        <span class="icon-stack">--}}
-                        {{--                                                            <i class="base-7 icon-stack-3x color-warning-500"></i>--}}
-                        {{--                                                            <i class="base-7 icon-stack-2x color-warning-700"></i>--}}
-                        {{--                                                            <i class="fa fa-spinner color-warning-500"></i>--}}
-                        {{--                                                        </span>--}}
-                        {{--                                    <span class="app-list-name">--}}
-                        {{--                                                            {{ trans_choice('general.module_process',2) }}--}}
-                        {{--                                                        </span>--}}
-                        {{--                                </a>--}}
-                        {{--                            </li>--}}
-                        {{--                        @endcan--}}
-                        {{--                        @can('read-module-risk')--}}
-                        {{--                            <li>--}}
-                        {{--                                <a href="{{ route('risk.home') }}" class="app-list-item hover-white">--}}
-                        {{--                                <span class="icon-stack">--}}
-                        {{--                                    <i class="base-7 icon-stack-3x color-danger-300"></i>--}}
-                        {{--                                    <i class="base-7 icon-stack-2x color-danger-500"></i>--}}
-                        {{--                                    <i class="fas fa-exclamation-triangle icon-stack-1x text-white"></i>--}}
-                        {{--                                </span>--}}
-                        {{--                                    <span class="app-list-name">--}}
-                        {{--                                    {{ trans('general.module_risk') }}--}}
-                        {{--                                </span>--}}
-                        {{--                                </a>--}}
-                        {{--                            </li>--}}
-                        {{--                        @endcan--}}
-                        {{--                        @can('read-module-indicator')--}}
-                        {{--                            <li>--}}
-                        {{--                                <a href="{{ route('indicator.home') }}" class="app-list-item hover-white">--}}
-                        {{--                                <span class="icon-stack">--}}
-                        {{--                                    <i class="base-7 icon-stack-3x color-warning-500"></i>--}}
-                        {{--                                    <i class="base-7 icon-stack-2x color-warning-700"></i>--}}
-                        {{--                                    <i class="ni ni-graph icon-stack-1x text-white"></i>--}}
-                        {{--                                </span>--}}
-                        {{--                                    <span class="app-list-name">--}}
-                        {{--                                    {{ trans('general.module_indicator') }}--}}
-                        {{--                                </span>--}}
-                        {{--                                </a>--}}
-                        {{--                            </li>--}}
-                        {{--                        @endcan--}}
+                        @if(Gate::check('audit-view') || Gate::check('audit-manage') )
+                            <li>
+                                <a href="{{ route('audit.home') }}" class="app-list-item hover-white">
+                                                        <span class="icon-stack">
+                                                            <i class="base-18 icon-stack-3x color-info-700"></i>
+                                                            <span class="position-absolute pos-top pos-left pos-right color-white fs-md mt-2 fw-400">28</span>
+                                                        </span>
+                                    <span class="app-list-name">
+                                                            {{ trans('general.module_audit') }}
+                                                        </span>
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -249,7 +237,7 @@
                 </a>
                 <div class="dropdown-divider m-0"></div>
                 <div class="dropdown-divider m-0"></div>
-                <a class="dropdown-item fw-500 pt-3 pb-3" href="{{ route('logout') }}">
+                <a class="dropdown-item fw-500 pt-3 pb-3" href="{{ route('azure.logout') }}">
                     <span>{{ trans('auth.logout') }} <i class="fas fa-sign-out float-right color-primary-500"></i></span>
                 </a>
             </div>

@@ -63,7 +63,7 @@
                                     @endif
                                     <div class="d-flex flex-wrap">
                                         <x-label-detail>{{ trans('general.poa_activity_cost') }}</x-label-detail>
-                                        <x-content-detail>{{ $activity->getTotalBudget($transaction->status) }}</x-content-detail>
+                                        <x-content-detail>{{ $activity->getTotalBudget($transaction) }}</x-content-detail>
                                     </div>
                                     <div class="d-flex flex-wrap">
                                         <x-label-detail>{{ trans('general.poa_activity_location') }}</x-label-detail>
@@ -129,7 +129,7 @@
                                     @endforeach
                                     <tr style="background-color: #e0e0e0">
                                         <td colspan="3"></td>
-                                        <td style="color: #008000" class="fs-2x fw-700">{{ $activity->getTotalBudget($transaction->status) }}</td>
+                                        <td style="color: #008000" class="fs-2x fw-700">{{ $activity->getTotalBudget($transaction) }}</td>
                                     </tr>
                                     </tbody>
                                 </table>

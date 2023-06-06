@@ -16,12 +16,22 @@
                 </td>
                 <td>{{ $item->id }}</td>
                 <td>{{ $item->description }}</td>
-                <td class="@if($item->getCertifiedValues($certification->id) < $transaction->expenseCommitments($item->id) )color-danger-700 @endif">
-                    {{ $item->getCertifiedValues($certification->id)  }}
-                </td>
-                <td class="@if($item->getCertifiedValues($certification->id)< $transaction->expenseCommitments($item->id) )color-danger-700 @endif">
-                    {{ $transaction->expenseCommitments($item->id) }}
-                </td>
+                @if($transaction->status instanceof \App\States\Transaction\Approved)
+                    <td>
+                        {{ $item->getCertifiedValues($certification->id)  }}
+                    </td>
+                    <td>
+                        {{ $transaction->expenseCommitments($item->id) }}
+                    </td>
+                @else
+                    <td class="@if($item->getCertifiedValues($certification->id) < $transaction->expenseCommitments($item->id) )color-danger-700 @endif">
+                        {{ $item->getCertifiedValues($certification->id)  }}
+                    </td>
+                    <td class="@if($item->getCertifiedValues($certification->id)< $transaction->expenseCommitments($item->id) )color-danger-700 @endif">
+                        {{ $transaction->expenseCommitments($item->id) }}
+                    </td>
+                @endif
+
             </tr>
         @endforeach
         </tbody>

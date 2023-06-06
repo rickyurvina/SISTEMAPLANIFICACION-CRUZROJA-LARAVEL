@@ -29,6 +29,7 @@ class UpdateUnitIndicator extends Job
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -39,7 +40,7 @@ class UpdateUnitIndicator extends Job
             });
             return $this->unitIndicator;
         } catch (Throwable $e) {
-            return $e;
+            throw new \Exception($e->getMessage());
         }
     }
 }

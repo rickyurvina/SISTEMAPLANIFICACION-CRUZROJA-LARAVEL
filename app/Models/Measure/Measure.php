@@ -224,6 +224,110 @@ class Measure extends Model
         return false;
     }
 
+    public function scoreDashboard($period, $model = null)
+    {
+        if ($period->calendar_id == $this->calendar_id) {
+            $score = $this->scores()->where('period_id', $period->id)->first();
+
+            return [
+                'period_id' => $period->id,
+                'frequency' => $score->period->name,
+                'year' => $score->period->name != $score->period->start_date->year ? $score->period->start_date->year : '',
+                'value' => $score->actual,
+                'score' => $score->score,
+                'thresholds' => $score->thresholds,
+                'color' => Score::COLOR[$score->color],
+                'cssColor' => $score->color,
+                'dataUsed' => [
+                    [
+                        'id' => $this->id,
+                        'name' => $score->period->name,
+                        'color' => Score::COLOR[$score->color],
+                        'cssColor' => $score->color,
+                        'score' => $score->score,
+                        'actual' => $score->actual,
+                        'thresholds' => $score->thresholds,
+                        'type' => 'measure',
+                    ]
+                ]
+            ];
+        } else {
+            if ($period->days >= $this->calendar->periods->first()->days) {
+                $dataUsed = [];
+                $scores = $this->scores()->join('msr_periods', 'msr_periods.id', '=', 'msr_scores.period_id')
+                    ->orderBy('msr_periods.start_date', 'desc')
+                    ->whereDate('msr_periods.start_date', '>=', $period->start_date) // Inicio periodo
+                    ->whereDate('msr_periods.end_date', '<=', $period->end_date) // Fin periodo
+                    ->select(['msr_scores.*', 'msr_periods.start_date', 'msr_periods.end_date'])
+                    ->get();
+
+                $thresholds = $scores->pluck('thresholds')->toArray();
+                $final = array_shift($thresholds);
+                $actual = null;
+                $existAnyValue = $scores->contains(function ($value) {
+                    return !is_null($value->actual);
+                });
+                if ($existAnyValue) {
+                    $score = round($scores->avg('score'), 1);
+                }
+                switch ($this->aggregation_type) {
+                    case Measure::AGGREGATION_TYPE_AVE:
+                        foreach ($final as $key => &$value) {
+                            $value = array_sum(array_column($thresholds, $key)) / count($thresholds);
+                        }
+                        unset($value);
+
+                        if ($existAnyValue) {
+                            $actual = $scores->avg('actual');
+                        }
+                        break;
+                    case Measure::AGGREGATION_TYPE_NUMBER_OF_YESES:
+                        if ($existAnyValue) {
+                            $actual = $scores->where('actual', 1)->sum('actual');
+                        }
+                        break;
+                    case Measure::AGGREGATION_TYPE_SUM:
+                        foreach ($final as $key => &$value) {
+                            $value += array_sum(array_column($thresholds, $key));
+                        }
+                        unset($value);
+                        if ($existAnyValue) {
+                            $actual = $scores->sum('actual');
+                        }
+
+                }
+
+                foreach ($scores->reverse() as $score) {
+                    $dataUsed[] = [
+                        'id' => $this->id,
+                        'name' => $score->period->name != $period->start_date->year ? $score->period->name . ' ' . $period->start_date->year : $score->period->name,
+                        'color' => Score::COLOR[$score->color],
+                        'cssColor' => $score->color,
+                        'score' => $score->score,
+                        'actual' => $score->actual,
+                        'thresholds' => $score->thresholds,
+                        'type' => 'measure',
+                    ];
+                }
+
+                $scoreAvg = Score::getScore($actual, $this, $final);
+                return [
+                    'period_id' => $period->id,
+                    'frequency' => $period->name,
+                    'year' => $period->name != $period->start_date->year ? $period->start_date->year : '',
+                    'value' => !is_null($actual) ? round($actual, 2) : null,
+                    'score' => !is_null($scoreAvg) ? round($scoreAvg, 1) : null,
+                    'thresholds' => $final,
+                    'color' => Score::COLOR[Score::colorByScore($scoreAvg)],
+                    'cssColor' => Score::colorByScore($scoreAvg),
+                    'dataUsed' => $dataUsed
+                ];
+
+            }
+        }
+        return false;
+    }
+
     public function getGoal(array $thresholds)
     {
         switch ($this->scoringType->code) {

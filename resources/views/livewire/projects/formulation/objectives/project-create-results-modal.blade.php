@@ -5,7 +5,7 @@
 
                 <div class="modal-header bg-primary color-white">
                     <h4 class="modal-title">
-                        Crear Resultado de {{$objective->name}}
+                        Crear {{$objective->project->isMisional()? 'Resultado':'Hito'}}  de {{$objective->name}}
                     </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fal fa-times"></i></span>
@@ -18,7 +18,7 @@
                                                placeholder="{{ trans('general.form.enter', ['field' => trans('general.code')]) }}">
                             </x-form.modal.text>
 
-                            <x-form.modal.text id="name" label="{{ __('general.name') }}" class="form-group col-sm-7" required="required"
+                            <x-form.modal.text id="name" label="{{ __('general.name') }}" class="form-group col-sm-12" required="required"
                                                placeholder="{{ trans('general.form.enter', ['field' => trans('general.name')]) }}">
                             </x-form.modal.text>
                             <x-form.modal.textarea id="description"

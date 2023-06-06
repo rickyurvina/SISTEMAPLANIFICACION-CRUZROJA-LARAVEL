@@ -10,7 +10,7 @@
                 </div>
                 <div class="d-flex ml-auto w-10">
                     @if($pageIndex==\App\Models\Process\Process::PHASE_CHECK)
-                        @can('manage-indicators-process')
+                        @can('process-manage-indicators')
                             <button class="btn btn-success border-0 shadow-0 ml-auto"
                                     wire:click="$emit('show', 'App\\Models\\Process\\Process', '{{ $process->id }}')">
                                 {{ trans('general.create') }} Indicador
@@ -45,47 +45,48 @@
                                 <td class="text-center">
                                     <div class="frame-wrap" wire:key="{{ 'r.i.' . $loop->index }}">
                                         <div class="d-flex justify-content-start">
-                                            <div class="p-1 mt-1">
-                                                <div class="cursor-pointer"
-                                                     wire:click="$emit('triggerAdvance','{{ $indicator->id }}')">
+                                            @can('process-manage-indicators')
+                                                <div class="p-2 mt-1">
+                                                    <div class="cursor-pointer"
+                                                         wire:click="$emit('triggerAdvance','{{ $indicator->id }}')">
                                                             <span class="color-success-700"><i
                                                                         class="far fa-calendar-alt" aria-expanded="false"
                                                                         data-toggle="tooltip" data-placement="top" title=""
                                                                         data-original-title="Avance"></i></span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="p-1 mt-1">
-                                                @can('view-indicators-process')
+                                            @endcan
+                                            @can('process-view-indicators')
+                                                <div class="p-2 mt-1">
                                                     <div class="cursor-pointer" data-toggle="tooltip" data-placement="top" title="" data-original-title="Ver"
                                                          wire:click="$emitTo('indicators.indicator-show', 'open', {{ $indicator->id }})">
                                                                                     <span class="color-info-700"><i
                                                                                                 class="far fa-eye"></i></span>
                                                     </div>
-                                                @endcan
-                                            </div>
-                                            <div class="p-1 mt-1">
-                                                @if($pageIndex==\App\Models\Process\Process::PHASE_CHECK)
-                                                    @can('manage-indicators-process')
-                                                        <a href="javascript:void(0);" aria-expanded="false" data-toggle="tooltip" data-placement="top" title=""
-                                                           data-original-title="Editar"
-                                                           wire:click="$emitTo('indicators.indicator-edit', 'open', {{ $indicator->id }})"> <i
+                                                </div>
+                                            @endcan
+                                            @if($pageIndex==\App\Models\Process\Process::PHASE_CHECK)
+                                                @can('process-manage-indicators')
+                                                    <div class="p-2 mt-1">
+                                                        <div class="cursor-pointer" aria-expanded="false" data-toggle="tooltip" data-placement="top" title=""
+                                                             data-original-title="Editar" wire:click="$emit('triggerEdit','{{$indicator->id}}')"><i
                                                                     class="fas fa-edit mr-1 text-info"></i>
-                                                        </a>
-                                                    @endcan
-                                                @endif
-                                            </div>
-                                            <div class="p-1 mt-1">
-                                                @if($pageIndex==\App\Models\Process\Process::PHASE_CHECK)
-                                                    @can('manage-indicators-process')
+                                                        </div>
+                                                    </div>
+                                                @endcan
+                                            @endif
+                                            @if($pageIndex==\App\Models\Process\Process::PHASE_CHECK)
+                                                @can('process-manage-indicators')
+                                                    <div class="p-2 mt-1">
                                                         <a href="javascript:void(0);" class="cursor-pointer" wire:click="$emit('triggerDeleteIndicator', '{{ $indicator->id }}')"
                                                            aria-expanded="false"
                                                            data-toggle="tooltip" data-placement="top" title=""
                                                            data-original-title="Eliminar"
                                                         ><i class="fas fa-trash-alt text-danger"></i>
                                                         </a>
-                                                    @endcan
-                                                @endif
-                                            </div>
+                                                    </div>
+                                                @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
@@ -131,27 +132,35 @@
             $('#register-indicator-advance').modal('toggle');
             Livewire.emit('actionLoad', id);
         });
+
+
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-
-        @this.on('triggerDeleteIndicator', id => {
-            Swal.fire({
-                title: '{{ trans('messages.warning.sure') }}',
-                text: '{{ trans('messages.warning.delete') }}',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: 'var(--danger)',
-                confirmButtonText: '<i class="fas fa-trash"></i> {{ trans('general.yes') . ', ' . trans('general.delete') }}',
-                cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
-            }).then((result) => {
-                //if user clicks on delete
-                if (result.value) {
-                    // calling destroy method to delete
-                @this.call('deleteIndicator', id);
-                }
+            @this.
+            on('triggerEdit', id => {
+                Livewire.emit('loadIndicatorEditData', id);
+                $('#indicator-edit-modal').modal('toggle');
             });
-        });
+            @this.
+            on('triggerDeleteIndicator', id => {
+                Swal.fire({
+                    title: '{{ trans('messages.warning.sure') }}',
+                    text: '{{ trans('messages.warning.delete') }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--danger)',
+                    confirmButtonText: '<i class="fas fa-trash"></i> {{ trans('general.yes') . ', ' . trans('general.delete') }}',
+                    cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
+                }).then((result) => {
+                    //if user clicks on delete
+                    if (result.value) {
+                        // calling destroy method to delete
+                        @this.
+                        call('deleteIndicator', id);
+                    }
+                });
+            });
         });
     </script>
 @endpush

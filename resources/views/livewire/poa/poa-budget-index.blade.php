@@ -45,9 +45,7 @@
                                 <td class="border text-center " rowspan="{{$activity->accounts->count()}}">{{$activity->text}}</td>
                             @endif
                             <td class="border text-center ">
-                                <a href="{{route('budget.showAccount',$account->id)}}">
-                                    {{$account->code}}
-                                </a>
+                                {{$account->code}}
                             </td>
                             <td>{{ money( $account->balancePr->getAmount()) }} </td>
                             <td class="border text-center ">{{$account->balanceRe}}</td>
@@ -96,9 +94,7 @@
                                 <td class="border text-center " rowspan="{{$activity->accounts->count()}}">{{$activity->name}}</td>
                             @endif
                             <td class="border text-center ">
-                                <a href="{{route('budget.showAccount',$account->id)}}">
                                     {{$account->code}}
-                                </a>
                             </td>
                             <td class="border text-center">
                                 {{ $account->description}}
@@ -158,11 +154,11 @@
             on('approveAll', id => {
                 Swal.fire({
                     title: '{{ trans('messages.warning.sure') }}',
-                    text: '{{ trans('general.approve_all_budget_activity_project') }}',
+                    text: '{{ trans('general.approve_all_budget_activity_poa') }}',
                     icon: 'success',
                     showCancelButton: true,
                     confirmButtonColor: 'var(--success)',
-                    confirmButtonText: '<i class="fas fa-check-circle"></i> {{ trans('general.yes') . ', ' . trans('general.delete') }}',
+                    confirmButtonText: '<i class="fas fa-check-circle"></i> {{ trans('general.yes') . ', ' . trans('general.approve') }}',
                     cancelButtonText: '<i class="fas fa-times"></i> {{ trans('general.no') . ', ' . trans('general.cancel') }}'
                 }).then((result) => {
                     if (result.value) {

@@ -18,6 +18,17 @@ class IndicatorSourceController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:admin-manage-catalogs', ['only' => ['index']]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
      * @return Application|Factory|View
      */
     public function index()

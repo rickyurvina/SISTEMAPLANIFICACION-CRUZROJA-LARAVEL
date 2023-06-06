@@ -100,14 +100,14 @@
                                 @foreach($project->tasks->where('type','task') as $task)
                                     <tr>
                                         <td class="border p-2 text-center">{{$task->text}}</td>
-                                        <td>{{ $task->getBalanceEncodedApproved() }}</td>
+                                        <td>{{ $task->getTotalBudget($transaction) }}</td>
                                         <td>{{ $task->getBalanceAs() }}</td>
                                         <td class="border p-2 text-center">
                                             <div class="progress">
                                                 <div class="progress-bar progress-bar-striped bg-info"
-                                                     role="progressbar" style="width: {{$task->getPercentageBudget()}}%"
-                                                     aria-valuenow="{{$task->getPercentageBudget()}}" aria-valuemin="0"
-                                                     aria-valuemax="100">{{$task->getPercentageBudget()}}%
+                                                     role="progressbar" style="width: {{$task->getPercentageBudget($transaction)}}%"
+                                                     aria-valuenow="{{$task->getPercentageBudget($transaction)}}" aria-valuemin="0"
+                                                     aria-valuemax="100">{{$task->getPercentageBudget($transaction)}}%
                                                 </div>
                                             </div>
                                         </td>

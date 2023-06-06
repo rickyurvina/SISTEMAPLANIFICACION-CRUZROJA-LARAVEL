@@ -18,7 +18,9 @@
             <div class="d-flex flex-nowrap">
                 <div class="flex-grow-1 w-100" style="overflow: hidden auto">
                     <div class="d-flex flex-wrap">
-                        <x-label-section>Equipo de Proyecto</x-label-section>
+                        <x-label-section>Equipo de Proyecto
+                            <x-tooltip-help message="Permite seleccionar los miembros del equipo del proyecto"></x-tooltip-help>
+                        </x-label-section>
                         <button class="btn btn-sm btn-success ml-auto mr-2" x-on:click="show = true">
                             <i class="fas fa-plus mr-1"></i>{{ trans('general.add_new') }}
                         </button>

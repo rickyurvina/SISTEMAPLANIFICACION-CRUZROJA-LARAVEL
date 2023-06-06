@@ -103,9 +103,6 @@ class ProjectResultsActivities extends TableComponent
         })->orderBy('id', 'asc')
             ->where('project_id', $this->project->id)
             ->where('type', 'task')
-            ->when(!(user()->hasRole('super-admin')), function ($q) {
-                $q->where('owner_id', user()->id);
-            })
             ->search('text', $this->search)
             ->get();
         return view('livewire.projects.activities.project-results-activities', compact('activities'));
@@ -139,13 +136,8 @@ class ProjectResultsActivities extends TableComponent
     {
         $response = $this->ajaxDispatch(new DeleteIndicator($id));
         if ($response['success']) {
-            if ($response['data']) {
-                $message = trans('general.cant_delete_indicator');
-                flash($message)->error();
-            } else {
-                $message = trans_choice('messages.success.deleted', 0, ['type' => trans_choice('general.indicators', 1)]);
-                flash($message)->success();
-            }
+            $message = trans_choice('messages.success.deleted', 0, ['type' => trans_choice('general.indicators', 1)]);
+            flash($message)->success();
         } else {
             $message = $response['message'];
             flash($message)->error();

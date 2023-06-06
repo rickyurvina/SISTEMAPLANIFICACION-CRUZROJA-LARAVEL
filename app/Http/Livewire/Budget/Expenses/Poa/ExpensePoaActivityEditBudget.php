@@ -40,6 +40,7 @@ class ExpensePoaActivityEditBudget extends Component
     public $budgetItemOld;
 
     public $ids = array();
+    public $tree;
 
     protected $listeners = ['loadExpensePoa'];
 
@@ -71,76 +72,60 @@ class ExpensePoaActivityEditBudget extends Component
         $this->itemAmount = $this->transactionDetail->credit->getAmount() / 100;
         $this->budgetItemOld = $this->account->code;
         $this->fields = $this->account->settings;
-        foreach ($this->fields as $key => $field) {
+        $maxLevel = max(array_column($this->fields, 'level'));
+        $keyMaxLevel = array_search($maxLevel, array_column($this->fields, 'level'));
+        $keyMaxLevel_1 = array_search($maxLevel - 1, array_column($this->fields, 'level'));
+        $keyIndicators = array_search('Indicadores', array_column($this->fields, 'label'));
+        $keyCatalogGeographic = array_search('Juntas Provinciales', array_column($this->fields, 'label'));
+        $keyResults = array_search('Resultados Proyecto', array_column($this->fields, 'label'));
+        $keyActivity = array_search('Actividad', array_column($this->fields, 'label'));
+        $keyLocation = array_search('Localidad', array_column($this->fields, 'label'));
+        $indicator = $this->activity->measure;
+        $planElementOfIndicator = $indicator->indicatorable;
+        $this->tree = $planElementOfIndicator->ancestorsAndSelf;
+        foreach ($this->tree as $planElement) {
+            $key = array_search($planElement->planRegistered->name, array_column($this->fields, 'label'));
+            $this->fields[$key]['format'] = $planElement->code;
+            $this->fields[$key]['value'] = $planElement->code;
+            $this->fields[$key]['id'] = $planElement->id;
+        }
+
+        if ($keyIndicators) {
             $item = '';
-            if ($field['level'] == '10') {
-                $item .= $this->activity->location->full_code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->location->id;
-            }
-            if ($field['level'] == '9') {
-                $item .= $this->activity->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->id;
-            }
-            if ($field['level'] == '8') {
-                $item .= '';
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = '';
-            }
-            if ($field['level'] == '7') {
-                $item .= $this->activity->location->full_code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->location->id;
-            }
-            if ($field['level'] == '6') {
-                $this->fields[$key]['format'] = '';
-                $this->fields[$key]['value'] = '';
-                $this->fields[$key]['id'] = '';
-            }
-            if ($field['level'] == '5') {
-                $item .= $this->activity->measure->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->measure->id;
-            }
-            if ($field['level'] == '4') {
-                $item .= $this->activity->measure->indicatorable->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->measure->indicatorable->id;
-            }
-            if ($field['level'] == '3') {
-                $item .= $this->activity->measure->indicatorable->parent->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->measure->indicatorable->parent->id;
-            }
-            if ($field['level'] == '2') {
-                $item .= $this->activity->measure->indicatorable->parent->parent->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->measure->indicatorable->parent->parent->id;
-            }
-            if ($field['level'] == '1') {
-                $item .= $this->activity->measure->indicatorable->parent->parent->parent->code;
-                $this->fields[$key]['format'] = $item;
-                $this->fields[$key]['value'] = $item;
-                $this->fields[$key]['id'] = $this->activity->measure->indicatorable->parent->parent->parent->id;
-            }
-            if ($field['level'] == '11') {
-                array_push($this->fieldsOptionals, $field);
-            }
-            if ($field['level'] == '12') {
-                array_push($this->fieldsOptionals, $field);
-            }
+            $item .= $indicator->code;
+            $this->fields[$keyIndicators]['format'] = $item;
+            $this->fields[$keyIndicators]['value'] = $item;
+            $this->fields[$keyIndicators]['id'] = $indicator->id;
+        }
+        if ($keyCatalogGeographic) {
+            $item = '';
+            $item .= $this->activity->location->full_code;
+            $this->fields[$keyCatalogGeographic]['format'] = $item;
+            $this->fields[$keyCatalogGeographic]['value'] = $item;
+            $this->fields[$keyCatalogGeographic]['id'] = $this->activity->location->id;
+        }
+        if ($keyActivity) {
+            $item = '';
+            $item .= $this->activity->code;
+            $this->fields[$keyResults]['format'] = $item;
+            $this->fields[$keyResults]['value'] = $item;
+            $this->fields[$keyResults]['id'] = $this->activity->id;
+        }
+        if ($keyLocation) {
+            $item = '';
+            $item .= $this->activity->location->full_code;
+            $this->fields[$keyResults]['format'] = $item;
+            $this->fields[$keyResults]['value'] = $item;
+            $this->fields[$keyResults]['id'] = $this->activity->location->id;
+        }
+        if ($this->fields[$keyMaxLevel_1]) {
+            array_push($this->fieldsOptionals, $this->fields[$keyMaxLevel_1]);
+        }
+        if ($this->fields[$keyMaxLevel]) {
+            array_push($this->fieldsOptionals, $this->fields[$keyMaxLevel]);
         }
         foreach ($this->fieldsOptionals as $key => $field2) {
-            if (isset($field2['meta']['source']) && $field['meta']['source']['type'] == BudgetStructure::SOURCE_TYPE_MODEL) {
+            if (isset($field2['meta']['source']) && $field2['meta']['source']['type'] == BudgetStructure::SOURCE_TYPE_MODEL) {
 
                 $model = app($field2['meta']['source']['class']);
 
@@ -179,59 +164,65 @@ class ExpensePoaActivityEditBudget extends Component
     {
         $item2 = '';
         $this->ids = [];
-        foreach ($this->fieldsOptionals as $field2) {
-            if ($field2['value']) {
-                $item2 .= $field2['value'] . '.';
-                $model = app($field2['meta']['source']['class']);
-                $query = $model->query();
-                foreach ($field2['meta']['source']['conditions'] as $condition) {
-                    $query->where($condition['field'], $condition['op'], $condition['value']);
-                }
-                $result = $query->get();
-                $result = $result->where($field2['meta']['source']['field'], $field2['value'])->first();
-                $this->ids[] = [
-                    'id' => $result->id,
-                ];
-            } else {
-                $item2 .= $field2['format'] . '.';
-            }
-        }
-        if ($this->ids) {
-            foreach ($this->fieldsOptionals as $index => $item) {
-                if (isset($this->ids[$index])) {
-                    $this->fieldsOptionals[$index]['id'] = $this->ids[$index]['id'];
+        if ($this->fields) {
+            $maxLevel = max(array_column($this->fields, 'level'));
+            $keyMaxLevel = array_search($maxLevel, array_column($this->fields, 'level'));
+            $keyMaxLevel_1 = array_search($maxLevel - 1, array_column($this->fields, 'level'));
+            foreach ($this->fieldsOptionals as $field2) {
+                if ($field2['value']) {
+                    $item2 .= $field2['value'] . '.';
+                    $model = app($field2['meta']['source']['class']);
+                    $query = $model->query();
+                    foreach ($field2['meta']['source']['conditions'] as $condition) {
+                        $query->where($condition['field'], $condition['op'], $condition['value']);
+                    }
+                    $result = $query->get();
+                    $result = $result->where($field2['meta']['source']['field'], $field2['value'])->first();
+                    $this->ids[] = [
+                        'id' => $result->id,
+                    ];
+                } else {
+                    $item2 .= $field2['format'] . '.';
                 }
             }
-        }
-        $item = '';
 
-        if ($this->fieldsOptionals) {
-            $this->fields[10]['format'] = $this->fieldsOptionals[0]['value'];
-            $this->fields[10]['value'] = $this->fieldsOptionals[0]['value'];
-            $this->fields[10]['id'] = $this->fieldsOptionals[0]['id'];
-            $this->fields[11]['format'] = $this->fieldsOptionals[1]['value'];
-            $this->fields[11]['value'] = $this->fieldsOptionals[1]['value'];
-            $this->fields[11]['id'] = $this->fieldsOptionals[1]['id'];
-        }
-
-
-        foreach ($this->fields as $key => $field) {
-            if ($field['format']) {
-                $item .= $field['format'] . '.';
-            } else {
-                if ($field['level'] != '11' || $field['level'] != '12') {
-                    $item .= '999' . '.';
+            if ($this->ids) {
+                foreach ($this->fieldsOptionals as $index => $item) {
+                    if (isset($this->ids[$index])) {
+                        $this->fieldsOptionals[$index]['id'] = $this->ids[$index]['id'];
+                    }
                 }
             }
-        }
-        $this->dispatchBrowserEvent('loadBudgets');
+            $item = '';
 
-        return substr($item, 0, -1);
+            if ($this->fieldsOptionals) {
+                $this->fields[$keyMaxLevel_1]['format'] = $this->fieldsOptionals[0]['value'];
+                $this->fields[$keyMaxLevel_1]['value'] = $this->fieldsOptionals[0]['value'];
+                $this->fields[$keyMaxLevel_1]['id'] = $this->fieldsOptionals[0]['id'];
+                $this->fields[$keyMaxLevel]['format'] = $this->fieldsOptionals[1]['value'];
+                $this->fields[$keyMaxLevel]['value'] = $this->fieldsOptionals[1]['value'];
+                $this->fields[$keyMaxLevel]['id'] = $this->fieldsOptionals[1]['id'];
+            }
+
+            foreach ($this->fields as $key => $field) {
+                if ($field['format']) {
+                    $item .= $field['format'] . '.';
+                } else {
+                    if ($field['level'] != $keyMaxLevel_1 || $field['level'] != $keyMaxLevel) {
+                        $item .= '999' . '.';
+                    }
+                }
+            }
+            $this->dispatchBrowserEvent('loadBudgets');
+
+            return substr($item, 0, -1);
+        }
+
     }
 
     public function resetForm()
     {
-        $this->reset(['itemName', 'itemDescription', 'itemAmount']);
+        $this->reset(['itemName', 'itemDescription', 'itemAmount', 'fields', 'fieldsOptionals']);
         $this->resetErrorBag();
         $this->resetValidation();
     }
@@ -267,7 +258,7 @@ class ExpensePoaActivityEditBudget extends Component
         $response = $this->ajaxDispatch(new BudgetExpenseEdit($accountData));
 
         if ($response['success']) {
-            flash(trans_choice('messages.success.updated', 0, ['type' => __('budget . expense')]))->success()->livewire($this);
+            flash(trans_choice('messages.success.updated', 0, ['type' => __('budget.expense')]))->success()->livewire($this);
             $this->emit('updateIndexExpensesPoaActivity');
             $this->emit('toggleEditExpensePoaActivity');
             $this->resetForm();

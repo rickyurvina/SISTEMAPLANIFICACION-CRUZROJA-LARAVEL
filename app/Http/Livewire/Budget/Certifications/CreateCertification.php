@@ -13,6 +13,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CreateCertification extends Component
@@ -42,7 +43,7 @@ class CreateCertification extends Component
     public function mount(Transaction $transaction)
     {
         $this->transaction = $transaction;
-        $this->transactionPr = Transaction::where('year',$transaction->year)->whereStatus(Approved::label())->first();
+        $this->transactionPr = Transaction::where('year', $transaction->year)->whereStatus(Approved::label())->first();
         $this->poa = Poa::where('year', $this->transaction->year)->first();
         $this->projects = Project::whereIn('phase', [Project::PHASE_PLANNING, Project::PHASE_IMPLEMENTATION])->get();
     }
@@ -143,34 +144,44 @@ class CreateCertification extends Component
         if (count($this->certificationsValues) === 0) {
             flash('No se han asignado valores a la certificación')->warning()->livewire($this);
         } else {
-            self::updatedCertificationsValues();
-            $number = Transaction::query()->where([
-                    ['year', '=', $this->transaction->year],
-                    ['type', '=', Transaction::TYPE_CERTIFICATION],
-                ])->max('number') + 1;
-            $newTransaction = Transaction::create([
-                'year' => $this->transaction->year,
-                'description' => $this->description,
-                'type' => Transaction::TYPE_CERTIFICATION,
-                'number' => $number,
-                'created_by' => user()->id,
-                'company_id' => session('company_id'),
-            ]);
-            foreach ($this->certificationsValues as $index => $item) {
-                if ($this->expensesPoa) {
-                    $expense = $this->expensesPoa->find($index);
-                } else {
-                    $expense = $this->expensesProject->find($index);
+            if (self::updatedCertificationsValues()) {
+                try {
+                    $number = Transaction::query()->where([
+                            ['year', '=', $this->transaction->year],
+                            ['type', '=', Transaction::TYPE_CERTIFICATION],
+                        ])->max('number') + 1;
+                    $newTransaction = Transaction::create([
+                        'year' => $this->transaction->year,
+                        'description' => $this->description,
+                        'type' => Transaction::TYPE_CERTIFICATION,
+                        'number' => $number,
+                        'created_by' => user()->id,
+                        'company_id' => session('company_id'),
+                    ]);
+                    foreach ($this->certificationsValues as $index => $item) {
+                        if ($this->expensesPoa) {
+                            $expense = $this->expensesPoa->find($index);
+                        } else {
+                            $expense = $this->expensesProject->find($index);
+                        }
+                        DB::beginTransaction();
+                        $newTransaction->debit($item, $this->description, $expense->id);
+                        DB::commit();
+                    }
+                    flash('Guardado Exitosamente')->success();
+                    return redirect()->route('budgets.certifications', $this->transaction);
+                }catch (\Exception $exception){
+                    DB::rollBack();
+                    flash($exception->getMessage())->error()->livewire($this);
                 }
-                $newTransaction->debit($item, $this->description, $expense->id);
+
             }
-            flash('Guardado Exitosamente')->success();
-            return redirect()->route('budgets.certifications', $this->transaction);
         }
     }
 
     public function updatedCertificationsValues()
     {
+        $validate=true;
         foreach ($this->certificationsValues as $index => $item) {
             if ($this->expensesPoa) {
                 $expense = $this->expensesPoa->find($index);
@@ -180,8 +191,10 @@ class CreateCertification extends Component
             if ($expense->balance->getAmount() / 100 < $item) {
                 flash('El valor no puede ser mayor al valor por comprometer')->warning()->livewire($this);
                 unset($this->certificationsValues[$index]);
+               $validate=false;
             }
         }
+        return $validate;
     }
 
     public function clearFilters()

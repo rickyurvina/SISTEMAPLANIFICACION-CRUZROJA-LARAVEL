@@ -17,20 +17,21 @@ class ProjectActivities extends Component
     public $existsResults = false;
     public $messagesList;
     public $results;
-
+    public $limitSup;
+    public $limitMin;
 
     protected $listeners = ['timeUpdated'];
 
-    public function mount(Project $project, $messagesList=null)
+    public function mount(Project $project, $messagesList = null)
     {
         $this->project = $project->load(['objectives.results']);
-        $this->results=Task::where('project_id',$project->id)
-            ->orderBy('id','asc')
-            ->where('type','!=','task')
-            ->where('parent','!=','root')
+        $this->results = Task::where('project_id', $project->id)
+            ->orderBy('id', 'asc')
+            ->where('type', '!=', 'task')
+            ->where('parent', '!=', 'root')
             ->get();
         if ($project->estimated_time) {
-            $this->time = explode(',', $project->estimated_time)[3];
+            $this->time = $project->estimated_time;
             foreach ($project->objectives as $objective) {
                 foreach ($objective->results as $result) {
                     if ($result->planning) {
@@ -44,12 +45,19 @@ class ProjectActivities extends Component
                 $this->existsResults = true;
             }
         }
-        $this->messagesList=$messagesList;
+        $this->messagesList = $messagesList;
+
+        $this->limitMin = 1;
+        if ($this->time < 13) {
+            $this->limitSup = $this->time;
+        } else {
+            $this->limitSup = 12;
+        }
     }
 
-    public function timeUpdated(Project $project, $messagesList=null)
+    public function timeUpdated(Project $project, $messagesList = null)
     {
-        $this->messagesList=$messagesList;
+        $this->messagesList = $messagesList;
         $this->reset(['plans', 'time', 'project']);
         $this->mount($project);
     }
@@ -82,5 +90,25 @@ class ProjectActivities extends Component
             $this->plans[$resultId][$i] = true;
         }
         $this->updatedPlans();
+    }
+
+    public function plusTime()
+    {
+        $this->limitSup += 12;
+        $this->limitMin += 12;
+        if ($this->limitSup > $this->time) {
+            $this->limitSup = $this->time;
+            $this->limitMin = $this->limitSup - 11;
+        }
+    }
+
+    public function decreaseTime()
+    {
+        $this->limitSup -= 12;
+        $this->limitMin -= 12;
+        if ($this->limitSup < 12) {
+            $this->limitSup = 12;
+            $this->limitMin = 1;
+        }
     }
 }

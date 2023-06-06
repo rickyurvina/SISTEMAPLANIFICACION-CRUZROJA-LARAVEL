@@ -85,7 +85,7 @@
 
 
 <div class="logo">
-    <img src="{{ asset('img/logo_cre.jpg') }}" alt="logo"/>
+    <img src="{{ public_path('img/logo_cre.jpg') }}" alt="logo"/>
 </div>
 
 <h1 class="title-project">
@@ -274,7 +274,6 @@
     {{--        </a>--}}
     {{--    </li>--}}
 </ol>
-<div style="page-break-after: always;"></div>
 <h2 id="id-problem">1. IDENTIFICACIÓN DEL PROBLEMA</h2>
 {!! $project->problem_identified !!}
 
@@ -380,8 +379,6 @@
     </div>
 @endif
 
-<div style="page-break-after: always;"></div>
-
 <h2 id="work-team">6. EQUIPO DE TRABAJO</h2>
 @if($project->members->count()>0)
     <table class="summary-table w-100">
@@ -451,7 +448,6 @@
         <strong>No existe </strong>equipo de proyecto definido.
     </div>
 @endif
-<div style="page-break-after: always;"></div>
 
 <br/>
 <h2 id="stakeholders">7. ACTORES CLAVE</h2>
@@ -524,7 +520,6 @@
         <strong>No existen </strong>actores clave.
     </div>
 @endif
-<div style="page-break-after: always;"></div>
 
 <br/>
 <h2 id="risk">8. RIESGOS</h2>
@@ -543,7 +538,6 @@
 @endif
 
 <br/>
-<div style="page-break-after: always;"></div>
 
 <h2 id="schedule">9. CRONOGRAMA</h2>@php
     $maxCols=8;
@@ -597,10 +591,7 @@
                             </td>
                             @php
                                 $l++;
-                                if($l>9)
-                                    {
-                                       echo('<div style="page-break-after: always;"></div>');
-                                    }
+
                             @endphp
                         @endfor
                     </tr>
@@ -623,17 +614,9 @@
     @endphp
 @endwhile
 
-<div style="page-break-after: always;"></div>
-
 <br/>
 <h2 id="budget">10. PRESUPUESTO</h2>
 {{'$'.number_format($project->estimated_amount,2) }}
-
-{{--<br/>--}}
-{{--<h2 id="requirements">11. REQUISITOS DE APROBACIÓN DEL PROYECTO</h2>--}}
-
-{{--<br/>--}}
-{{--<h2 id="approval">12. APROBACIONES</h2>--}}
 
 </body>
 </html>

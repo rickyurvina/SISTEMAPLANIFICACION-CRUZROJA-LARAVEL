@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Strategy;
 
 use App\Abstracts\Http\Controller;
+use App\Http\Middleware\Azure\Azure;
 use App\Jobs\Strategy\CreatePlanDetail;
 use App\Jobs\Strategy\DeletePlan;
 use App\Jobs\Strategy\DeletePlanDetail;
@@ -24,19 +25,27 @@ class PlanController extends Controller
     use Jobs;
 
     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct(Azure $azure)
+    {
+        $this->middleware('azure');
+        $this->middleware('permission:strategy-manage|strategy-manage-plans|strategy-view-plans', ['only' => ['index','detail']]);
+        $this->middleware('permission:strategy-manage|strategy-view-plans|strategy-view', ['only' => ['articulations','showPlanDetailsIndicators']]);
+        $this->middleware('permission:strategy-manage|strategy-manage-plans', ['only' => ['detailStore','detailEdit','detailUpdate','destroy']]);
+    }
+
+    /**
      * Calls Plan default view.
      *
      * @return Application|Factory|View
      */
     public function index()
     {
-
-        if (user()->cannot('strategy-crud-strategy') && user()->cannot('strategy-read-strategy') && user()->cannot('strategy-plan-crud-strategy')) {
-            abort(403);
-        }else{
-            $plans = Plan::with(['planDetails','planRegisteredTemplateDetails'])->where('company_id', session('company_id'))->collect();
-            return view('modules.strategy.plan.index', compact('plans'));
-        }
+        $plans = Plan::with(['planDetails', 'planRegisteredTemplateDetails'])->where('company_id', session('company_id'))->collect();
+        return view('modules.strategy.plan.index', compact('plans'));
     }
 
     /**
@@ -55,7 +64,6 @@ class PlanController extends Controller
 
     public function listDetails(Plan $plan)
     {
-
         $children = $plan->planRegisteredTemplateDetails->where('parent_id', null);
         return view('modules.strategy.plan.index-level-1')->with(compact('plan', 'children'));
     }
@@ -66,65 +74,63 @@ class PlanController extends Controller
      */
     public function detail(Request $request)
     {
-        if (user()->cannot('strategy-crud-strategy') && user()->cannot('strategy-read-strategy')) {
-            abort(403);
-        }else{
-            $level = $request->level;
-            $id = $request->plan;
-            $planDetailId = $request->planDetailId;
-            $itemId = $request->itemId;
-            $planTemplateDetailId = $request->planTemplateDetailId;
 
-            if ($request->detail) {
-                $planRegisteredTemplateDetail = PlanRegisteredTemplateDetails::find($request->detail);
-            } else {
-                $planRegisteredTemplateDetail = Plan::find($id)->planRegisteredTemplateDetails->where('parent_id', null)->first();
-            }
-            if ($level) {
-                $plan = Plan::with(['planRegisteredTemplateDetails.childs', 'planDetails.parent'])->find($id);
-                $planDetails = PlanDetail::where('level', $level)
-                    ->where('plan_registered_template_detail_id', $planRegisteredTemplateDetail->id)
-                    ->get();
-                $itemId = $planRegisteredTemplateDetail->id;
-                $planDetailId = $planRegisteredTemplateDetail->id;
-                $title = $plan->name;
-            } else {
-                $planDetails = PlanDetail::with(['planArticulationSource', 'indicators', 'children', 'parent'])
-                    ->where('plan_registered_template_detail_id', $id)
-                    ->where('parent_id', $planDetailId)
-                    ->get();
-                $plan = Plan::find($planRegisteredTemplateDetail->plan_id);
-                $level = $planRegisteredTemplateDetail->level;
-                $planDetail = PlanDetail::find($planDetailId);
-                $title = $planDetail->name;
-                $itemId = $planRegisteredTemplateDetail->id;
+        $level = $request->level;
+        $id = $request->plan;
+        $planDetailId = $request->planDetailId;
+        $itemId = $request->itemId;
+        $planTemplateDetailId = $request->planTemplateDetailId;
 
-            }
-            $planRegisteredTemplateDetailsBreadcrumbs = $planRegisteredTemplateDetail
-                ->getPath($itemId ?? null, $plan->id, $planRegisteredTemplateDetail->id ?? null, $planDetailId);
+        if ($request->detail) {
+            $planRegisteredTemplateDetail = PlanRegisteredTemplateDetails::find($request->detail);
+        } else {
+            $planRegisteredTemplateDetail = Plan::find($id)->planRegisteredTemplateDetails->where('parent_id', null)->first();
+        }
+        if ($level) {
+            $plan = Plan::with(['planRegisteredTemplateDetails.childs', 'planDetails.parent'])->find($id);
+            $planDetails = PlanDetail::where('level', $level)
+                ->where('plan_registered_template_detail_id', $planRegisteredTemplateDetail->id)
+                ->get();
+            $itemId = $planRegisteredTemplateDetail->id;
+            $planDetailId = $planRegisteredTemplateDetail->id;
+            $title = $plan->name;
+        } else {
+            $planDetails = PlanDetail::with(['planArticulationSource', 'indicators', 'children', 'parent'])
+                ->where('plan_registered_template_detail_id', $id)
+                ->where('parent_id', $planDetailId)
+                ->get();
+            $plan = Plan::find($planRegisteredTemplateDetail->plan_id);
+            $level = $planRegisteredTemplateDetail->level;
+            $planDetail = PlanDetail::find($planDetailId);
+            $title = $planDetail->name;
+            $itemId = $planRegisteredTemplateDetail->id;
 
-            $articulations = [];
-            foreach ($planDetails as $index => $pd) {
-                foreach ($pd->planArticulationSource as $articulation) {
-                    $key = $articulation->plan_target_id;
-                    if (array_key_exists($key, $articulations)) {
-                        $articulations[$key][] = $articulation->plan_source_detail_id;
-                    } else {
-                        $articulations[$key][] = $articulation->plan_source_detail_id;
-                    }
+        }
+        $planRegisteredTemplateDetailsBreadcrumbs = $planRegisteredTemplateDetail
+            ->getPath($itemId ?? null, $plan->id, $planRegisteredTemplateDetail->id ?? null, $planDetailId);
+
+        $articulations = [];
+        foreach ($planDetails as $index => $pd) {
+            foreach ($pd->planArticulationSource as $articulation) {
+                $key = $articulation->plan_target_id;
+                if (array_key_exists($key, $articulations)) {
+                    $articulations[$key][] = $articulation->plan_source_detail_id;
+                } else {
+                    $articulations[$key][] = $articulation->plan_source_detail_id;
                 }
             }
-            $plans = Plan::get();
-            return view('modules.strategy.plan.detail', compact('planRegisteredTemplateDetail', 'planDetails'))
-                ->with('planId', $id)
-                ->with('plan', $plan)
-                ->with('level', $level)
-                ->with('title', $title)
-                ->with('planDetailId', $planDetailId)
-                ->with('articulations', $articulations)
-                ->with('plans', $plans)
-                ->with('planRegisteredTemplateDetailsBreadcrumbs', $planRegisteredTemplateDetailsBreadcrumbs);
         }
+        $plans = Plan::get();
+        return view('modules.strategy.plan.detail', compact('planRegisteredTemplateDetail', 'planDetails'))
+            ->with('planId', $id)
+            ->with('plan', $plan)
+            ->with('level', $level)
+            ->with('title', $title)
+            ->with('planDetailId', $planDetailId)
+            ->with('articulations', $articulations)
+            ->with('plans', $plans)
+            ->with('planRegisteredTemplateDetailsBreadcrumbs', $planRegisteredTemplateDetailsBreadcrumbs);
+
     }
 
     /**
@@ -256,9 +262,6 @@ class PlanController extends Controller
 
     public function showPlanDetailsIndicators(Request $request, $planDetailId = null)
     {
-        if (user()->cannot('strategy-crud-strategy') && user()->cannot('strategy-read-strategy')) {
-            abort(403);
-        }
         return view('modules.strategy.plan.plan_details_indicators',
             [
                 'planDetailId' => $planDetailId,

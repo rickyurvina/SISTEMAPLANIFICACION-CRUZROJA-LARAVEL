@@ -7,6 +7,7 @@ use App\Models\Measure\Score;
 use App\Models\Strategy\Plan;
 use App\Models\Strategy\PlanDetail;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 trait HasScore
 {
@@ -30,17 +31,12 @@ trait HasScore
     public function scoreDashboard(Period $period, $model): array
     {
         $dataUsed = [];
-        $score = null;
-        $count = 0;
-        $calculatedScore = null;
-
         if ($model->hasRelation('measures')) {
             foreach ($model->measures()->get() as $measure) {
-                $sc = $measure->score($period->id);
-                if ($sc && !is_null($sc['score'])) {
-                    $score += $sc['score'] * $measure->weight;
-                    $count += $measure->weight;
-                }
+                $sc = Score::where('scoreable_type', $measure::class)
+                    ->where('scoreable_id', $measure->id)
+                    ->where('period_id', $period->id)
+                    ->first();
                 $dataUsed[] = [
                     'id' => $measure->id,
                     'code' => $measure->code,
@@ -58,11 +54,10 @@ trait HasScore
 
         if ($model->children->count()) {
             foreach ($model->children()->get() as $child) {
-                $scoreOfPeriod = $child->scores()->wherePeriodId($period->id)->first();
-                if ($scoreOfPeriod) {
-                    $score += $scoreOfPeriod->score * $child->weight;
-                    $count += $child->weight;
-                }
+                $scoreOfPeriod = Score::where('scoreable_type', $child::class)
+                    ->where('scoreable_id', $child->id)
+                    ->where('period_id', $period->id)
+                    ->first();
                 $dataUsed[] = [
                     'id' => $child->id,
                     'code' => $child->code,
@@ -77,18 +72,18 @@ trait HasScore
             }
         }
 
-        if ($count) {
-            $calculatedScore = $score / $count;
-        }
-
+        $scoreModel = Score::where('scoreable_type', $model::class)
+            ->where('scoreable_id', $model->id)
+            ->where('period_id', $period->id)
+            ->first();
         return [
             'period_id' => $period->id,
             'frequency' => $period->name,
             'year' => $period->name != $period->start_date->year ? $period->start_date->year : '',
-            'value' => $calculatedScore ? round($calculatedScore, 1) : null,
-            'score' => $calculatedScore ? round($calculatedScore, 1) : null,
+            'value' => $scoreModel->score ? round($scoreModel->score, 1) : null,
+            'score' => $scoreModel->score ? round($scoreModel->score, 1) : null,
             'thresholds' => [],
-            'color' => Score::COLOR[Score::colorByScore($calculatedScore)],
+            'color' => $scoreModel->color ? Score::COLOR[Score::colorByScore($scoreModel->score)] : Score::COLOR[Score::colorByScore(null)],
             'dataUsed' => $dataUsed
         ];
     }
@@ -118,6 +113,7 @@ trait HasScore
                     'weight' => $measure->weight,
                     'thresholds' => [],
                     'type' => 'measure',
+                    'class' => $measure::class,
                 ];
             }
         }
@@ -128,6 +124,7 @@ trait HasScore
                 $score += $sc * $child->weight;
                 $count += $child->weight;
             }
+
             $dataUsed[] = [
                 'id' => $child->id,
                 'code' => $child->code,
@@ -138,7 +135,9 @@ trait HasScore
                 'weight' => $child->weight,
                 'thresholds' => [],
                 'type' => 'objective',
+                'class' => $child::class,
             ];
+
         }
 
         if ($count) {
@@ -155,6 +154,69 @@ trait HasScore
             'color' => Score::COLOR[Score::colorByScore($calculatedScore)],
             'dataUsed' => $dataUsed
         ];
+    }
+
+    /**
+     * @param Period $period
+     * @return void
+     */
+    public function updateScore(Period $period)
+    {
+        $periodId = $period->id;
+        $calculatedScore = null;
+        $score = null;
+        $count = 0;
+
+        if ($this->hasRelation('measures')) {
+            foreach ($this->measures()->get() as $measure) {
+                $sc = $measure->score($periodId);
+                if ($sc && !is_null($sc['score'])) {
+                    $score += $sc['score'] * $measure->weight;
+                    $count += $measure->weight;
+                }
+
+                $scoreMeasure = Score::where('scoreable_type', $measure::class)
+                    ->where('scoreable_id', $measure->id)
+                    ->where('period_id', $periodId)
+                    ->first();
+
+                if ($scoreMeasure && is_numeric($sc)) {
+                    $scoreMeasure->score = $sc ? round($sc, 1) : null;
+                    $scoreMeasure->save();
+                }
+            }
+        }
+
+        foreach ($this->children()->get() as $child) {
+            $sc = $child->childScore($child, $periodId);
+            if ($sc && !is_null($sc)) {
+                $score += $sc * $child->weight;
+                $count += $child->weight;
+            }
+
+            $scorePlanDetail = Score::where('scoreable_type', $child::class)
+                ->where('scoreable_id', $child->id)
+                ->where('period_id', $periodId)
+                ->first();
+            if ($scorePlanDetail) {
+                if ($sc > 0) {
+                    $scorePlanDetail->score = $sc ? round($sc, 1) : null;
+                    $scorePlanDetail->save();
+                }
+            }
+        }
+
+        if ($count) {
+            $calculatedScore = $score / $count;
+        }
+        $scoreModel = Score::where('scoreable_type', $this::class)
+            ->where('scoreable_id', $this->id)
+            ->where('period_id', $periodId)
+            ->first();
+        if ($scoreModel) {
+            $scoreModel->score = $calculatedScore ? round($calculatedScore, 1) : null;
+            $scoreModel->save();
+        }
     }
 
     public function childScore($child, $periodId)

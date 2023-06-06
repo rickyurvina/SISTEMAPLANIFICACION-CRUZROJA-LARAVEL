@@ -49,6 +49,7 @@ class ExpensePoaActivityIndex extends Component
 
         $total = money($total);
         $expenses = $expenses->orderBy('id', 'desc')->collect();
+        $this->dispatchBrowserEvent('reloadDelete');
         return view('livewire.budget.expenses.poa.expense-poa-activity-index', compact('expenses', 'total'));
     }
 }

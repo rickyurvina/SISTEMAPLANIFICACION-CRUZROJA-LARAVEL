@@ -37,29 +37,17 @@ class CreateIndicator extends Job
     {
         DB::transaction(function () {
             $result = array();
-            if ($this->request->threshold_type == Threshold::ASCENDING) {
-                $result[0] = ['state' => Threshold::DANGER, 'max' => $this->request->maxAD];
-                $result[1] = ['state' => Threshold::WARNING, 'min' => $this->request->minAW, 'max' => $this->request->maxAW];
-                $result[2] = ['state' => Threshold::SUCCESS, 'min' => $this->request->minAS];
-            } else {
-                if ($this->request->threshold_type == Threshold::DESCENDING) {
-                    $result[0] = ['state' => Threshold::DANGER, 'max' => $this->request->maxDD];
-                    $result[1] = ['state' => Threshold::WARNING, 'min' => $this->request->minDW, 'max' => $this->request->maxDW];
-                    $result[2] = ['state' => Threshold::SUCCESS, 'min' => $this->request->minDS];
-                } else {
-                    if ($this->request->threshold_type == Threshold::TOLERANCE) {
-                        $result[0] = ['state' => Threshold::DANGER, 'max' => $this->request->maxTD];
-                        $result[1] = ['state' => Threshold::WARNING, 'min' => $this->request->minTW, 'max' => $this->request->maxTW];
-                        $result[2] = ['state' => Threshold::SUCCESS, 'min' => $this->request->minTS];
-                    }
-                }
-            }
+
+            $result[0] = ['state' => Threshold::DANGER, 'max' => $this->request->minThreshold];
+            $result[1] = ['state' => Threshold::WARNING, 'min' => $this->request->minThreshold, 'max' => $this->request->maxThreshold];
+            $result[2] = ['state' => Threshold::SUCCESS, 'min' => $this->request->maxThreshold];
 
             $this->indicator = Indicator::create($this->request->except('start_date', 'end_date', 'goals_closed'));
 
             if ($this->request->goals_closed) {
                 $this->indicator->goals_closed = Indicator::GOALS_CLOSED;
             }
+
             $startDate = $this->request->start_date;
             $endDate = $this->request->end_date;
             $lastDayofMonth = Carbon::parse($endDate)->endOfMonth()->toDateString();
@@ -71,23 +59,14 @@ class CreateIndicator extends Job
             $this->indicator->f_end_date = $dates['f_end_date'];
             $this->indicator->threshold_properties = $result;
 
+            $user = auth()->user();
             if ($this->request->frequency == 1) {//si es anual
                 $periods = $this->indicator->numberOfPeriods('P1Y', '+0 year');
                 for ($i = 0; $i < count($periods); $i++) {
                     $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
                     $d = date("d-m-Y", strtotime($periods[$i] . "+ " . 11 . " month"));
                     $d = date("d-m-Y", strtotime($d . "+ " . 30 . " day"));
-                    GoalIndicators::create([
-                        'goal_value' => $this->request->freq[$i] ?? null,
-                        'indicators_id' => $this->indicator->id,
-                        'min' => $this->request->min[$i] ?? null,
-                        'max' => $this->request->max[$i] ?? null,
-                        'period' => $i + 1,
-                        'user_updated' => auth()->user()->id,
-                        'start_date' => Carbon::createFromFormat('d-m-Y', $periods[$i])->format('Y-m-d'),
-                        'end_date' => Carbon::createFromFormat('d-m-Y', $d)->format('Y-m-d'),
-                        'year' => $date->format("Y"),
-                    ]);
+                    self::goalIndicatorCreate($periods, $user, $i, $date, $d);
                 }
             } else {
                 if ($this->request->frequency == 2) {//si es semestral
@@ -96,17 +75,7 @@ class CreateIndicator extends Job
                         $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
                         $d = date("d-m-Y", strtotime($periods[$i] . "+ " . 6 . " month"));
                         $d = date("d-m-Y", strtotime($d . "- " . 1 . " day"));
-                        GoalIndicators::create([
-                            'goal_value' => $this->request->freq[$i] ?? null,
-                            'indicators_id' => $this->indicator->id,
-                            'min' => $this->request->min[$i] ?? null,
-                            'max' => $this->request->max[$i] ?? null,
-                            'period' => $i + 1,
-                            'user_updated' => auth()->user()->id,
-                            'start_date' => Carbon::createFromFormat('d-m-Y', $periods[$i])->format('Y-m-d'),
-                            'end_date' => Carbon::createFromFormat('d-m-Y', $d)->format('Y-m-d'),
-                            'year' => $date->format("Y"),
-                        ]);
+                        self::goalIndicatorCreate($periods, $user, $i, $date, $d);
                     }
                 } else {
                     if ($this->request->frequency == 4) {//si es trimestral
@@ -115,17 +84,7 @@ class CreateIndicator extends Job
                             $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
                             $d = date("d-m-Y", strtotime($periods[$i] . "+ " . 3 . " month"));
                             $d = date("d-m-Y", strtotime($d . "- " . 1 . " day"));
-                            GoalIndicators::create([
-                                'goal_value' => $this->request->freq[$i] ?? null,
-                                'indicators_id' => $this->indicator->id,
-                                'min' => $this->request->min[$i] ?? null,
-                                'max' => $this->request->max[$i] ?? null,
-                                'period' => $i + 1,
-                                'user_updated' => auth()->user()->id,
-                                'start_date' => Carbon::createFromFormat('d-m-Y', $periods[$i])->format('Y-m-d'),
-                                'end_date' => Carbon::createFromFormat('d-m-Y', $d)->format('Y-m-d'),
-                                'year' => $date->format("Y"),
-                            ]);
+                            self::goalIndicatorCreate($periods, $user, $i, $date, $d);
                         }
                     } else {
                         if ($this->request->frequency == 12) {
@@ -134,17 +93,7 @@ class CreateIndicator extends Job
                                 $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
                                 $d = date("d-m-Y", strtotime($periods[$i] . "+ " . 1 . " month"));
                                 $d = date("d-m-Y", strtotime($d . "- " . 1 . " day"));
-                                GoalIndicators::create([
-                                    'goal_value' => $this->request->freq[$i] ?? null,
-                                    'indicators_id' => $this->indicator->id,
-                                    'min' => $this->request->min[$i] ?? null,
-                                    'max' => $this->request->max[$i] ?? null,
-                                    'period' => $i + 1,
-                                    'user_updated' => auth()->user()->id,
-                                    'start_date' => Carbon::createFromFormat('d-m-Y', $periods[$i])->format('Y-m-d'),
-                                    'end_date' => Carbon::createFromFormat('d-m-Y', $d)->format('Y-m-d'),
-                                    'year' => $date->format("Y"),
-                                ]);
+                                self::goalIndicatorCreate($periods, $user, $i, $date, $d);
                             }
                         } else {
                             if ($this->request->frequency == 3) {//si es cuatimestral
@@ -153,17 +102,7 @@ class CreateIndicator extends Job
                                     $date = DateTime::createFromFormat("d-m-Y", $periods[$i]);
                                     $d = date("d-m-Y", strtotime($periods[$i] . "+ " . 4 . " month"));
                                     $d = date("d-m-Y", strtotime($d . "- " . 1 . " day"));
-                                    GoalIndicators::create([
-                                        'goal_value' => $this->request->freq[$i] ?? null,
-                                        'indicators_id' => $this->indicator->id,
-                                        'min' => $this->request->min[$i] ?? null,
-                                        'max' => $this->request->max[$i] ?? null,
-                                        'period' => $i + 1,
-                                        'user_updated' => auth()->user()->id,
-                                        'start_date' => Carbon::createFromFormat('d-m-Y', $periods[$i])->format('Y-m-d'),
-                                        'end_date' => Carbon::createFromFormat('d-m-Y', $d)->format('Y-m-d'),
-                                        'year' => $date->format("Y"),
-                                    ]);
+                                    self::goalIndicatorCreate($periods, $user, $i, $date, $d);
                                 }
                             }
                         }
@@ -174,6 +113,20 @@ class CreateIndicator extends Job
             $this->indicator->save();
         });
         return $this->indicator;
+    }
 
+    public function goalIndicatorCreate($periods, $user, $i, $date, $d)
+    {
+        GoalIndicators::create([
+            'goal_value' => $this->request->freq[$i] ?? null,
+            'indicators_id' => $this->indicator->id,
+            'min' => $this->request->min[$i] ?? null,
+            'max' => $this->request->max[$i] ?? null,
+            'period' => $i + 1,
+            'user_updated' => $user->id,
+            'start_date' => Carbon::createFromFormat('d-m-Y', $periods[$i])->format('Y-m-d'),
+            'end_date' => Carbon::createFromFormat('d-m-Y', $d)->format('Y-m-d'),
+            'year' => $date->format("Y"),
+        ]);
     }
 }
